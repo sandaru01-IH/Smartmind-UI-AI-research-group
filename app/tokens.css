@@ -1,0 +1,54 @@
+/*
+ * Design tokens: the single source of truth for colour.
+ * Dark is the default. Light is applied with data-theme='light' on <html>.
+ * lib/contrast.ts reads this file and the unit tests fail if any pair drops below WCAG AA.
+ */
+:root {
+  /* palette */
+  --ink: #090d12;
+  --graphite: #121922;
+  --paper: #f2efe8;
+  --mist: #8fa3b5;
+
+  /* semantic */
+  --bg: #090d12;
+  --surface: #121922;
+  --surface-2: #18212c;
+  --line: #1f2a36;
+  --line-strong: #5a6b7c;
+  --fg: #f2efe8;
+  --muted: #8fa3b5;
+  --signal: #c6ff3d;
+  --signal-fg: #090d12;
+  --focus: #c6ff3d;
+  --danger: #ff8a7a;
+
+  /* research theme codes (fills) and their text-safe variants (labels) */
+  --flood: #2de2c6;
+  --landslide: #ffb347;
+  --traffic: #ff6b57;
+  --ai: #9cc2ff;
+  --flood-ink: #2de2c6;
+  --landslide-ink: #ffb347;
+  --traffic-ink: #ff8a7a;
+  --ai-ink: #9cc2ff;
+}
+
+[data-theme='light'] {
+  --bg: #f2efe8;
+  --surface: #faf8f3;
+  --surface-2: #e9e5da;
+  --line: #d6d0c1;
+  --line-strong: #6b7480;
+  --fg: #090d12;
+  --muted: #4a5663;
+  --signal: #c6ff3d;
+  --signal-fg: #090d12;
+  --focus: #090d12;
+  --danger: #b3261e;
+
+  --flood-ink: #0a6b5e;
+  --landslide-ink: #8a4f00;
+  --traffic-ink: #b02a17;
+  --ai-ink: #24539e;
+}
