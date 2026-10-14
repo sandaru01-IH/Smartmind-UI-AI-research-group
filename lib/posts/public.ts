@@ -41,11 +41,8 @@ export async function listPosts(query: PublicListQuery = {}): Promise<PublicList
   return { posts: parsePostRows(data), total: count ?? 0 };
 }
 
-export async function getPostBySlug(slug: string): Promise<Post | null> {
-  'use cache';
-  cacheTag('posts', `post:${slug}`);
-  cacheLife({ stale: 30, revalidate: 30, expire: 3600 });
-
+/** One live post by slug, straight from the database. Never cached. */
+async function fetchPostBySlug(slug: string): Promise<Post | null> {
   const db = createPublicClient();
   if (!db) return visibleSeedPosts(SEED_POSTS).find((p) => p.slug === slug) ?? null;
   const { data, error } = await db
@@ -56,6 +53,24 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
     .maybeSingle();
   if (error) throw new Error(`Could not load post: ${error.message}`);
   return parsePostRow(data);
+}
+
+/**
+ * A post by slug. Cached for a long time, which lets known articles sit in the static page. Admin
+ * edits, unpublishing and deletion expire it at once through updateTag. A cache miss on "not found"
+ * is double-checked against the database by getPublicPost, so a post that was scheduled for later
+ * appears the moment its time passes.
+ */
+export async function getPostBySlug(slug: string): Promise<Post | null> {
+  'use cache';
+  cacheTag('posts', `post:${slug}`);
+  cacheLife({ stale: 300, revalidate: 900, expire: 86400 });
+  return fetchPostBySlug(slug);
+}
+
+/** The post for a public page: the cached copy, or a fresh lookup when the cache says it is missing. */
+export async function getPublicPost(slug: string): Promise<Post | null> {
+  return (await getPostBySlug(slug)) ?? (await fetchPostBySlug(slug));
 }
 
 /** Newest published items of any type: the ticker and the Latest strip share this. */

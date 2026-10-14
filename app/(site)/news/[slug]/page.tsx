@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { PostBody } from '@/components/ui/markdown';
 import { PostCover } from '@/components/news/post-cover';
@@ -9,7 +10,7 @@ import { JsonLd } from '@/components/seo/json-ld';
 import { Tag } from '@/components/ui/tag';
 import { BRAND, SITE_URL } from '@/content/brand';
 import { formatDate } from '@/lib/format';
-import { getPostBySlug, getSlugIndex } from '@/lib/posts/public';
+import { getPublicPost, getSlugIndex } from '@/lib/posts/public';
 import { mediaUrl } from '@/lib/supabase/env';
 
 type Props = { params: Promise<{ slug: string }> };
@@ -25,7 +26,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getPostBySlug(slug);
+  const post = await getPublicPost(slug);
   if (!post) return { title: 'Not found', robots: { index: false } };
   const description = post.excerpt || post.title;
   return {
@@ -43,9 +44,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function PostPage({ params }: Props) {
+/** The article itself. Reads the slug at request time, so it renders inside a Suspense boundary. */
+async function Article({ params }: Props) {
   const { slug } = await params;
-  const post = await getPostBySlug(slug);
+  const post = await getPublicPost(slug);
   if (!post) notFound();
 
   const cover = mediaUrl(post.cover_path);
@@ -121,5 +123,14 @@ export default async function PostPage({ params }: Props) {
         ) : null}
       </div>
     </article>
+  );
+}
+
+export default function PostPage({ params }: Props) {
+  return (
+    // The fallback is as tall as a screen, so the footer stays below the fold while a new post loads.
+    <Suspense fallback={<div className="container-site min-h-svh py-16" aria-busy="true" />}>
+      <Article params={params} />
+    </Suspense>
   );
 }

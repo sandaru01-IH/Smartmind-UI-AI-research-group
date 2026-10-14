@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const CommandPalette = dynamic(() => import('./command-palette').then((m) => m.CommandPalette), {
   ssr: false,
@@ -11,34 +11,36 @@ type Pages = { href: string; label: string }[];
 
 /**
  * The palette code loads after the page is idle, or at once if someone presses Ctrl or Cmd + K or
- * clicks the search button first. The key press that triggered the load is replayed once it is ready.
+ * clicks the search button first. Until the palette reports that it has mounted and is listening
+ * for itself, this wrapper keeps catching those inputs and asks the palette to open on arrival.
  */
 export function LazyCommandPalette({ pages }: { pages: Pages }) {
   const [ready, setReady] = useState(false);
-  const loaded = useRef(false);
   const [openRequested, setOpenRequested] = useState(false);
+  const listening = useRef(false);
+  const onMounted = useCallback(() => {
+    listening.current = true;
+  }, []);
+
   useEffect(() => {
-    const load = () => {
-      loaded.current = true;
+    const request = () => {
       setReady(true);
+      setOpenRequested(true);
     };
     const onKey = (e: KeyboardEvent) => {
-      if (loaded.current) return;
+      if (listening.current) return;
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        load();
-        setOpenRequested(true);
+        request();
       }
     };
     const onClick = (e: MouseEvent) => {
-      if (loaded.current) return;
-      if ((e.target as Element | null)?.closest('[data-palette-open]')) {
-        load();
-        setOpenRequested(true);
-      }
+      if (listening.current) return;
+      if ((e.target as Element | null)?.closest('[data-palette-open]')) request();
     };
     window.addEventListener('keydown', onKey);
     document.addEventListener('click', onClick);
+    const load = () => setReady(true);
     const idle =
       typeof window.requestIdleCallback === 'function'
         ? window.requestIdleCallback(load, { timeout: 4000 })
@@ -50,5 +52,8 @@ export function LazyCommandPalette({ pages }: { pages: Pages }) {
       else window.clearTimeout(idle);
     };
   }, []);
-  return ready ? <CommandPalette pages={pages} openOnMount={openRequested} /> : null;
+
+  return ready ? (
+    <CommandPalette pages={pages} openOnMount={openRequested} onMounted={onMounted} />
+  ) : null;
 }

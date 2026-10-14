@@ -36,10 +36,13 @@ function score(item: PaletteItem, q: string): number {
 export function CommandPalette({
   pages,
   openOnMount = false,
+  onMounted,
 }: {
   pages: { href: string; label: string }[];
   /** Open straight away. Used when the palette was loaded by a key press or click. */
   openOnMount?: boolean;
+  /** Called once the palette is listening for its own shortcut and button clicks. */
+  onMounted?: () => void;
 }) {
   const router = useRouter();
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -104,11 +107,12 @@ export function CommandPalette({
     };
     window.addEventListener('keydown', onKey);
     document.addEventListener('click', onClick);
+    onMounted?.();
     return () => {
       window.removeEventListener('keydown', onKey);
       document.removeEventListener('click', onClick);
     };
-  }, [open]);
+  }, [open, onMounted]);
 
   const go = (item: PaletteItem) => {
     close();

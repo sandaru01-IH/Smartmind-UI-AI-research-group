@@ -79,7 +79,11 @@ export function SiteHeader() {
           </button>
           <ThemeToggle />
           <div className="hidden md:block">
-            <Link href={CTA_ITEM.href} className={buttonClass('primary')}>
+            <Link
+              href={CTA_ITEM.href}
+              transitionTypes={['nav-forward']}
+              className={buttonClass('primary')}
+            >
               {CTA_ITEM.label}
             </Link>
           </div>

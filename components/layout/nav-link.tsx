@@ -11,7 +11,12 @@ function ActiveLink({ href, className, activeMark, children }: NavLinkProps) {
   const pathname = usePathname();
   const active = isActive(pathname, href);
   return (
-    <Link href={href} aria-current={active ? 'page' : undefined} className={className}>
+    <Link
+      href={href}
+      transitionTypes={['nav-forward']}
+      aria-current={active ? 'page' : undefined}
+      className={className}
+    >
       {children}
       {active ? activeMark : null}
     </Link>
@@ -34,7 +39,7 @@ export function NavLink(props: NavLinkProps) {
   return (
     <Suspense
       fallback={
-        <Link href={props.href} className={props.className}>
+        <Link href={props.href} transitionTypes={['nav-forward']} className={props.className}>
           {props.children}
         </Link>
       }

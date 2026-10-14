@@ -57,7 +57,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <ThemeScript />
       </head>
       <body>
-        <ViewTransition>{children}</ViewTransition>
+        {/* Page transitions run only for primary navigation (links tagged nav-forward). Suspense reveals never animate. */}
+        <ViewTransition
+          default="none"
+          enter={{ 'nav-forward': 'auto', default: 'none' }}
+          exit={{ 'nav-forward': 'auto', default: 'none' }}
+        >
+          {children}
+        </ViewTransition>
       </body>
     </html>
   );
