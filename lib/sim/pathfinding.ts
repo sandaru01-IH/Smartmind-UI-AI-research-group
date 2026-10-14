@@ -5,7 +5,12 @@ import { MinHeap } from './heap';
  * Dijkstra from `src` to `dst`. Edges flagged in `blocked` are impassable.
  * Returns the node sequence including both ends, or null when unreachable.
  */
-export function shortestPath(g: Graph, src: number, dst: number, blocked?: Uint8Array): number[] | null {
+export function shortestPath(
+  g: Graph,
+  src: number,
+  dst: number,
+  blocked?: Uint8Array,
+): number[] | null {
   if (src === dst) return [src];
   const n = g.nodes.length;
   const dist = new Float64Array(n).fill(Infinity);

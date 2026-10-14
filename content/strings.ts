@@ -38,7 +38,8 @@ const en = {
     legend: 'agents rerouting around flooded roads',
     legendHint: 'Move across the map to flood roads.',
     fallbackLabel: 'A road network drawn as nodes and links. Larger nodes carry more routes.',
-    simulationLabel: 'Road network simulation. Agents travel along roads and reroute around flooded sections.',
+    simulationLabel:
+      'Road network simulation. Agents travel along roads and reroute around flooded sections.',
     primaryCta: 'Explore the research',
     secondaryCta: 'Meet the chatbots',
   },

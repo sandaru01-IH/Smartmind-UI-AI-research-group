@@ -21,11 +21,18 @@ export default function PartnersPage() {
       <div className="container-site pb-16">
         <PartnersWall showNote />
       </div>
-      <Section id="also" numeral="+" title="Also named in project news" lead="Not on the lab’s partner list, but named in the department’s research page or in news about specific projects.">
+      <Section
+        id="also"
+        numeral="+"
+        title="Also named in project news"
+        lead="Not on the lab’s partner list, but named in the department’s research page or in news about specific projects."
+      >
         <ul className="border-t border-line">
           {ALSO_NAMED.map((p) => (
             <li key={p.name} className="grid-12 gap-y-1 border-b border-line py-4">
-              <span className="col-span-12 font-display text-xl md:col-span-5 md:text-2xl">{p.name}</span>
+              <span className="col-span-12 font-display text-xl md:col-span-5 md:text-2xl">
+                {p.name}
+              </span>
               <span className="col-span-12 text-muted md:col-span-7">{p.context}</span>
             </li>
           ))}

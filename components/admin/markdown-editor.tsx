@@ -89,7 +89,11 @@ export function MarkdownEditor({
           aria-label="Preview"
           className={`min-h-[22rem] overflow-auto border-line-strong p-4 lg:border-l ${tab === 'write' ? 'hidden lg:block' : ''}`}
         >
-          {value.trim() ? <PostBody source={value} /> : <p className="text-muted">Nothing to preview yet.</p>}
+          {value.trim() ? (
+            <PostBody source={value} />
+          ) : (
+            <p className="text-muted">Nothing to preview yet.</p>
+          )}
         </div>
       </div>
       {error ? <p className="mt-1 text-[0.9rem] text-danger">{error}</p> : null}

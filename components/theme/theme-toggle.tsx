@@ -34,7 +34,11 @@ export function ThemeToggle({ className }: { className?: string }) {
       aria-label={next === 'light' ? t.theme.toLight : t.theme.toDark}
       className={`inline-flex h-11 w-11 items-center justify-center rounded-sharp border border-line-strong text-fg transition-colors hover:bg-surface-2 ${className ?? ''}`}
     >
-      {theme === 'dark' ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
+      {theme === 'dark' ? (
+        <Sun size={18} aria-hidden="true" />
+      ) : (
+        <Moon size={18} aria-hidden="true" />
+      )}
     </button>
   );
 }

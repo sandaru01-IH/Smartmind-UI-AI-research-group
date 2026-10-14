@@ -14,7 +14,12 @@ export interface TickerItem {
   date: string | null;
 }
 
-const fmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+const fmt = new Intl.DateTimeFormat('en-GB', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
 const formatDate = (iso: string | null) => (iso ? fmt.format(new Date(iso)) : '');
 
 function Entry({ item }: { item: TickerItem }) {
@@ -30,7 +35,12 @@ function Entry({ item }: { item: TickerItem }) {
   const cls = 'inline-flex min-h-9 items-center gap-3 whitespace-nowrap px-6 text-sm';
   if (item.href && item.external) {
     return (
-      <a href={item.href} target="_blank" rel="noopener noreferrer" className={`${cls} hover:underline`}>
+      <a
+        href={item.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`${cls} hover:underline`}
+      >
         {body}
         <span className="sr-only"> ({t.common.external})</span>
       </a>
@@ -68,7 +78,10 @@ export function TickerView({ items }: { items: TickerItem[] }) {
         </p>
         <div
           className="relative min-w-0 flex-1 overflow-hidden motion-reduce:overflow-x-auto"
-          style={{ maskImage: 'linear-gradient(to right, transparent, #000 2rem, #000 calc(100% - 2rem), transparent)' }}
+          style={{
+            maskImage:
+              'linear-gradient(to right, transparent, #000 2rem, #000 calc(100% - 2rem), transparent)',
+          }}
         >
           <ul
             className="ticker-track flex w-max"

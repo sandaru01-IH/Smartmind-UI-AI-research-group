@@ -24,7 +24,14 @@ export function LoginForm({ next, expired }: { next: string; expired: boolean })
         <label htmlFor="email" className="label-mono mb-2 block text-muted">
           Email
         </label>
-        <input id="email" name="email" type="email" autoComplete="username" required className={field} />
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="username"
+          required
+          className={field}
+        />
       </div>
       <div>
         <label htmlFor="password" className="label-mono mb-2 block text-muted">

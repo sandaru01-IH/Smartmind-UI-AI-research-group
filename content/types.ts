@@ -11,7 +11,8 @@ export interface Sourced {
   source: string;
 }
 
-export const isConfirmed = <T extends Sourced>(item: T): boolean => item.confirmation === 'confirmed';
+export const isConfirmed = <T extends Sourced>(item: T): boolean =>
+  item.confirmation === 'confirmed';
 export const confirmedOnly = <T extends Sourced>(items: readonly T[]): T[] =>
   items.filter(isConfirmed);
 

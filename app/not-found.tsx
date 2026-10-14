@@ -6,7 +6,10 @@ export default function NotFound() {
   return (
     <SiteShell>
       <section className="container-site flex min-h-[60vh] flex-col justify-center py-20">
-        <p className="numeral text-[length:var(--text-display)] text-line-strong" aria-hidden="true">
+        <p
+          className="numeral text-[length:var(--text-display)] text-line-strong"
+          aria-hidden="true"
+        >
           404
         </p>
         <h1 className="mt-4 text-4xl md:text-6xl">{t.errors.notFoundTitle}</h1>

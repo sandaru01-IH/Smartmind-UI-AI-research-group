@@ -11,7 +11,11 @@ const display = Bricolage_Grotesque({
   display: 'swap',
   axes: ['opsz', 'wdth'],
 });
-const sans = Instrument_Sans({ subsets: ['latin'], variable: '--font-instrument', display: 'swap' });
+const sans = Instrument_Sans({
+  subsets: ['latin'],
+  variable: '--font-instrument',
+  display: 'swap',
+});
 const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains', display: 'swap' });
 
 export const metadata: Metadata = {

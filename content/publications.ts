@@ -27,7 +27,8 @@ export const LAB_PAPERS: Publication[] = [
   {
     id: 'ijsdp-2021-agglomeration',
     year: 2021,
-    title: 'A Novel Approach to Measure the Pattern of Urban Agglomeration Based on the Road Network',
+    title:
+      'A Novel Approach to Measure the Pattern of Urban Agglomeration Based on the Road Network',
     venue: 'Int. J. of Sustainable Development and Planning 16(2)',
     href: 'https://www.iieta.org/journals/ijsdp/paper/10.18280/ijsdp.160205',
     confirmation: 'confirmed',
@@ -36,7 +37,8 @@ export const LAB_PAPERS: Publication[] = [
   {
     id: 'jsalt-2021-nca',
     year: 2021,
-    title: 'Network Centrality Assessment (NCA): Assessing the Transport Network Resilience to Urban Flooding',
+    title:
+      'Network Centrality Assessment (NCA): Assessing the Transport Network Resilience to Urban Flooding',
     venue: 'Journal of South Asian Logistics and Transport 1(1)',
     href: 'https://slstl.lk/wp-content/uploads/2021/03/JSALT-1.1.6.pdf',
     confirmation: 'confirmed',
@@ -45,7 +47,8 @@ export const LAB_PAPERS: Publication[] = [
   {
     id: 'jsalt-2021-bypass',
     year: 2021,
-    title: 'An Investigation of the Effects of New Bypass Roads on Build Form in Small Towns in Sri Lanka',
+    title:
+      'An Investigation of the Effects of New Bypass Roads on Build Form in Small Towns in Sri Lanka',
     venue: 'Journal of South Asian Logistics and Transport 1(1)',
     href: 'https://slstl.lk/wp-content/uploads/2021/03/JSALT-1.1.1.pdf',
     confirmation: 'confirmed',
@@ -54,7 +57,8 @@ export const LAB_PAPERS: Publication[] = [
   {
     id: 'faru-2020-population-resilience',
     year: 2020,
-    title: 'An Alternative Approach to Assess the Residential Population Resilience to Urban Flooding',
+    title:
+      'An Alternative Approach to Assess the Residential Population Resilience to Urban Flooding',
     venue: 'FARU Journal 7',
     href: 'https://faruj.sljol.info/articles/10.4038/faruj.v7i0.30/galley/29/download/',
     confirmation: 'confirmed',
@@ -150,7 +154,8 @@ export const UNVERIFIED_PAPERS: Publication[] = [
     venue: 'PLoS ONE',
     authors: 'Jayasinghe, Ranaweera, Abenayake, Bandara, De Silva',
     confirmation: 'tbc',
-    source: 'Publications, paragraph after the table (staff profile snippet; verify before listing)',
+    source:
+      'Publications, paragraph after the table (staff profile snippet; verify before listing)',
   },
 ];
 

@@ -36,7 +36,11 @@ export function PostCard({
       <PostCover
         post={post}
         priority={priority}
-        sizes={feature ? '(min-width: 1024px) 60vw, 100vw' : '(min-width: 1024px) 30vw, (min-width: 640px) 50vw, 100vw'}
+        sizes={
+          feature
+            ? '(min-width: 1024px) 60vw, 100vw'
+            : '(min-width: 1024px) 30vw, (min-width: 640px) 50vw, 100vw'
+        }
       />
       <div className={`flex flex-1 flex-col gap-4 ${feature ? 'p-6 md:p-8' : 'p-5'}`}>
         <div className="flex flex-wrap items-center gap-3">
@@ -46,7 +50,10 @@ export function PostCard({
           </time>
         </div>
         <h3 className={feature ? 'text-2xl md:text-3xl' : 'text-xl'}>
-          <Link href={`/news/${post.slug}`} className="after:absolute after:inset-0 group-hover:underline">
+          <Link
+            href={`/news/${post.slug}`}
+            className="after:absolute after:inset-0 group-hover:underline"
+          >
             {post.title}
           </Link>
         </h3>

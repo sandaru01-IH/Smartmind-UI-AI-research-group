@@ -23,20 +23,34 @@ describe('service-role key hygiene', () => {
       const full = path.join(ROOT, p);
       if (!existsSync(full)) return [];
       return statSync(full).isDirectory() ? walk(full) : [full];
-    }).filter((f) => /\.(ts|tsx|mjs|js|css)$/.test(f) && !f.endsWith('.test.ts') && !f.endsWith('.test.tsx'));
-    const offenders = files.filter((f) => /SERVICE_ROLE|service_role/.test(readFileSync(f, 'utf8')));
+    }).filter(
+      (f) =>
+        /\.(ts|tsx|mjs|js|css)$/.test(f) && !f.endsWith('.test.ts') && !f.endsWith('.test.tsx'),
+    );
+    const offenders = files.filter((f) =>
+      /SERVICE_ROLE|service_role/.test(readFileSync(f, 'utf8')),
+    );
     expect(offenders.map((f) => path.relative(ROOT, f))).toEqual([]);
   });
 
   it('is not in any committed file', () => {
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!key) return;
-    const tracked = ['README.md', '.env.example', 'docs', 'supabase/config.toml', 'package.json', 'scripts'].flatMap((p) => {
+    const tracked = [
+      'README.md',
+      '.env.example',
+      'docs',
+      'supabase/config.toml',
+      'package.json',
+      'scripts',
+    ].flatMap((p) => {
       const full = path.join(ROOT, p);
       if (!existsSync(full)) return [];
       return statSync(full).isDirectory() ? walk(full) : [full];
     });
-    const offenders = tracked.filter((f) => !f.endsWith('.png') && readFileSync(f, 'utf8').includes(key));
+    const offenders = tracked.filter(
+      (f) => !f.endsWith('.png') && readFileSync(f, 'utf8').includes(key),
+    );
     expect(offenders.map((f) => path.relative(ROOT, f))).toEqual([]);
   });
 
@@ -44,7 +58,9 @@ describe('service-role key hygiene', () => {
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const staticDir = path.join(ROOT, '.next', 'static');
     if (!key || !existsSync(staticDir)) return;
-    const offenders = walk(staticDir).filter((f) => /\.(js|css|map)$/.test(f) && readFileSync(f, 'utf8').includes(key));
+    const offenders = walk(staticDir).filter(
+      (f) => /\.(js|css|map)$/.test(f) && readFileSync(f, 'utf8').includes(key),
+    );
     expect(offenders).toEqual([]);
   });
 });

@@ -16,8 +16,10 @@ export function ArchitectureDiagram() {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || typeof IntersectionObserver === 'undefined') {
-      setRun(false);
+    if (
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+      typeof IntersectionObserver === 'undefined'
+    ) {
       el.dataset.static = 'true';
       return;
     }
@@ -62,8 +64,9 @@ export function ArchitectureDiagram() {
       >
         <title id="arch-title">Architecture of the participatory flood and landslide chatbot</title>
         <desc id="arch-desc">
-          Residents and planners reach the chatbot through WhatsApp. A multi-agent design with a language agent, a live-weather
-          API agent and a scheduler agent produces preparedness guidance for residents and risk-sensitive zoning insight for planners.
+          Residents and planners reach the chatbot through WhatsApp. A multi-agent design with a
+          language agent, a live-weather API agent and a scheduler agent produces preparedness
+          guidance for residents and risk-sensitive zoning insight for planners.
         </desc>
         <style>{`
           .route{fill:none;stroke:var(--line-strong);stroke-width:1.5;stroke-dasharray:var(--len,400);stroke-dashoffset:0}
@@ -107,7 +110,16 @@ export function ArchitectureDiagram() {
         </g>
 
         {/* Multi-agent group frame */}
-        <rect x="470" y="70" width="240" height="290" rx="2" fill="none" stroke="var(--line-strong)" strokeDasharray="4 6" />
+        <rect
+          x="470"
+          y="70"
+          width="240"
+          height="290"
+          rx="2"
+          fill="none"
+          stroke="var(--line-strong)"
+          strokeDasharray="4 6"
+        />
         <text x="480" y="62" className={note}>
           multi-agent design
         </text>
@@ -133,7 +145,15 @@ export function ArchitectureDiagram() {
 
         {/* Outputs */}
         <g className="node" style={{ '--d': '1.2s' } as React.CSSProperties}>
-          <rect x="800" y="110" width="180" height="80" rx="2" className={box} stroke="var(--flood)" />
+          <rect
+            x="800"
+            y="110"
+            width="180"
+            height="80"
+            rx="2"
+            className={box}
+            stroke="var(--flood)"
+          />
           <text x="890" y="146" textAnchor="middle" className={label}>
             {residents.label}
           </text>
@@ -142,7 +162,15 @@ export function ArchitectureDiagram() {
           </text>
         </g>
         <g className="node" style={{ '--d': '1.2s' } as React.CSSProperties}>
-          <rect x="800" y="230" width="180" height="80" rx="2" className={box} stroke="var(--landslide)" />
+          <rect
+            x="800"
+            y="230"
+            width="180"
+            height="80"
+            rx="2"
+            className={box}
+            stroke="var(--landslide)"
+          />
           <text x="890" y="266" textAnchor="middle" className={label}>
             {planners.label}
           </text>

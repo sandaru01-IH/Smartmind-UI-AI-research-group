@@ -20,9 +20,16 @@ export function staticNetwork(): StaticNetwork {
   const c = betweenness(g, { samples: 40, seed: HERO_SEED });
   cached = {
     roads: g.edges
-      .map((e) => `M${round(g.nodes[e.a].x)} ${round(g.nodes[e.a].y)}L${round(g.nodes[e.b].x)} ${round(g.nodes[e.b].y)}`)
+      .map(
+        (e) =>
+          `M${round(g.nodes[e.a].x)} ${round(g.nodes[e.a].y)}L${round(g.nodes[e.b].x)} ${round(g.nodes[e.b].y)}`,
+      )
       .join(''),
-    nodes: g.nodes.map((n, i) => ({ x: round(n.x), y: round(n.y), r: round(0.35 + 1.5 * Math.pow(c[i], 0.6)) })),
+    nodes: g.nodes.map((n, i) => ({
+      x: round(n.x),
+      y: round(n.y),
+      r: round(0.35 + 1.5 * Math.pow(c[i], 0.6)),
+    })),
   };
   return cached;
 }

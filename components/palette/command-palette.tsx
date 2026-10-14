@@ -26,7 +26,11 @@ function score(item: PaletteItem, q: string): number {
   const hay = `${item.label} ${item.hint ?? ''}`.toLowerCase();
   const words = q.toLowerCase().split(/\s+/).filter(Boolean);
   if (!words.every((w) => hay.includes(w))) return -1;
-  return item.label.toLowerCase().startsWith(words[0]) ? 3 : item.label.toLowerCase().includes(words[0]) ? 2 : 1;
+  return item.label.toLowerCase().startsWith(words[0])
+    ? 3
+    : item.label.toLowerCase().includes(words[0])
+      ? 2
+      : 1;
 }
 
 export function CommandPalette({ items }: { items: PaletteItem[] }) {
@@ -99,8 +103,6 @@ export function CommandPalette({ items }: { items: PaletteItem[] }) {
     document.getElementById(`${listId}-${active}`)?.scrollIntoView({ block: 'nearest' });
   }, [active, listId]);
 
-  let lastGroup: string | null = null;
-
   return (
     <dialog
       ref={dialogRef}
@@ -132,15 +134,20 @@ export function CommandPalette({ items }: { items: PaletteItem[] }) {
         />
         <kbd className="label-mono text-muted">Esc</kbd>
       </div>
-      <ul id={listId} role="listbox" aria-label={t.palette.results} className="max-h-[50vh] overflow-y-auto p-2">
+      <ul
+        id={listId}
+        role="listbox"
+        aria-label={t.palette.results}
+        className="max-h-[50vh] overflow-y-auto p-2"
+      >
         {results.length === 0 ? (
           <li role="presentation" className="px-3 py-6 text-center text-muted">
             {t.palette.empty}
           </li>
         ) : null}
         {results.map((item, i) => {
-          const header = item.group !== lastGroup ? GROUP_LABEL[item.group] : null;
-          lastGroup = item.group;
+          const header =
+            i === 0 || results[i - 1].group !== item.group ? GROUP_LABEL[item.group] : null;
           return (
             <li key={item.id} role="presentation">
               {header ? <p className="label-mono px-3 pb-1 pt-3 text-muted">{header}</p> : null}
@@ -154,9 +161,13 @@ export function CommandPalette({ items }: { items: PaletteItem[] }) {
               >
                 <span className="min-w-0">
                   <span className="block truncate">{item.label}</span>
-                  {item.hint ? <span className="label-mono block truncate text-muted">{item.hint}</span> : null}
+                  {item.hint ? (
+                    <span className="label-mono block truncate text-muted">{item.hint}</span>
+                  ) : null}
                 </span>
-                {i === active ? <CornerDownLeft size={16} aria-hidden="true" className="shrink-0 text-muted" /> : null}
+                {i === active ? (
+                  <CornerDownLeft size={16} aria-hidden="true" className="shrink-0 text-muted" />
+                ) : null}
               </div>
             </li>
           );

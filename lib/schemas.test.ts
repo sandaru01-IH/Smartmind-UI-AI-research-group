@@ -18,7 +18,15 @@ describe('postInputSchema', () => {
   });
 
   it('exposes the seven categories', () => {
-    expect(CATEGORIES).toEqual(['News', 'Event', 'Research', 'Chatbot', 'Award', 'Publication', 'Partnership']);
+    expect(CATEGORIES).toEqual([
+      'News',
+      'Event',
+      'Research',
+      'Chatbot',
+      'Award',
+      'Publication',
+      'Partnership',
+    ]);
   });
 
   it('rejects unknown categories', () => {
@@ -33,14 +41,24 @@ describe('postInputSchema', () => {
   it('requires alt text when a cover is set', () => {
     const r = postInputSchema.safeParse({ ...article, cover_path: 'covers/a.webp', cover_alt: '' });
     expect(r.success).toBe(false);
-    const ok = postInputSchema.safeParse({ ...article, cover_path: 'covers/a.webp', cover_alt: 'A road network' });
+    const ok = postInputSchema.safeParse({
+      ...article,
+      cover_path: 'covers/a.webp',
+      cover_alt: 'A road network',
+    });
     expect(ok.success).toBe(true);
   });
 
   it('only allows http(s) links', () => {
-    expect(postInputSchema.safeParse({ ...article, link_url: 'javascript:alert(1)' }).success).toBe(false);
-    expect(postInputSchema.safeParse({ ...article, link_url: 'data:text/html,hi' }).success).toBe(false);
-    expect(postInputSchema.safeParse({ ...article, link_url: 'https://example.org/x' }).success).toBe(true);
+    expect(postInputSchema.safeParse({ ...article, link_url: 'javascript:alert(1)' }).success).toBe(
+      false,
+    );
+    expect(postInputSchema.safeParse({ ...article, link_url: 'data:text/html,hi' }).success).toBe(
+      false,
+    );
+    expect(
+      postInputSchema.safeParse({ ...article, link_url: 'https://example.org/x' }).success,
+    ).toBe(true);
   });
 
   it('rejects malformed event dates', () => {
@@ -52,7 +70,10 @@ describe('postInputSchema', () => {
   it('normalises tags: trims, lowercases, de-duplicates, caps at 8', () => {
     const r = postInputSchema.parse({ ...article, tags: [' Flood ', 'flood', 'Chatbot'] });
     expect(r.tags).toEqual(['flood', 'chatbot']);
-    const tooMany = postInputSchema.safeParse({ ...article, tags: Array.from({ length: 9 }, (_, i) => `t${i}`) });
+    const tooMany = postInputSchema.safeParse({
+      ...article,
+      tags: Array.from({ length: 9 }, (_, i) => `t${i}`),
+    });
     expect(tooMany.success).toBe(false);
   });
 
@@ -63,7 +84,9 @@ describe('postInputSchema', () => {
   });
 
   it('rejects oversized bodies', () => {
-    expect(postInputSchema.safeParse({ ...article, body_md: 'x'.repeat(50_001) }).success).toBe(false);
+    expect(postInputSchema.safeParse({ ...article, body_md: 'x'.repeat(50_001) }).success).toBe(
+      false,
+    );
   });
 
   it('rejects an invalid published_at', () => {

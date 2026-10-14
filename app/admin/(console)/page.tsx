@@ -13,14 +13,17 @@ import { publicState } from '@/lib/visibility';
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? '';
 
-const field = 'h-11 w-full rounded-sharp border border-line-strong bg-surface px-3 text-base text-fg placeholder:text-muted';
+const field =
+  'h-11 w-full rounded-sharp border border-line-strong bg-surface px-3 text-base text-fg placeholder:text-muted';
 
 export default async function Dashboard({ searchParams }: { searchParams: SearchParams }) {
   await connection();
   const { supabase } = await requireAdmin();
   const sp = await searchParams;
-  const status = (['draft', 'published', 'scheduled'] as const).find((s) => s === one(sp.status)) ?? 'all';
-  const sort = (['updated', 'published', 'title'] as const).find((s) => s === one(sp.sort)) ?? 'updated';
+  const status =
+    (['draft', 'published', 'scheduled'] as const).find((s) => s === one(sp.status)) ?? 'all';
+  const sort =
+    (['updated', 'published', 'title'] as const).find((s) => s === one(sp.sort)) ?? 'updated';
   const category = CATEGORIES.find((c) => c === one(sp.category)) ?? 'all';
   const type = (['article', 'update'] as const).find((t) => t === one(sp.type)) ?? 'all';
   const q = one(sp.q).slice(0, 80);
@@ -64,18 +67,35 @@ export default async function Dashboard({ searchParams }: { searchParams: Search
 
       <section aria-labelledby="posts-title">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 id="posts-title" className="text-2xl">Posts</h2>
+          <h2 id="posts-title" className="text-2xl">
+            Posts
+          </h2>
           <Link href="/admin/posts/new" className={buttonClass('primary')}>
             New article
           </Link>
         </div>
-        <form method="get" role="search" aria-label="Filter posts" className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+        <form
+          method="get"
+          role="search"
+          aria-label="Filter posts"
+          className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-6"
+        >
           <div className="lg:col-span-2">
-            <label htmlFor="f-q" className="label-mono mb-2 block text-muted">Search</label>
-            <input id="f-q" name="q" defaultValue={q} placeholder="Title, slug or tag" className={field} />
+            <label htmlFor="f-q" className="label-mono mb-2 block text-muted">
+              Search
+            </label>
+            <input
+              id="f-q"
+              name="q"
+              defaultValue={q}
+              placeholder="Title, slug or tag"
+              className={field}
+            />
           </div>
           <div>
-            <label htmlFor="f-status" className="label-mono mb-2 block text-muted">Status</label>
+            <label htmlFor="f-status" className="label-mono mb-2 block text-muted">
+              Status
+            </label>
             <select id="f-status" name="status" defaultValue={status} className={field}>
               <option value="all">All</option>
               <option value="published">Published</option>
@@ -84,7 +104,9 @@ export default async function Dashboard({ searchParams }: { searchParams: Search
             </select>
           </div>
           <div>
-            <label htmlFor="f-cat" className="label-mono mb-2 block text-muted">Category</label>
+            <label htmlFor="f-cat" className="label-mono mb-2 block text-muted">
+              Category
+            </label>
             <select id="f-cat" name="category" defaultValue={category} className={field}>
               <option value="all">All</option>
               {CATEGORIES.map((c) => (
@@ -93,7 +115,9 @@ export default async function Dashboard({ searchParams }: { searchParams: Search
             </select>
           </div>
           <div>
-            <label htmlFor="f-type" className="label-mono mb-2 block text-muted">Type</label>
+            <label htmlFor="f-type" className="label-mono mb-2 block text-muted">
+              Type
+            </label>
             <select id="f-type" name="type" defaultValue={type} className={field}>
               <option value="all">All</option>
               <option value="article">Articles</option>
@@ -101,7 +125,9 @@ export default async function Dashboard({ searchParams }: { searchParams: Search
             </select>
           </div>
           <div>
-            <label htmlFor="f-sort" className="label-mono mb-2 block text-muted">Sort</label>
+            <label htmlFor="f-sort" className="label-mono mb-2 block text-muted">
+              Sort
+            </label>
             <select id="f-sort" name="sort" defaultValue={sort} className={field}>
               <option value="updated">Recently updated</option>
               <option value="published">Publish date</option>
@@ -109,9 +135,15 @@ export default async function Dashboard({ searchParams }: { searchParams: Search
             </select>
           </div>
           <div className="flex items-end gap-2 sm:col-span-2 lg:col-span-6">
-            <button type="submit" className={buttonClass('secondary')}>Apply filters</button>
-            <Link href="/admin" className={buttonClass('ghost')}>Reset</Link>
-            <p role="status" className="label-mono ml-auto text-muted">{rows.length} shown</p>
+            <button type="submit" className={buttonClass('secondary')}>
+              Apply filters
+            </button>
+            <Link href="/admin" className={buttonClass('ghost')}>
+              Reset
+            </Link>
+            <p role="status" className="label-mono ml-auto text-muted">
+              {rows.length} shown
+            </p>
           </div>
         </form>
         <div className="mt-6">

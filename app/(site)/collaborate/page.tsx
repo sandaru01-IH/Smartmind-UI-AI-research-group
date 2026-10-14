@@ -7,14 +7,19 @@ import { pageMeta } from '@/lib/seo';
 
 export const metadata = pageMeta({
   title: 'Collaborate',
-  description: 'Build a tailored chatbot with Smartmind, or join the network of Town & Country Planning alumni and students.',
+  description:
+    'Build a tailored chatbot with Smartmind, or join the network of Town & Country Planning alumni and students.',
   path: '/collaborate',
 });
 
 export default function CollaboratePage() {
   return (
     <>
-      <PageHeader eyebrow="Collaborate" title={COLLABORATE.heading} lead={BRAND.callToAction + '.'} />
+      <PageHeader
+        eyebrow="Collaborate"
+        title={COLLABORATE.heading}
+        lead={BRAND.callToAction + '.'}
+      />
 
       <Section id="chatbots" numeral="01" title="Tailored chatbots">
         <div className="max-w-[60ch] space-y-5 text-lg">

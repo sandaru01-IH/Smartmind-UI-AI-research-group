@@ -12,7 +12,21 @@ const out = process.argv[3] ?? 'docs/screenshots';
 const routeArgs = process.argv.slice(4);
 const ROUTES = routeArgs.length
   ? routeArgs
-  : ['/', '/about', '/research', '/chatbots', '/team', '/publications', '/awards', '/partners', '/news', '/news/participatory-chatbot-flood-landslide-resilience', '/collaborate', '/contact', '/does-not-exist'];
+  : [
+      '/',
+      '/about',
+      '/research',
+      '/chatbots',
+      '/team',
+      '/publications',
+      '/awards',
+      '/partners',
+      '/news',
+      '/news/participatory-chatbot-flood-landslide-resilience',
+      '/collaborate',
+      '/contact',
+      '/does-not-exist',
+    ];
 const WIDTHS = [390, 768, 1440] as const;
 const THEMES = ['dark', 'light'] as const;
 
@@ -44,7 +58,9 @@ async function main() {
           window.scrollTo(0, 0);
         });
         await page.waitForTimeout(600);
-        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+        const overflow = await page.evaluate(
+          () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        );
         const slug = route === '/' ? 'home' : route.replace(/^\//, '').replace(/\//g, '_');
         const file = path.join(out, `${slug}-${width}-${theme}.png`);
         await page.screenshot({ path: file, fullPage: !process.env.SHOT_VIEWPORT });
@@ -56,7 +72,9 @@ async function main() {
               .slice(0, 5)
               .map((el) => el.tagName.toLowerCase() + '.' + String(el.className).slice(0, 60));
           });
-          problems.push(`${route} @${width} ${theme}: horizontal overflow ${overflow}px — ${culprits.join(' | ')}`);
+          problems.push(
+            `${route} @${width} ${theme}: horizontal overflow ${overflow}px — ${culprits.join(' | ')}`,
+          );
         }
         for (const e of errors) problems.push(`${route} @${width} ${theme}: console error: ${e}`);
       }

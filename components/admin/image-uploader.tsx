@@ -12,7 +12,8 @@ export interface CoverValue {
   alt: string;
 }
 
-const field = 'h-11 w-full rounded-sharp border border-line-strong bg-surface px-3 text-base text-fg placeholder:text-muted';
+const field =
+  'h-11 w-full rounded-sharp border border-line-strong bg-surface px-3 text-base text-fg placeholder:text-muted';
 
 /**
  * Cover image control. Checks type and size in the browser, uploads straight to Supabase Storage
@@ -36,16 +37,20 @@ export function ImageUploader({
   const [busy, setBusy] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
 
-  useEffect(() => () => {
-    if (preview) URL.revokeObjectURL(preview);
-  }, [preview]);
+  useEffect(
+    () => () => {
+      if (preview) URL.revokeObjectURL(preview);
+    },
+    [preview],
+  );
 
   const stored = mediaUrl(value.path);
   const shown = preview ?? stored;
 
   async function choose(file: File | undefined) {
     if (!file) return;
-    if (!(IMAGE_TYPES as readonly string[]).includes(file.type)) return onError('Use a JPEG, PNG or WebP image.');
+    if (!(IMAGE_TYPES as readonly string[]).includes(file.type))
+      return onError('Use a JPEG, PNG or WebP image.');
     if (file.size > MAX_IMAGE_BYTES) return onError('Images must be 5 MB or smaller.');
     setBusy(true);
     try {
@@ -53,7 +58,9 @@ export function ImageUploader({
       if (!req.ok) return onError(req.message);
       const client = createUploadClient();
       if (!client) return onError('Storage is not configured.');
-      const up = await client.storage.from('media').uploadToSignedUrl(req.data.path, req.data.token, file, { contentType: file.type });
+      const up = await client.storage
+        .from('media')
+        .uploadToSignedUrl(req.data.path, req.data.token, file, { contentType: file.type });
       if (up.error) return onError('The upload failed. Try again.');
       const done = await finalizeUploadAction(req.data.path);
       if (!done.ok) return onError(done.message);
@@ -73,14 +80,22 @@ export function ImageUploader({
       {shown ? (
         // A plain <img> is right here: the preview is a blob URL or a just-uploaded file.
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={shown} alt={value.alt || 'Cover preview'} className="aspect-[16/9] w-full max-w-md border border-line object-cover" />
+        <img
+          src={shown}
+          alt={value.alt || 'Cover preview'}
+          className="aspect-[16/9] w-full max-w-md border border-line object-cover"
+        />
       ) : null}
       <div className="flex flex-wrap items-center gap-2">
         <label
           htmlFor={inputId}
           className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-sharp border border-line-strong px-4 text-[0.95rem] font-semibold hover:bg-surface-2 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus"
         >
-          {busy ? <Loader2 size={16} aria-hidden="true" className="animate-spin" /> : <ImagePlus size={16} aria-hidden="true" />}
+          {busy ? (
+            <Loader2 size={16} aria-hidden="true" className="animate-spin" />
+          ) : (
+            <ImagePlus size={16} aria-hidden="true" />
+          )}
           {value.path ? 'Replace image' : 'Add cover image'}
           <input
             id={inputId}

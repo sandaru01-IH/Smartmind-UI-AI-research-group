@@ -13,8 +13,13 @@ export default async function globalSetup() {
   if (id) {
     await db.auth.admin.updateUserById(id, { password: ADMIN_PASSWORD, email_confirm: true });
   } else {
-    const created = await db.auth.admin.createUser({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD, email_confirm: true });
-    if (created.error || !created.data.user) throw created.error ?? new Error('Could not create the e2e admin');
+    const created = await db.auth.admin.createUser({
+      email: ADMIN_EMAIL,
+      password: ADMIN_PASSWORD,
+      email_confirm: true,
+    });
+    if (created.error || !created.data.user)
+      throw created.error ?? new Error('Could not create the e2e admin');
     id = created.data.user.id;
   }
   const { error } = await db.from('profiles').upsert({ id, role: 'admin' });

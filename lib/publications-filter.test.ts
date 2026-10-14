@@ -20,7 +20,9 @@ describe('filterPublications', () => {
   it('searches every word, ignoring case', () => {
     const r = filterPublications(ALL_PUBLICATIONS, { ...base, q: 'network CENTRALITY' });
     expect(r.length).toBeGreaterThan(3);
-    expect(r.every((p) => /network/i.test(p.title) && /centrality/i.test(p.title + p.venue))).toBe(true);
+    expect(r.every((p) => /network/i.test(p.title) && /centrality/i.test(p.title + p.venue))).toBe(
+      true,
+    );
   });
   it('combines filters', () => {
     const r = filterPublications(ALL_PUBLICATIONS, { q: 'flood', year: 2019, venue: 'all' });

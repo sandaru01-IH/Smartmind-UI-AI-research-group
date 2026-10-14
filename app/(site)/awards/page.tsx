@@ -21,7 +21,12 @@ export default function AwardsPage() {
       <div className="container-site pb-24">
         <ol className="border-t border-line">
           {AWARDS_NEWEST_FIRST.map((a, i) => (
-            <Reveal as="li" key={a.id} index={i % 4} className="grid-12 gap-y-3 border-b border-line py-8">
+            <Reveal
+              as="li"
+              key={a.id}
+              index={i % 4}
+              className="grid-12 gap-y-3 border-b border-line py-8"
+            >
               <div className="col-span-12 md:col-span-3">
                 <p className="numeral text-5xl md:text-6xl">{a.year}</p>
                 <p className="label-mono mt-2 text-muted">{a.when}</p>

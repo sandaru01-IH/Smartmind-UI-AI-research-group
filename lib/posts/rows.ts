@@ -8,10 +8,19 @@ export const postRowSchema = z.object({
   type: z.enum(['article', 'update']),
   title: z.string(),
   slug: z.string(),
-  excerpt: z.string().nullable().transform((v) => v ?? ''),
-  body_md: z.string().nullable().transform((v) => v ?? ''),
+  excerpt: z
+    .string()
+    .nullable()
+    .transform((v) => v ?? ''),
+  body_md: z
+    .string()
+    .nullable()
+    .transform((v) => v ?? ''),
   category: z.enum(CATEGORIES),
-  tags: z.array(z.string()).nullable().transform((v) => v ?? []),
+  tags: z
+    .array(z.string())
+    .nullable()
+    .transform((v) => v ?? []),
   cover_path: z.string().nullable(),
   cover_alt: z.string().nullable(),
   link_url: z.string().nullable(),

@@ -13,20 +13,35 @@ const field =
 
 export function PublicationsExplorer({ publications }: { publications: Publication[] }) {
   const [filters, setFilters] = useState<PublicationFilters>({ q: '', year: 'all', venue: 'all' });
-  const years = useMemo(() => Array.from(new Set(publications.map((p) => p.year))).sort((a, b) => b - a), [publications]);
-  const venues = useMemo(() => Array.from(new Set(publications.map((p) => p.venue))).sort((a, b) => a.localeCompare(b)), [publications]);
+  const years = useMemo(
+    () => Array.from(new Set(publications.map((p) => p.year))).sort((a, b) => b - a),
+    [publications],
+  );
+  const venues = useMemo(
+    () => Array.from(new Set(publications.map((p) => p.venue))).sort((a, b) => a.localeCompare(b)),
+    [publications],
+  );
   const results = useMemo(() => filterPublications(publications, filters), [publications, filters]);
   const active = filters.q !== '' || filters.year !== 'all' || filters.venue !== 'all';
 
   return (
     <div>
-      <form role="search" aria-label="Filter publications" className="grid gap-4 md:grid-cols-12" onSubmit={(e) => e.preventDefault()}>
+      <form
+        role="search"
+        aria-label="Filter publications"
+        className="grid gap-4 md:grid-cols-12"
+        onSubmit={(e) => e.preventDefault()}
+      >
         <div className="md:col-span-5">
           <label htmlFor="pub-q" className="label-mono mb-2 block text-muted">
             {t.common.search}
           </label>
           <div className="relative">
-            <Search size={16} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+            <Search
+              size={16}
+              aria-hidden="true"
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+            />
             <input
               id="pub-q"
               type="search"
@@ -44,7 +59,12 @@ export function PublicationsExplorer({ publications }: { publications: Publicati
           <select
             id="pub-year"
             value={filters.year}
-            onChange={(e) => setFilters((f) => ({ ...f, year: e.target.value === 'all' ? 'all' : Number(e.target.value) }))}
+            onChange={(e) =>
+              setFilters((f) => ({
+                ...f,
+                year: e.target.value === 'all' ? 'all' : Number(e.target.value),
+              }))
+            }
             className={field}
           >
             <option value="all">{t.common.all}</option>

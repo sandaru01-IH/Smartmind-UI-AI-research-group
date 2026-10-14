@@ -4,7 +4,12 @@ import Link from 'next/link';
 import { Button, buttonClass } from '@/components/ui/button';
 import { t } from '@/content/strings';
 
-export default function GlobalError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function GlobalError({
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
   return (
     <main id="main" className="container-site flex min-h-[70vh] flex-col justify-center py-20">
       <p className="label-mono text-muted">Error</p>

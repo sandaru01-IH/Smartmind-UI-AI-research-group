@@ -11,7 +11,11 @@ export const metadata = pageMeta({
 export default function ContactPage() {
   return (
     <>
-      <PageHeader eyebrow="Contact" title="Talk to the team" lead="Questions about the research, the chatbots or joining the network." />
+      <PageHeader
+        eyebrow="Contact"
+        title="Talk to the team"
+        lead="Questions about the research, the chatbots or joining the network."
+      />
       <div className="container-site pb-24">
         <ContactCard />
       </div>

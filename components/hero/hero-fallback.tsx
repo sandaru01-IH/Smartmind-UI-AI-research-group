@@ -15,7 +15,14 @@ export function HeroFallback() {
       preserveAspectRatio="xMidYMid slice"
       className="absolute inset-0 h-full w-full"
     >
-      <path d={roads} fill="none" stroke="var(--line-strong)" strokeWidth="0.22" strokeLinecap="round" opacity="0.55" />
+      <path
+        d={roads}
+        fill="none"
+        stroke="var(--line-strong)"
+        strokeWidth="0.22"
+        strokeLinecap="round"
+        opacity="0.55"
+      />
       <g fill="var(--muted)" opacity="0.8">
         {nodes.map((n, i) => (
           <circle key={i} cx={n.x} cy={n.y} r={n.r} />

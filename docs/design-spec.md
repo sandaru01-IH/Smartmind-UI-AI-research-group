@@ -4,12 +4,12 @@ Status: draft for approval. Source of truth for all facts: `this.md`.
 
 ## 1. Audience and goals
 
-| Audience | What they need | Where we serve them |
-| --- | --- | --- |
-| Planners and agencies (NBRO, UDA, councils) | Proof the work is real; a way to commission a chatbot | Home, Chatbots, Collaborate |
-| Researchers and funders | Publications, themes, partners, awards | Research, Publications, Awards, Partners |
-| Alumni and students of Town & Country Planning | Who is in the network; how to join | About, Team, Collaborate |
-| Press and the public | What happened recently | Latest ticker, News |
+| Audience                                       | What they need                                        | Where we serve them                      |
+| ---------------------------------------------- | ----------------------------------------------------- | ---------------------------------------- |
+| Planners and agencies (NBRO, UDA, councils)    | Proof the work is real; a way to commission a chatbot | Home, Chatbots, Collaborate              |
+| Researchers and funders                        | Publications, themes, partners, awards                | Research, Publications, Awards, Partners |
+| Alumni and students of Town & Country Planning | Who is in the network; how to join                    | About, Team, Collaborate                 |
+| Press and the public                           | What happened recently                                | Latest ticker, News                      |
 
 Primary goal: make SmartMind legible as a serious GeoAI research studio and give visitors one clear next step (collaborate). Secondary: let admins publish news without code.
 
@@ -21,6 +21,7 @@ Anti-goals: looking like a university template or SaaS landing page; any invente
 Dark-first editorial/technical look. A live road-network simulation is the hero. Hairline borders, oversized mono numerals, one sharp accent (lime). Theme colours appear only as data codes.
 
 Rejected alternatives
+
 1. **"Paper atlas"**: warm cartographic, serif-led, light-first. Beautiful but reads as a museum or a journal; it undersells the live, computational nature of the work and makes the hero simulation feel bolted on.
 2. **"Dashboard brutalism"**: dense grid of panels, monospace everywhere, neon on black. Reads as an ops console; hurts scanning for non-technical visitors (agencies, alumni) and fails on mobile.
 
@@ -57,23 +58,25 @@ Confirmed-only rule: items flagged unconfirmed in this.md (2024 and 2025 awards,
 Single source: CSS variables in `app/tokens.css`, mapped into Tailwind theme. No hard-coded hex in components.
 
 Dark (default)
-| Token | Value | Use |
-| --- | --- | --- |
-| `--ink` | #090D12 | page background |
-| `--graphite` | #121922 | raised surfaces |
-| `--line` | #1F2A36 | hairlines |
-| `--mist` | #8FA3B5 | secondary text (verify AA on ink and graphite) |
-| `--paper` | #F2EFE8 | primary text |
-| `--signal` | #C6FF3D | buttons, live dot, focus |
-| `--flood` | #2DE2C6 | theme: flood |
-| `--landslide` | #FFB347 | theme: landslide / hazard |
-| `--traffic` | #FF6B57 | theme: traffic |
+
+| Token         | Value   | Use                                            |
+| ------------- | ------- | ---------------------------------------------- |
+| `--ink`       | #090D12 | page background                                |
+| `--graphite`  | #121922 | raised surfaces                                |
+| `--line`      | #1F2A36 | hairlines                                      |
+| `--mist`      | #8FA3B5 | secondary text (verify AA on ink and graphite) |
+| `--paper`     | #F2EFE8 | primary text                                   |
+| `--signal`    | #C6FF3D | buttons, live dot, focus                       |
+| `--flood`     | #2DE2C6 | theme: flood                                   |
+| `--landslide` | #FFB347 | theme: landslide / hazard                      |
+| `--traffic`   | #FF6B57 | theme: traffic                                 |
 
 Light (warm): background paper #F2EFE8, text ink, hairlines a darkened paper, secondary text a darkened mist. Lime is used only as a filled button background with ink text, or as a decorative mark, never as text on paper. Theme colours get darker text-safe variants for light mode (`--flood-ink` etc.).
 
 Contrast: a script (`scripts/check-contrast.ts`, unit-tested) computes WCAG ratios for every declared text/background pair in both themes and fails the build below 4.5:1 (3:1 for large text and UI borders). The values above are a starting point; exact secondary and light-mode shades are fixed by that script, not by eye.
 
 Type (next/font, self-hosted, `display: swap` with size-adjusted fallbacks to avoid CLS)
+
 - Display: Bricolage Grotesque. Body: Instrument Sans. Data/labels/dates/tags: JetBrains Mono.
 - Fluid scale with `clamp()`: step -1 to 7, base 1rem at 360 px rising to about 1.125rem at 1440 px; display up to about 8rem.
 
@@ -89,6 +92,7 @@ Space and layout: 12-column grid, 4 px base unit, gutters 16 / 24 / 32 px at 360
 - `prefers-reduced-motion`: no parallax, no counters (final values shown), no flow animation in the diagram, hero replaced by a static SVG of the same network.
 
 ### Hero simulation (technical notes)
+
 - Procedural graph from a seeded RNG (stable across loads): 150 to 250 nodes by relaxed Poisson-disc sampling, edges from a Delaunay-like neighbour pruning, removing long edges.
 - Betweenness approximated by sampled shortest paths (about 40 sources), cached once, sizes the nodes.
 - Agents follow shortest paths using Dijkstra on the current edge weights; a cursor or touch "flood" disc multiplies weights of edges inside radius, agents re-plan when their next edge becomes blocked.

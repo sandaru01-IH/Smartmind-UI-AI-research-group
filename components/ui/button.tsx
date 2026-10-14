@@ -19,10 +19,12 @@ export function buttonClass(variant: Variant = 'primary', extra = ''): string {
   return `${base} ${variants[variant]} ${extra}`.trim();
 }
 
-type LinkProps = { href: string; variant?: Variant; children: ReactNode; className?: string } & Omit<
-  ComponentProps<typeof Link>,
-  'href' | 'className' | 'children'
->;
+type LinkProps = {
+  href: string;
+  variant?: Variant;
+  children: ReactNode;
+  className?: string;
+} & Omit<ComponentProps<typeof Link>, 'href' | 'className' | 'children'>;
 
 export function ButtonLink({ href, variant = 'primary', className, children, ...rest }: LinkProps) {
   const external = /^https?:\/\//.test(href);

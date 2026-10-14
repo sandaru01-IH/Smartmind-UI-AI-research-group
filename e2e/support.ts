@@ -21,7 +21,12 @@ export async function signIn(page: Page, next = '/admin') {
 }
 
 /** Reload until `assertion` passes. Public pages should update within seconds of an admin change. */
-export async function eventually(page: Page, url: string, assertion: () => Promise<void>, timeoutMs = 15_000) {
+export async function eventually(
+  page: Page,
+  url: string,
+  assertion: () => Promise<void>,
+  timeoutMs = 15_000,
+) {
   await expect(async () => {
     await page.goto(url);
     await assertion();

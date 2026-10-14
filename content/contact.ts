@@ -7,5 +7,6 @@ export const COLLABORATE = {
   ],
   membership:
     'Smartmind is a network of Town & Country Planning alumni and students. What joining involves is still to be confirmed.',
-  emailPending: 'Contact details coming soon. Until then, reach the team through the University of Moratuwa.',
+  emailPending:
+    'Contact details coming soon. Until then, reach the team through the University of Moratuwa.',
 } as const;

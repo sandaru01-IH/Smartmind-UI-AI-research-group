@@ -69,14 +69,19 @@ test.describe('admin lifecycle', () => {
     await page.getByLabel('Title', { exact: true }).fill(title);
     await expect(page.getByLabel('Slug')).toHaveValue(slug);
     await page.getByLabel('Excerpt').fill('An end-to-end test post.');
-    await page.getByLabel('Body (Markdown)').fill('## Heading\n\nSome **bold** body text for the e2e test.');
+    await page
+      .getByLabel('Body (Markdown)')
+      .fill('## Heading\n\nSome **bold** body text for the e2e test.');
     await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(page.getByText('Draft saved.')).toBeVisible();
     await expect(page).toHaveURL(/\/admin\/posts\/[0-9a-f-]{36}$/);
     const editUrl = page.url();
 
     // A draft is invisible to visitors.
-    const anon = await page.context().browser()!.newContext({ baseURL: new URL(page.url()).origin });
+    const anon = await page
+      .context()
+      .browser()!
+      .newContext({ baseURL: new URL(page.url()).origin });
     const visitor = await anon.newPage();
     expect((await visitor.goto(`/news/${slug}`))?.status()).toBe(404);
     await visitor.goto('/news');
@@ -93,7 +98,9 @@ test.describe('admin lifecycle', () => {
     });
     await eventually(visitor, '/', async () => {
       await expect(visitor.locator('#latest').getByText(title)).toBeVisible();
-      await expect(visitor.getByRole('region', { name: 'Latest updates' }).getByText(title).first()).toBeAttached();
+      await expect(
+        visitor.getByRole('region', { name: 'Latest updates' }).getByText(title).first(),
+      ).toBeAttached();
     });
     await eventually(visitor, `/news/${slug}`, async () => {
       await expect(visitor.getByRole('heading', { level: 1, name: title })).toBeVisible();
@@ -139,11 +146,16 @@ test.describe('admin lifecycle', () => {
 
     const visitor = await (await browser.newContext()).newPage();
     await eventually(visitor, '/', async () => {
-      await expect(visitor.getByRole('region', { name: 'Latest updates' }).getByText(headline).first()).toBeAttached();
+      await expect(
+        visitor.getByRole('region', { name: 'Latest updates' }).getByText(headline).first(),
+      ).toBeAttached();
     });
   });
 
-  test('a scheduled post stays hidden, then goes live without any manual step', async ({ page, browser }) => {
+  test('a scheduled post stays hidden, then goes live without any manual step', async ({
+    page,
+    browser,
+  }) => {
     test.setTimeout(180_000);
     const scheduled = `${TITLE_PREFIX}Scheduled ${stamp}`;
     await signIn(page);
@@ -156,29 +168,48 @@ test.describe('admin lifecycle', () => {
     // datetime-local has minute precision, so schedule for the next full minute boundary after 20 s.
     when.setSeconds(0, 0);
     if (when.getTime() < Date.now() + 5_000) when.setMinutes(when.getMinutes() + 1);
-    await page.getByLabel('Publish at (optional)').fill(
-      `${when.getFullYear()}-${pad(when.getMonth() + 1)}-${pad(when.getDate())}T${pad(when.getHours())}:${pad(when.getMinutes())}`,
-    );
+    await page
+      .getByLabel('Publish at (optional)')
+      .fill(
+        `${when.getFullYear()}-${pad(when.getMonth() + 1)}-${pad(when.getDate())}T${pad(when.getHours())}:${pad(when.getMinutes())}`,
+      );
     await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(page.getByText('Saved and published.')).toBeVisible();
 
     const visitor = await (await browser.newContext()).newPage();
     await visitor.goto('/news');
     await expect(visitor.locator('main').getByText(scheduled)).toHaveCount(0);
-    await eventually(visitor, '/news', async () => {
-      await expect(visitor.locator('main').getByRole('link', { name: scheduled })).toBeVisible();
-    }, 120_000);
+    await eventually(
+      visitor,
+      '/news',
+      async () => {
+        await expect(visitor.locator('main').getByRole('link', { name: scheduled })).toBeVisible();
+      },
+      120_000,
+    );
   });
 
   test('uploads reject files that are not images', async ({ page }) => {
     await signIn(page);
     await page.goto('/admin/posts/new', { waitUntil: 'networkidle' });
-    await page.locator('input[type=file]').setInputFiles({ name: 'not-an-image.html', mimeType: 'text/html', buffer: Buffer.from('<script>alert(1)</script>') });
+    await page.locator('input[type=file]').setInputFiles({
+      name: 'not-an-image.html',
+      mimeType: 'text/html',
+      buffer: Buffer.from('<script>alert(1)</script>'),
+    });
     await expect(page.getByText('Use a JPEG, PNG or WebP image.')).toBeVisible();
-    await page.locator('input[type=file]').setInputFiles({ name: 'big.png', mimeType: 'image/png', buffer: Buffer.alloc(5 * 1024 * 1024 + 10, 1) });
+    await page.locator('input[type=file]').setInputFiles({
+      name: 'big.png',
+      mimeType: 'image/png',
+      buffer: Buffer.alloc(5 * 1024 * 1024 + 10, 1),
+    });
     await expect(page.getByText('Images must be 5 MB or smaller.')).toBeVisible();
     // A file that claims to be a PNG but is not: the server rejects it after upload.
-    await page.locator('input[type=file]').setInputFiles({ name: 'fake.png', mimeType: 'image/png', buffer: Buffer.from('<html>not a png</html>') });
+    await page.locator('input[type=file]').setInputFiles({
+      name: 'fake.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from('<html>not a png</html>'),
+    });
     await expect(page.getByText(/does not match|Use a JPEG/)).toBeVisible();
   });
 });

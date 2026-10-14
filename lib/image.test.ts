@@ -20,7 +20,10 @@ describe('sniffImageType', () => {
 
 describe('validateImage', () => {
   it('accepts a matching declared type', () => {
-    expect(validateImage({ declaredType: 'image/png', bytes: png })).toEqual({ ok: true, type: 'image/png' });
+    expect(validateImage({ declaredType: 'image/png', bytes: png })).toEqual({
+      ok: true,
+      type: 'image/png',
+    });
   });
   it('rejects content that disguises itself with an image MIME type', () => {
     const r = validateImage({ declaredType: 'image/png', bytes: html });
@@ -31,7 +34,10 @@ describe('validateImage', () => {
   });
   it('rejects SVG and GIF', () => {
     expect(validateImage({ declaredType: 'image/svg+xml', bytes: html }).ok).toBe(false);
-    expect(validateImage({ declaredType: 'image/gif', bytes: new Uint8Array([0x47, 0x49, 0x46, 0x38]) }).ok).toBe(false);
+    expect(
+      validateImage({ declaredType: 'image/gif', bytes: new Uint8Array([0x47, 0x49, 0x46, 0x38]) })
+        .ok,
+    ).toBe(false);
   });
   it('rejects files over 5 MB', () => {
     const big = new Uint8Array(5 * 1024 * 1024 + 1);

@@ -40,7 +40,8 @@ export const NUMBERS: NumberStat[] = [
     id: 'awards',
     value: CONFIRMED_AWARD_COUNT,
     label: 'Awards, 2018 and 2019',
-    source: 'this.md, Awards: seven awards from 2018 and 2019, sourced to the department’s ongoing research page.',
+    source:
+      'this.md, Awards: seven awards from 2018 and 2019, sourced to the department’s ongoing research page.',
   },
   {
     id: 'partners',

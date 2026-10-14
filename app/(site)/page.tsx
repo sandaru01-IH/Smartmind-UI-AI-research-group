@@ -15,7 +15,9 @@ import { PARTNERS } from '@/content/partners';
 import { t } from '@/content/strings';
 
 export const metadata: Metadata = {
-  title: { absolute: `${BRAND.name}, GeoAI for urban simulation | ${BRAND.lab}, ${BRAND.university}` },
+  title: {
+    absolute: `${BRAND.name}, GeoAI for urban simulation | ${BRAND.lab}, ${BRAND.university}`,
+  },
   description: `${BRAND.name} is a GeoAI network of Town & Country Planning alumni and students at the ${BRAND.university}. Research on flood, land use, traffic and AI, and chatbots for planners and residents.`,
   alternates: { canonical: '/' },
 };
@@ -49,7 +51,9 @@ export default function HomePage() {
       <Hero />
 
       <Section id="latest" numeral="01" title={t.home.latest} lead={t.home.latestLead}>
-        <Suspense fallback={<div className="h-96 border border-line bg-surface" aria-hidden="true" />}>
+        <Suspense
+          fallback={<div className="h-96 border border-line bg-surface" aria-hidden="true" />}
+        >
           <LatestBento />
         </Suspense>
       </Section>
@@ -63,7 +67,11 @@ export default function HomePage() {
         numeral="03"
         title={t.home.researchTitle}
         lead={t.home.researchLead}
-        action={<ButtonLink href="/research" variant="secondary">{t.home.researchCta}</ButtonLink>}
+        action={
+          <ButtonLink href="/research" variant="secondary">
+            {t.home.researchCta}
+          </ButtonLink>
+        }
       >
         <ResearchBento />
       </Section>
@@ -73,7 +81,11 @@ export default function HomePage() {
         numeral="04"
         title={t.home.chatbotsTitle}
         lead={t.home.chatbotsLead}
-        action={<ButtonLink href="/chatbots" variant="secondary">{t.home.chatbotsCta}</ButtonLink>}
+        action={
+          <ButtonLink href="/chatbots" variant="secondary">
+            {t.home.chatbotsCta}
+          </ButtonLink>
+        }
       >
         <JourneyTeaser />
       </Section>
@@ -83,7 +95,11 @@ export default function HomePage() {
         numeral="05"
         title={`${PARTNERS.length} ${t.home.partnersTitle.toLowerCase()}`}
         lead={t.home.partnersLead}
-        action={<ButtonLink href="/partners" variant="secondary">{t.nav.partners}</ButtonLink>}
+        action={
+          <ButtonLink href="/partners" variant="secondary">
+            {t.nav.partners}
+          </ButtonLink>
+        }
       >
         <PartnersInline />
       </Section>

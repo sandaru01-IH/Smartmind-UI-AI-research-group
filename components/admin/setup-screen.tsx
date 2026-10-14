@@ -3,8 +3,14 @@ import { Database } from 'lucide-react';
 
 const STEPS = [
   { title: 'Start Supabase locally', code: 'npx supabase start' },
-  { title: 'Copy the API URL and anon key into .env.local', code: 'NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321\nNEXT_PUBLIC_SUPABASE_ANON_KEY=<anon key from the start output>' },
-  { title: 'Add the server-only key the scripts use (see .env.example)', code: '# the secret key printed by supabase start. It stays on the server and is never exposed to the browser.' },
+  {
+    title: 'Copy the API URL and anon key into .env.local',
+    code: 'NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321\nNEXT_PUBLIC_SUPABASE_ANON_KEY=<anon key from the start output>',
+  },
+  {
+    title: 'Add the server-only key the scripts use (see .env.example)',
+    code: '# the secret key printed by supabase start. It stays on the server and is never exposed to the browser.',
+  },
   { title: 'Apply the schema and seed the news', code: 'npx supabase db reset\nnpm run seed' },
   { title: 'Create the first admin', code: 'npm run create-admin -- you@example.com' },
   { title: 'Restart the dev server, then sign in', code: 'npm run dev' },
@@ -19,8 +25,8 @@ export function SetupScreen() {
       </p>
       <h1 className="mt-4 text-4xl">Connect Supabase to use the admin</h1>
       <p className="mt-4 text-muted">
-        The public site is running on its built-in seed posts. The admin needs a Supabase project for sign-in, the post
-        database and image storage. Follow these steps once.
+        The public site is running on its built-in seed posts. The admin needs a Supabase project
+        for sign-in, the post database and image storage. Follow these steps once.
       </p>
       <ol className="mt-10 space-y-6">
         {STEPS.map((s, i) => (
@@ -29,7 +35,9 @@ export function SetupScreen() {
               <span className="numeral text-muted">{String(i + 1).padStart(2, '0')}</span>
               <span className="font-semibold">{s.title}</span>
             </p>
-            <pre className="mt-2 overflow-x-auto border border-line bg-surface p-3 font-mono text-sm">{s.code}</pre>
+            <pre className="mt-2 overflow-x-auto border border-line bg-surface p-3 font-mono text-sm">
+              {s.code}
+            </pre>
           </li>
         ))}
       </ol>

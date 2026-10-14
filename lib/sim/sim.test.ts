@@ -9,10 +9,26 @@ import { createRng } from './rng';
 /** A line of nodes 0-1-2-3-4 plus a longer detour 1-5-3. */
 function lineGraph(): Graph {
   const nodes = [
-    { x: 0, y: 0 }, { x: 10, y: 0 }, { x: 20, y: 0 }, { x: 30, y: 0 }, { x: 40, y: 0 }, { x: 20, y: 12 },
+    { x: 0, y: 0 },
+    { x: 10, y: 0 },
+    { x: 20, y: 0 },
+    { x: 30, y: 0 },
+    { x: 40, y: 0 },
+    { x: 20, y: 12 },
   ];
-  const pairs: [number, number][] = [[0, 1], [1, 2], [2, 3], [3, 4], [1, 5], [5, 3]];
-  const edges = pairs.map(([a, b]) => ({ a, b, len: Math.hypot(nodes[a].x - nodes[b].x, nodes[a].y - nodes[b].y) }));
+  const pairs: [number, number][] = [
+    [0, 1],
+    [1, 2],
+    [2, 3],
+    [3, 4],
+    [1, 5],
+    [5, 3],
+  ];
+  const edges = pairs.map(([a, b]) => ({
+    a,
+    b,
+    len: Math.hypot(nodes[a].x - nodes[b].x, nodes[a].y - nodes[b].y),
+  }));
   const adj: { to: number; edge: number }[][] = nodes.map(() => []);
   edges.forEach((e, i) => {
     adj[e.a].push({ to: e.b, edge: i });
@@ -108,7 +124,11 @@ describe('shortestPath', () => {
 
 describe('RoadSim', () => {
   const make = (agents = 60) =>
-    new RoadSim({ graph: generateGraph({ seed: 3, nodeTarget: 160, width: 160, height: 100 }), agentCount: agents, seed: 9 });
+    new RoadSim({
+      graph: generateGraph({ seed: 3, nodeTarget: 160, width: 160, height: 100 }),
+      agentCount: agents,
+      seed: 9,
+    });
 
   it('spawns the requested number of agents', () => {
     expect(make(60).agents.length).toBe(60);

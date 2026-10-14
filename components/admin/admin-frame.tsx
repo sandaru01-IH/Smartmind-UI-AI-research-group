@@ -16,7 +16,10 @@ export function AdminFrame({ email, children }: { email: string; children: React
       </a>
       <header className="sticky top-0 z-40 border-b border-line bg-bg/95 backdrop-blur-sm">
         <div className="mx-auto flex min-h-14 max-w-[1200px] flex-wrap items-center justify-between gap-x-4 gap-y-1 px-[var(--gutter)] py-1">
-          <Link href="/admin" className="inline-flex min-h-11 items-center gap-2.5 font-display text-lg font-semibold">
+          <Link
+            href="/admin"
+            className="inline-flex min-h-11 items-center gap-2.5 font-display text-lg font-semibold"
+          >
             <LogoMark size={24} />
             Smartmind <span className="label-mono text-muted">Admin</span>
           </Link>
@@ -26,7 +29,12 @@ export function AdminFrame({ email, children }: { email: string; children: React
               <span className="hidden sm:inline">New post</span>
               <span className="sm:hidden">New</span>
             </Link>
-            <Link href="/" target="_blank" className={buttonClass('ghost', 'px-3')} aria-label="View the public site (opens in a new tab)">
+            <Link
+              href="/"
+              target="_blank"
+              className={buttonClass('ghost', 'px-3')}
+              aria-label="View the public site (opens in a new tab)"
+            >
               <ExternalLink size={16} aria-hidden="true" />
               <span className="hidden sm:inline">View site</span>
             </Link>
@@ -43,7 +51,11 @@ export function AdminFrame({ email, children }: { email: string; children: React
           Signed in as <span className="text-fg">{email}</span>
         </p>
       </header>
-      <main id="main" tabIndex={-1} className="mx-auto max-w-[1200px] px-[var(--gutter)] py-8 outline-none">
+      <main
+        id="main"
+        tabIndex={-1}
+        className="mx-auto max-w-[1200px] px-[var(--gutter)] py-8 outline-none"
+      >
         {children}
       </main>
     </ToastProvider>

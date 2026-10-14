@@ -6,7 +6,9 @@ import { defaultSchema, type Options as SanitizeSchema } from 'rehype-sanitize';
  */
 export const markdownSchema: SanitizeSchema = {
   ...defaultSchema,
-  tagNames: (defaultSchema.tagNames ?? []).filter((t) => !['img', 'iframe', 'script', 'style', 'input'].includes(t)),
+  tagNames: (defaultSchema.tagNames ?? []).filter(
+    (t) => !['img', 'iframe', 'script', 'style', 'input'].includes(t),
+  ),
   attributes: {
     ...defaultSchema.attributes,
     a: ['href', 'title'],

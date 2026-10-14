@@ -8,11 +8,16 @@ import { serviceClient } from './_env';
 
 async function main() {
   const db = serviceClient();
-  const rows = SEED_POSTS.map(({ id: _id, author_id: _author, ...post }) => post);
+  // The database assigns ids, and seed posts have no author.
+  const rows = SEED_POSTS.map((p) =>
+    Object.fromEntries(Object.entries(p).filter(([k]) => k !== 'id' && k !== 'author_id')),
+  );
   const { error } = await db.from('posts').upsert(rows, { onConflict: 'slug' });
   if (error) throw error;
   const live = SEED_POSTS.filter((p) => p.status === 'published').length;
-  console.log(`Seeded ${SEED_POSTS.length} posts (${live} published, ${SEED_POSTS.length - live} drafts).`);
+  console.log(
+    `Seeded ${SEED_POSTS.length} posts (${live} published, ${SEED_POSTS.length - live} drafts).`,
+  );
 }
 
 main().catch((e) => {

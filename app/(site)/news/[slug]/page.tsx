@@ -33,7 +33,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: post.title,
     description,
     alternates: { canonical: `/news/${post.slug}` },
-    openGraph: { type: 'article', title: post.title, description, url: `/news/${post.slug}`, publishedTime: post.published_at ?? undefined },
+    openGraph: {
+      type: 'article',
+      title: post.title,
+      description,
+      url: `/news/${post.slug}`,
+      publishedTime: post.published_at ?? undefined,
+    },
     twitter: { title: post.title, description },
   };
 }
@@ -61,7 +67,10 @@ async function Article({ params }: Props) {
         }}
       />
       <div className="container-site pt-10 md:pt-16">
-        <Link href="/news" className="inline-flex min-h-11 items-center gap-2 text-muted hover:text-fg">
+        <Link
+          href="/news"
+          className="inline-flex min-h-11 items-center gap-2 text-muted hover:text-fg"
+        >
           <ArrowLeft size={16} aria-hidden="true" />
           All news
         </Link>
@@ -77,7 +86,9 @@ async function Article({ params }: Props) {
           ) : null}
         </div>
         <h1 className="mt-5 max-w-[22ch] text-4xl md:text-6xl">{post.title}</h1>
-        {post.excerpt ? <p className="mt-6 max-w-[58ch] text-xl text-muted">{post.excerpt}</p> : null}
+        {post.excerpt ? (
+          <p className="mt-6 max-w-[58ch] text-xl text-muted">{post.excerpt}</p>
+        ) : null}
       </div>
 
       <div className="container-site mt-10 max-w-[1100px]">
@@ -99,7 +110,10 @@ async function Article({ params }: Props) {
             <ul className="mt-3 flex flex-wrap gap-2">
               {post.tags.map((tg) => (
                 <li key={tg}>
-                  <Link href={`/news?tag=${encodeURIComponent(tg)}`} className="inline-flex min-h-11 items-center">
+                  <Link
+                    href={`/news?tag=${encodeURIComponent(tg)}`}
+                    className="inline-flex min-h-11 items-center"
+                  >
                     <Tag>#{tg}</Tag>
                   </Link>
                 </li>

@@ -53,7 +53,10 @@ export const THEMES: ResearchTheme[] = [
     colourVar: '--traffic',
     inkVar: '--traffic-ink',
     projects: [
-      { title: 'Road crash magnitude versus road network configuration, Kegalle', srcFunded: false },
+      {
+        title: 'Road crash magnitude versus road network configuration, Kegalle',
+        srcFunded: false,
+      },
       {
         title: 'Built environment versus travellers’ mode choice, Colombo',
         srcFunded: false,

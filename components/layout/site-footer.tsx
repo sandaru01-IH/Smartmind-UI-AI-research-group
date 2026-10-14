@@ -20,7 +20,10 @@ export function SiteFooter() {
           <ul className="mt-4 space-y-1">
             {[...NAV_ITEMS, CTA_ITEM].map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="inline-flex min-h-11 items-center hover:underline md:min-h-9">
+                <Link
+                  href={item.href}
+                  className="inline-flex min-h-11 items-center hover:underline md:min-h-9"
+                >
                   {item.label}
                 </Link>
               </li>
@@ -40,7 +43,10 @@ export function SiteFooter() {
               {UNIVERSITY_CONTACT.phones.map((phone, i) => (
                 <span key={phone}>
                   {i > 0 ? ' / ' : ''}
-                  <a href={`tel:${phone.replace(/\s/g, '')}`} className="inline-block py-2 hover:underline">
+                  <a
+                    href={`tel:${phone.replace(/\s/g, '')}`}
+                    className="inline-block py-2 hover:underline"
+                  >
                     {phone}
                   </a>
                 </span>
@@ -48,7 +54,10 @@ export function SiteFooter() {
             </span>
           </address>
           <p className="mt-4">
-            <ExternalLink href={LINKS.facebook} className="inline-flex min-h-11 items-center underline underline-offset-4">
+            <ExternalLink
+              href={LINKS.facebook}
+              className="inline-flex min-h-11 items-center underline underline-offset-4"
+            >
               {t.footer.follow}
             </ExternalLink>
           </p>

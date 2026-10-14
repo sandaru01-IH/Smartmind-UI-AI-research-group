@@ -4,7 +4,9 @@ export const RESERVED_SLUGS: ReadonlySet<string> = new Set(['admin', 'api', 'new
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export function isValidSlug(slug: string): boolean {
-  return slug.length > 0 && slug.length <= SLUG_MAX && SLUG_RE.test(slug) && !RESERVED_SLUGS.has(slug);
+  return (
+    slug.length > 0 && slug.length <= SLUG_MAX && SLUG_RE.test(slug) && !RESERVED_SLUGS.has(slug)
+  );
 }
 
 /** Lowercase ASCII, hyphen separated, at most SLUG_MAX characters. */

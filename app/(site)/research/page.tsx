@@ -36,13 +36,18 @@ export default function ResearchPage() {
         <ul className="border-t border-line">
           {WIDER_TOPICS.map((topic, i) => (
             <li key={topic} className="grid-12 items-baseline border-b border-line py-4">
-              <span className="numeral col-span-2 text-sm text-muted md:col-span-3">{String(i + 1).padStart(2, '0')}</span>
+              <span className="numeral col-span-2 text-sm text-muted md:col-span-3">
+                {String(i + 1).padStart(2, '0')}
+              </span>
               <span className="col-span-10 text-lg md:col-span-9">{topic}</span>
             </li>
           ))}
         </ul>
         <p className="mt-6">
-          <ExternalLink href={LINKS.departmentResearch} className="inline-flex min-h-11 items-center underline underline-offset-4">
+          <ExternalLink
+            href={LINKS.departmentResearch}
+            className="inline-flex min-h-11 items-center underline underline-offset-4"
+          >
             Department ongoing research page
           </ExternalLink>
         </p>

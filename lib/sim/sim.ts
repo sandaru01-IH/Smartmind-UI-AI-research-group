@@ -30,7 +30,12 @@ export interface RoadSimOptions {
   centrality?: number[];
 }
 
-function segmentDistSq(px: number, py: number, a: { x: number; y: number }, b: { x: number; y: number }): number {
+function segmentDistSq(
+  px: number,
+  py: number,
+  a: { x: number; y: number },
+  b: { x: number; y: number },
+): number {
   const dx = b.x - a.x;
   const dy = b.y - a.y;
   const len2 = dx * dx + dy * dy;

@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Suspense, useEffect, type ReactNode } from 'react';
 
-const isActive = (pathname: string, href: string) => pathname === href || pathname.startsWith(`${href}/`);
+const isActive = (pathname: string, href: string) =>
+  pathname === href || pathname.startsWith(`${href}/`);
 
 function ActiveLink({ href, className, activeMark, children }: NavLinkProps) {
   const pathname = usePathname();

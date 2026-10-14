@@ -24,7 +24,9 @@ function PersonCard({ person, index }: { person: Person; index: number }) {
       </div>
       <div className="min-w-0">
         <h3 className="text-xl">{person.name}</h3>
-        {person.affiliation ? <p className="label-mono mt-1 text-muted">{person.affiliation}</p> : null}
+        {person.affiliation ? (
+          <p className="label-mono mt-1 text-muted">{person.affiliation}</p>
+        ) : null}
         <ul className="mt-3 space-y-1 text-[0.95rem] text-muted">
           {person.appears.map((a) => (
             <li key={a}>{a}</li>

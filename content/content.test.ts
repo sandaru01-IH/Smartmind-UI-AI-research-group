@@ -34,7 +34,9 @@ describe('content integrity', () => {
   });
   it('has twelve lab papers spanning 2019 to 2021, each with a link', () => {
     expect(LAB_PAPERS).toHaveLength(12);
-    expect(LAB_PAPERS.every((p) => p.year >= 2019 && p.year <= 2021 && p.href?.startsWith('https://'))).toBe(true);
+    expect(
+      LAB_PAPERS.every((p) => p.year >= 2019 && p.year <= 2021 && p.href?.startsWith('https://')),
+    ).toBe(true);
   });
   it('flags the unverified PLoS ONE paper', () => {
     const plos = ALL_PUBLICATIONS.find((p) => p.venue === 'PLoS ONE');
@@ -65,6 +67,10 @@ describe('content integrity', () => {
   });
   it('gives every sourced item a source and a confirmation', () => {
     const all = [...AWARDS, ...TEAM, ...PARTNERS, ...MILESTONES, ...ALL_PUBLICATIONS];
-    expect(all.every((i) => i.source.length > 0 && (i.confirmation === 'confirmed' || i.confirmation === 'tbc'))).toBe(true);
+    expect(
+      all.every(
+        (i) => i.source.length > 0 && (i.confirmation === 'confirmed' || i.confirmation === 'tbc'),
+      ),
+    ).toBe(true);
   });
 });

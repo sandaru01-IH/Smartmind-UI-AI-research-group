@@ -11,7 +11,10 @@ import { COLLABORATE } from '@/content/contact';
 export function ContactCard() {
   return (
     <div className="grid gap-5 md:grid-cols-2">
-      <section aria-labelledby="contact-smartmind" className="border border-line bg-surface p-6 md:p-8">
+      <section
+        aria-labelledby="contact-smartmind"
+        className="border border-line bg-surface p-6 md:p-8"
+      >
         <h2 id="contact-smartmind" className="text-2xl">
           Smartmind
         </h2>
@@ -23,18 +26,27 @@ export function ContactCard() {
             </ButtonLink>
           </p>
         ) : (
-          <p className="mt-5 border border-dashed border-line-strong p-4 text-muted" data-testid="contact-soon">
+          <p
+            className="mt-5 border border-dashed border-line-strong p-4 text-muted"
+            data-testid="contact-soon"
+          >
             {COLLABORATE.emailPending}
           </p>
         )}
         <p className="mt-5">
-          <ExternalLink href={LINKS.facebook} className="inline-flex min-h-11 items-center underline underline-offset-4">
+          <ExternalLink
+            href={LINKS.facebook}
+            className="inline-flex min-h-11 items-center underline underline-offset-4"
+          >
             Facebook page
           </ExternalLink>
         </p>
       </section>
 
-      <section aria-labelledby="contact-university" className="border border-line bg-surface p-6 md:p-8">
+      <section
+        aria-labelledby="contact-university"
+        className="border border-line bg-surface p-6 md:p-8"
+      >
         <h2 id="contact-university" className="text-2xl">
           University of Moratuwa
         </h2>
@@ -48,18 +60,26 @@ export function ContactCard() {
         <ul className="mt-4 space-y-1">
           {UNIVERSITY_CONTACT.phones.map((p) => (
             <li key={p}>
-              <a href={`tel:${p.replace(/\s/g, '')}`} className="inline-flex min-h-11 items-center underline underline-offset-4">
+              <a
+                href={`tel:${p.replace(/\s/g, '')}`}
+                className="inline-flex min-h-11 items-center underline underline-offset-4"
+              >
                 {p}
               </a>
             </li>
           ))}
           <li>
-            <a href={`mailto:${UNIVERSITY_CONTACT.email}`} className="inline-flex min-h-11 items-center underline underline-offset-4">
+            <a
+              href={`mailto:${UNIVERSITY_CONTACT.email}`}
+              className="inline-flex min-h-11 items-center underline underline-offset-4"
+            >
               {UNIVERSITY_CONTACT.email}
             </a>
           </li>
         </ul>
-        <p className="label-mono mt-4 text-muted">General university contact, not a Smartmind address.</p>
+        <p className="label-mono mt-4 text-muted">
+          General university contact, not a Smartmind address.
+        </p>
       </section>
     </div>
   );

@@ -2,30 +2,27 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import { NUMBERS, type NumberStat } from '@/content/numbers';
+import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
 
 const DURATION = 400;
 
 function useCountUp(target: number, start: boolean): number {
-  const [value, setValue] = useState(target);
+  const reduced = usePrefersReducedMotion();
+  const [value, setValue] = useState(0);
   useEffect(() => {
-    if (!start) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setValue(target);
-      return;
-    }
+    if (!start || reduced) return;
     let raf = 0;
     const t0 = performance.now();
     const tick = (now: number) => {
       const p = Math.min(1, (now - t0) / DURATION);
-      const eased = 1 - Math.pow(1 - p, 3);
-      setValue(Math.round(target * eased));
+      setValue(Math.round(target * (1 - Math.pow(1 - p, 3))));
       if (p < 1) raf = requestAnimationFrame(tick);
     };
-    setValue(0);
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [target, start]);
-  return value;
+  }, [target, start, reduced]);
+  // Before the counter scrolls into view, and under reduced motion, show the final figure.
+  return start && !reduced ? value : target;
 }
 
 function Stat({ stat, index }: { stat: NumberStat; index: number }) {
@@ -52,7 +49,10 @@ function Stat({ stat, index }: { stat: NumberStat; index: number }) {
   }, []);
 
   return (
-    <li ref={ref} className="group relative border-t border-line first:border-t-0 sm:border-l sm:border-t-0 sm:first:border-l-0">
+    <li
+      ref={ref}
+      className="group relative border-t border-line first:border-t-0 sm:border-l sm:border-t-0 sm:first:border-l-0"
+    >
       <button
         type="button"
         aria-describedby={noteId}

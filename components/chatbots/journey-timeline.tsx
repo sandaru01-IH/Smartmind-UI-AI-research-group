@@ -58,10 +58,7 @@ export function JourneyTimeline({ milestones }: { milestones: Milestone[] }) {
           <p aria-hidden="true" className="numeral mt-1 text-6xl text-fg md:text-7xl lg:text-8xl">
             {current?.year}
           </p>
-          <div
-            aria-hidden="true"
-            className="relative mt-4 h-1 w-full bg-line md:h-56 md:w-1"
-          >
+          <div aria-hidden="true" className="relative mt-4 h-1 w-full bg-line md:h-56 md:w-1">
             <div
               className="absolute inset-0 origin-left scale-x-[var(--p)] bg-signal md:origin-top md:scale-x-100 md:scale-y-[var(--p)]"
               style={{ '--p': progress } as CSSProperties}
@@ -92,7 +89,10 @@ export function JourneyTimeline({ milestones }: { milestones: Milestone[] }) {
               <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-1">
                 {m.links.map((l) => (
                   <li key={l.href}>
-                    <ExternalLink href={l.href} className="inline-flex min-h-11 items-center underline underline-offset-4">
+                    <ExternalLink
+                      href={l.href}
+                      className="inline-flex min-h-11 items-center underline underline-offset-4"
+                    >
                       {l.label}
                     </ExternalLink>
                   </li>

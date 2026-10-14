@@ -37,7 +37,11 @@ function parseHex(input: string): [number, number, number] {
   const m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(input.trim());
   if (!m) throw new Error(`Not a hex colour: ${input}`);
   let hex = m[1];
-  if (hex.length === 3) hex = hex.split('').map((c) => c + c).join('');
+  if (hex.length === 3)
+    hex = hex
+      .split('')
+      .map((c) => c + c)
+      .join('');
   return [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16)) as [number, number, number];
 }
 

@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
+import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
 import { betweenness } from '@/lib/sim/centrality';
 import { generateGraph } from '@/lib/sim/graph';
 import { HERO_SEED } from '@/lib/sim/static-network';
@@ -42,15 +43,7 @@ function agentBudget(width: number): number {
  */
 export function HeroCanvas({ onReady }: { onReady?: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [reduced, setReduced] = useState(true);
-
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setReduced(mq.matches);
-    const on = () => setReduced(mq.matches);
-    mq.addEventListener('change', on);
-    return () => mq.removeEventListener('change', on);
-  }, []);
+  const reduced = usePrefersReducedMotion();
 
   useEffect(() => {
     if (reduced) return;
@@ -100,7 +93,13 @@ export function HeroCanvas({ onReady }: { onReady?: () => void }) {
       l.fillStyle = palette.node;
       g.nodes.forEach((n, i) => {
         l.beginPath();
-        l.arc(n.x * scale, n.y * scale, scale * (0.35 + 1.5 * Math.pow(centrality[i], 0.6)), 0, Math.PI * 2);
+        l.arc(
+          n.x * scale,
+          n.y * scale,
+          scale * (0.35 + 1.5 * Math.pow(centrality[i], 0.6)),
+          0,
+          Math.PI * 2,
+        );
         l.fill();
       });
     };
@@ -217,7 +216,11 @@ export function HeroCanvas({ onReady }: { onReady?: () => void }) {
 
     const toWorld = (clientX: number, clientY: number) => {
       const r = canvas.getBoundingClientRect();
-      return { x: (clientX - r.left) / scale, y: (clientY - r.top) / scale, inside: clientY >= r.top && clientY <= r.bottom && clientX >= r.left && clientX <= r.right };
+      return {
+        x: (clientX - r.left) / scale,
+        y: (clientY - r.top) / scale,
+        inside: clientY >= r.top && clientY <= r.bottom && clientX >= r.left && clientX <= r.right,
+      };
     };
     const onPointer = (e: PointerEvent) => {
       if (!sim) return;
@@ -251,13 +254,19 @@ export function HeroCanvas({ onReady }: { onReady?: () => void }) {
       onReady?.();
       io.observe(host);
       ro.observe(host);
-      theme.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+      theme.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme'],
+      });
       window.addEventListener('pointermove', onPointer, { passive: true });
       window.addEventListener('pointerdown', onPointer, { passive: true });
       document.addEventListener('visibilitychange', onVisibility);
       start();
     };
-    const idle = typeof window.requestIdleCallback === 'function' ? window.requestIdleCallback.bind(window) : null;
+    const idle =
+      typeof window.requestIdleCallback === 'function'
+        ? window.requestIdleCallback.bind(window)
+        : null;
     const handle = idle ? idle(boot, { timeout: 1200 }) : window.setTimeout(boot, 300);
 
     return () => {

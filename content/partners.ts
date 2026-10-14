@@ -46,7 +46,10 @@ export const ALSO_NAMED: { name: string; context: string }[] = [
   { name: 'SUPSI, Switzerland', context: 'Named on the department’s research page (4ONSE)' },
   { name: 'University of Manchester, UK', context: 'Grant for the NBRO landslide chatbot' },
   { name: 'TU Dresden', context: 'Host of the Street Cloud presentation' },
-  { name: 'Alexander von Humboldt Foundation and DAAD', context: 'Supporters of the Street Cloud presentation' },
+  {
+    name: 'Alexander von Humboldt Foundation and DAAD',
+    context: 'Supporters of the Street Cloud presentation',
+  },
 ];
 
 export const LOGO_NOTE = 'Partner logos need permission from each partner. Names only for now.';

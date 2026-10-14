@@ -7,7 +7,10 @@ export interface PublicationFilters {
 }
 
 /** Case-insensitive search over title, venue and authors, plus exact year and venue filters. */
-export function filterPublications(items: readonly Publication[], f: PublicationFilters): Publication[] {
+export function filterPublications(
+  items: readonly Publication[],
+  f: PublicationFilters,
+): Publication[] {
   const words = f.q.trim().toLowerCase().split(/\s+/).filter(Boolean);
   return items.filter((p) => {
     if (f.year !== 'all' && p.year !== f.year) return false;

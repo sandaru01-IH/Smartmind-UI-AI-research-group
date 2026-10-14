@@ -44,7 +44,11 @@ describe.skipIf(!enabled)('Row Level Security', () => {
   const uploaded: string[] = [];
 
   async function makeUser(email: string, role: 'admin' | null): Promise<SupabaseClient> {
-    const { data, error } = await service.auth.admin.createUser({ email, password: PASSWORD, email_confirm: true });
+    const { data, error } = await service.auth.admin.createUser({
+      email,
+      password: PASSWORD,
+      email_confirm: true,
+    });
     if (error || !data.user) throw error ?? new Error('createUser failed');
     userIds.push(data.user.id);
     if (role) {
@@ -65,11 +69,13 @@ describe.skipIf(!enabled)('Row Level Security', () => {
 
     const past = new Date(Date.now() - 3_600_000).toISOString();
     const future = new Date(Date.now() + 86_400_000).toISOString();
-    const { error } = await service.from('posts').insert([
-      post(slugs.draft, { status: 'draft' }),
-      post(slugs.live, { status: 'published', published_at: past }),
-      post(slugs.future, { status: 'published', published_at: future }),
-    ]);
+    const { error } = await service
+      .from('posts')
+      .insert([
+        post(slugs.draft, { status: 'draft' }),
+        post(slugs.live, { status: 'published', published_at: past }),
+        post(slugs.future, { status: 'published', published_at: future }),
+      ]);
     if (error) throw error;
   });
 
@@ -82,7 +88,10 @@ describe.skipIf(!enabled)('Row Level Security', () => {
 
   describe('anonymous visitor', () => {
     it('sees live posts only', async () => {
-      const { data, error } = await anon.from('posts').select('slug').in('slug', Object.values(slugs));
+      const { data, error } = await anon
+        .from('posts')
+        .select('slug')
+        .in('slug', Object.values(slugs));
       expect(error).toBeNull();
       expect((data ?? []).map((r) => r.slug)).toEqual([slugs.live]);
     });
@@ -109,7 +118,9 @@ describe.skipIf(!enabled)('Row Level Security', () => {
       expect(data ?? []).toEqual([]);
     });
     it('cannot upload to the media bucket', async () => {
-      const { error } = await anon.storage.from('media').upload(`covers/anon-${RUN}.png`, PNG, { contentType: 'image/png' });
+      const { error } = await anon.storage
+        .from('media')
+        .upload(`covers/anon-${RUN}.png`, PNG, { contentType: 'image/png' });
       expect(error).not.toBeNull();
     });
   });
@@ -136,7 +147,9 @@ describe.skipIf(!enabled)('Row Level Security', () => {
       expect(data).toEqual([]);
     });
     it('cannot upload to the media bucket', async () => {
-      const { error } = await member.storage.from('media').upload(`covers/member-${RUN}.png`, PNG, { contentType: 'image/png' });
+      const { error } = await member.storage
+        .from('media')
+        .upload(`covers/member-${RUN}.png`, PNG, { contentType: 'image/png' });
       expect(error).not.toBeNull();
     });
   });
@@ -144,7 +157,9 @@ describe.skipIf(!enabled)('Row Level Security', () => {
   describe('admin', () => {
     it('sees drafts and scheduled posts', async () => {
       const { data } = await admin.from('posts').select('slug').in('slug', Object.values(slugs));
-      expect((data ?? []).map((r) => r.slug).sort()).toEqual([slugs.draft, slugs.future, slugs.live].sort());
+      expect((data ?? []).map((r) => r.slug).sort()).toEqual(
+        [slugs.draft, slugs.future, slugs.live].sort(),
+      );
     });
 
     it('runs the full lifecycle: draft, publish, edit, unpublish, delete', async () => {
@@ -156,14 +171,26 @@ describe.skipIf(!enabled)('Row Level Security', () => {
       expect((await anon.from('posts').select('id').eq('id', id)).data).toEqual([]);
 
       // Publish: visible.
-      const publish = await admin.from('posts').update({ status: 'published', published_at: new Date().toISOString() }).eq('id', id).select().single();
+      const publish = await admin
+        .from('posts')
+        .update({ status: 'published', published_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single();
       expect(publish.error).toBeNull();
       expect((await anon.from('posts').select('id').eq('id', id)).data).toHaveLength(1);
 
       // Edit.
-      const edit = await admin.from('posts').update({ title: 'Edited by admin' }).eq('id', id).select().single();
+      const edit = await admin
+        .from('posts')
+        .update({ title: 'Edited by admin' })
+        .eq('id', id)
+        .select()
+        .single();
       expect(edit.data?.title).toBe('Edited by admin');
-      expect((await anon.from('posts').select('title').eq('id', id).single()).data?.title).toBe('Edited by admin');
+      expect((await anon.from('posts').select('title').eq('id', id).single()).data?.title).toBe(
+        'Edited by admin',
+      );
 
       // Unpublish: hidden again.
       await admin.from('posts').update({ status: 'draft' }).eq('id', id);
@@ -176,13 +203,21 @@ describe.skipIf(!enabled)('Row Level Security', () => {
     });
 
     it('enforces data constraints in the database', async () => {
-      const noAlt = await admin.from('posts').insert(post(`rls-noalt-${RUN}`, { cover_path: 'covers/2026/x.png' }));
+      const noAlt = await admin
+        .from('posts')
+        .insert(post(`rls-noalt-${RUN}`, { cover_path: 'covers/2026/x.png' }));
       expect(noAlt.error).not.toBeNull();
-      const longUpdate = await admin.from('posts').insert(post(`rls-long-${RUN}`, { type: 'update', title: 'x'.repeat(141) }));
+      const longUpdate = await admin
+        .from('posts')
+        .insert(post(`rls-long-${RUN}`, { type: 'update', title: 'x'.repeat(141) }));
       expect(longUpdate.error).not.toBeNull();
-      const badLink = await admin.from('posts').insert(post(`rls-link-${RUN}`, { link_url: 'javascript:alert(1)' }));
+      const badLink = await admin
+        .from('posts')
+        .insert(post(`rls-link-${RUN}`, { link_url: 'javascript:alert(1)' }));
       expect(badLink.error).not.toBeNull();
-      const noDate = await admin.from('posts').insert(post(`rls-nodate-${RUN}`, { status: 'published' }));
+      const noDate = await admin
+        .from('posts')
+        .insert(post(`rls-nodate-${RUN}`, { status: 'published' }));
       expect(noDate.error).not.toBeNull();
     });
 
@@ -200,7 +235,9 @@ describe.skipIf(!enabled)('Row Level Security', () => {
 
     it('is rejected by the bucket for disallowed types', async () => {
       const path = `covers/2026/rls-${RUN}.html`;
-      const up = await admin.storage.from('media').upload(path, new TextEncoder().encode('<script>1</script>'), { contentType: 'text/html' });
+      const up = await admin.storage
+        .from('media')
+        .upload(path, new TextEncoder().encode('<script>1</script>'), { contentType: 'text/html' });
       expect(up.error).not.toBeNull();
     });
   });

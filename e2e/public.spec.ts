@@ -41,7 +41,9 @@ test.describe('every public route renders cleanly', () => {
           await open(page, route, theme);
           await expect(page.locator('main')).toBeVisible();
           await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
-          const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+          const overflow = await page.evaluate(
+            () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+          );
           expect(overflow, `${route} overflows horizontally`).toBeLessThanOrEqual(0);
           expect(errors, `${route} logged errors`).toEqual([]);
         }
@@ -58,14 +60,36 @@ test.describe('every public route renders cleanly', () => {
 });
 
 test.describe('accessibility (axe, WCAG 2.2 AA)', () => {
-  const KEY = ['/', '/news', '/news/participatory-chatbot-flood-landslide-resilience', '/research', '/chatbots', '/publications', '/team', '/awards', '/partners', '/contact', '/admin/login'];
+  const KEY = [
+    '/',
+    '/news',
+    '/news/participatory-chatbot-flood-landslide-resilience',
+    '/research',
+    '/chatbots',
+    '/publications',
+    '/team',
+    '/awards',
+    '/partners',
+    '/contact',
+    '/admin/login',
+  ];
   for (const theme of THEMES) {
     for (const route of KEY) {
       test(`${theme}: ${route}`, async ({ page }) => {
         await open(page, route, theme);
         await page.waitForTimeout(800);
-        const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
-        expect(results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).slice(0, 3).join(' | ')}`)).toEqual([]);
+        const results = await new AxeBuilder({ page })
+          .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+          .analyze();
+        expect(
+          results.violations.map(
+            (v) =>
+              `${v.id}: ${v.nodes
+                .map((n) => n.target.join(' '))
+                .slice(0, 3)
+                .join(' | ')}`,
+          ),
+        ).toEqual([]);
       });
     }
   }
@@ -144,15 +168,23 @@ test.describe('features', () => {
     await expect(ticker.getByRole('button', { name: 'Play updates' })).toBeVisible();
   });
 
-  test('hero: canvas runs, and is replaced by the static network under reduced motion', async ({ browser }) => {
+  test('hero: canvas runs, and is replaced by the static network under reduced motion', async ({
+    browser,
+  }) => {
     const live = await (await browser.newContext()).newPage();
     await live.goto('/', { waitUntil: 'networkidle' });
-    await expect(live.locator('#hero-sim-host canvas')).toHaveCSS('opacity', '1', { timeout: 8000 });
+    await expect(live.locator('#hero-sim-host canvas')).toHaveCSS('opacity', '1', {
+      timeout: 8000,
+    });
     const painted = await live.evaluate(() => {
       const c = document.querySelector<HTMLCanvasElement>('#hero-sim-host canvas');
       if (!c) return 0;
       const ctx = c.getContext('2d');
-      return ctx ? ctx.getImageData(0, 0, c.width, c.height).data.some((v, i) => i % 4 === 3 && v > 0) ? 1 : 0 : 0;
+      return ctx
+        ? ctx.getImageData(0, 0, c.width, c.height).data.some((v, i) => i % 4 === 3 && v > 0)
+          ? 1
+          : 0
+        : 0;
     });
     expect(painted).toBe(1);
 
@@ -165,7 +197,9 @@ test.describe('features', () => {
   test('hero: moving the pointer floods roads', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/', { waitUntil: 'networkidle' });
-    await expect(page.locator('#hero-sim-host canvas')).toHaveCSS('opacity', '1', { timeout: 8000 });
+    await expect(page.locator('#hero-sim-host canvas')).toHaveCSS('opacity', '1', {
+      timeout: 8000,
+    });
     const before = await page.locator('#hero-sim-host canvas').screenshot();
     for (let i = 0; i < 25; i++) await page.mouse.move(300 + i * 25, 420 + Math.sin(i / 3) * 40);
     await page.waitForTimeout(250);
@@ -176,7 +210,13 @@ test.describe('features', () => {
   test('numbers strip shows sourced figures with a source note', async ({ page }) => {
     await page.goto('/');
     const strip = page.locator('#numbers');
-    for (const [value, label] of [['12', 'Listed papers'], ['8', 'Core team members'], ['4', 'Research themes'], ['7', 'Awards, 2018 and 2019'], ['14', 'Listed partners']]) {
+    for (const [value, label] of [
+      ['12', 'Listed papers'],
+      ['8', 'Core team members'],
+      ['4', 'Research themes'],
+      ['7', 'Awards, 2018 and 2019'],
+      ['14', 'Listed partners'],
+    ]) {
       const stat = strip.getByRole('button', { name: new RegExp(label) });
       await stat.scrollIntoViewIfNeeded();
       await expect(stat.getByLabel(value, { exact: true })).toBeVisible();
@@ -205,12 +245,20 @@ test.describe('features', () => {
 
   test('chatbots timeline progresses with native scrolling', async ({ page }) => {
     await page.goto('/chatbots');
-    await expect(page.getByRole('list').filter({ has: page.getByRole('heading', { name: /First chatbot launched/ }) })).toBeVisible();
+    await expect(
+      page
+        .getByRole('list')
+        .filter({ has: page.getByRole('heading', { name: /First chatbot launched/ }) }),
+    ).toBeVisible();
     await page.locator('#journey').scrollIntoViewIfNeeded();
     await page.evaluate(() => window.scrollBy(0, 2600));
     await page.waitForTimeout(400);
     await expect(page.locator('[aria-current="step"]')).toBeVisible();
-    const sticky = await page.evaluate(() => Array.from(document.querySelectorAll('#journey *')).some((el) => getComputedStyle(el).position === 'sticky'));
+    const sticky = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('#journey *')).some(
+        (el) => getComputedStyle(el).position === 'sticky',
+      ),
+    );
     expect(sticky).toBe(true);
     // Native scroll only: no scroll-jacking handlers that block wheel events.
     expect(await page.evaluate(() => document.documentElement.style.overflow)).toBe('');
@@ -220,7 +268,14 @@ test.describe('features', () => {
     await page.goto('/chatbots');
     const svg = page.getByRole('img', { name: /Architecture of the participatory/ });
     await svg.scrollIntoViewIfNeeded();
-    for (const label of ['WhatsApp', 'Language agent', 'Live-weather API agent', 'Scheduler agent', 'Residents', 'Planners']) {
+    for (const label of [
+      'WhatsApp',
+      'Language agent',
+      'Live-weather API agent',
+      'Scheduler agent',
+      'Residents',
+      'Planners',
+    ]) {
       await expect(svg.getByText(label, { exact: true })).toBeAttached();
     }
   });
@@ -236,7 +291,10 @@ test.describe('features', () => {
     await page.getByRole('button', { name: 'Clear filters' }).click();
     await page.getByRole('searchbox', { name: 'Search' }).fill('flood');
     await expect(status).not.toContainText('14 of 14');
-    await expect(page.getByRole('link', { name: /Network Centrality Assessment/ })).toHaveAttribute('href', /slstl\.lk/);
+    await expect(page.getByRole('link', { name: /Network Centrality Assessment/ })).toHaveAttribute(
+      'href',
+      /slstl\.lk/,
+    );
   });
 
   test('contact shows a coming-soon state until an email is configured', async ({ page }) => {
@@ -258,18 +316,29 @@ test.describe('features', () => {
     await expect(footer).toContainText('Moratuwa 10400');
     await expect(footer).toContainText('+94 11 2650301');
     await expect(footer).toContainText('smartmind.net');
-    await expect(footer.getByRole('link', { name: /Facebook/ })).toHaveAttribute('href', /facebook\.com\/share/);
+    await expect(footer.getByRole('link', { name: /Facebook/ })).toHaveAttribute(
+      'href',
+      /facebook\.com\/share/,
+    );
   });
 
   test('news filters, featured post and tags', async ({ page }) => {
     await page.goto('/news');
     await expect(page.getByText('Featured', { exact: true })).toBeVisible();
-    await page.getByRole('navigation', { name: 'Filter news by category' }).getByRole('link', { name: 'Partnership' }).click();
+    await page
+      .getByRole('navigation', { name: 'Filter news by category' })
+      .getByRole('link', { name: 'Partnership' })
+      .click();
     await expect(page).toHaveURL(/category=Partnership/);
-    await expect(page.getByRole('heading', { name: /NBRO and the University of Manchester/ })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: /NBRO and the University of Manchester/ }),
+    ).toBeVisible();
   });
 
-  test('metadata: unique titles, canonicals, sitemap, robots and JSON-LD', async ({ page, request }) => {
+  test('metadata: unique titles, canonicals, sitemap, robots and JSON-LD', async ({
+    page,
+    request,
+  }) => {
     const titles = new Set<string>();
     for (const route of ['/', '/about', '/research', '/news']) {
       await page.goto(route);
@@ -288,10 +357,14 @@ test.describe('features', () => {
     expect(JSON.parse(ld2!)['@type']).toBe('NewsArticle');
     const sitemap = await request.get('/sitemap.xml');
     expect(sitemap.status()).toBe(200);
-    expect(await sitemap.text()).toContain('/news/participatory-chatbot-flood-landslide-resilience');
+    expect(await sitemap.text()).toContain(
+      '/news/participatory-chatbot-flood-landslide-resilience',
+    );
     const robots = await (await request.get('/robots.txt')).text();
     expect(robots).toContain('Disallow: /admin');
-    expect((await request.get('/opengraph-image')).headers()['content-type']).toContain('image/png');
+    expect((await request.get('/opengraph-image')).headers()['content-type']).toContain(
+      'image/png',
+    );
   });
 
   test('security headers are present', async ({ request }) => {

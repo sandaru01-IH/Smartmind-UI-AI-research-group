@@ -30,7 +30,10 @@ function ThemeTile({ theme, index }: { theme: ResearchTheme; index: number }) {
       />
       <div className="relative">
         <p className="numeral text-2xl text-line-strong">{String(index + 1).padStart(2, '0')}</p>
-        <h3 className="mt-3 max-w-[14ch] text-3xl md:text-4xl" style={{ color: `var(${theme.inkVar})` }}>
+        <h3
+          className="mt-3 max-w-[14ch] text-3xl md:text-4xl"
+          style={{ color: `var(${theme.inkVar})` }}
+        >
           {theme.title}
         </h3>
       </div>
@@ -44,7 +47,11 @@ function ThemeTile({ theme, index }: { theme: ResearchTheme; index: number }) {
           className="label-mono inline-flex min-h-11 items-center gap-2 text-fg"
         >
           {theme.projects.length} projects
-          <ChevronDown size={16} aria-hidden="true" className={`transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+          <ChevronDown
+            size={16}
+            aria-hidden="true"
+            className={`transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          />
         </button>
         {/* Projects are always in the DOM. They reveal on hover and focus for pointers, and on toggle for everyone. */}
         <ul
@@ -54,7 +61,10 @@ function ThemeTile({ theme, index }: { theme: ResearchTheme; index: number }) {
           }`}
         >
           {theme.projects.map((p) => (
-            <li key={p.title} className="flex items-start gap-3 border-t border-line pt-3 text-[0.95rem]">
+            <li
+              key={p.title}
+              className="flex items-start gap-3 border-t border-line pt-3 text-[0.95rem]"
+            >
               <span>{p.title}</span>
               {p.srcFunded ? <Tag className="shrink-0">SRC-funded</Tag> : null}
             </li>

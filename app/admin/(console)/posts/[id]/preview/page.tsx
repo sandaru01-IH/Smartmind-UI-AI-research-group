@@ -20,8 +20,12 @@ export default async function PreviewPage({ params }: { params: Promise<{ id: st
   const state = publicState(post);
   return (
     <article>
-      <p role="status" className="label-mono mb-8 border border-dashed border-line-strong p-3 text-muted">
-        Preview as visitor. This post is currently <strong className="text-fg">{state === 'live' ? 'live' : state}</strong>
+      <p
+        role="status"
+        className="label-mono mb-8 border border-dashed border-line-strong p-3 text-muted"
+      >
+        Preview as visitor. This post is currently{' '}
+        <strong className="text-fg">{state === 'live' ? 'live' : state}</strong>
         {state !== 'live' ? ' and is not visible to visitors.' : '.'}
       </p>
       <div className="flex flex-wrap items-center gap-3">

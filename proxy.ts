@@ -54,7 +54,12 @@ export async function proxy(request: NextRequest) {
         for (const { name, value } of list) request.cookies.set(name, value);
         response = NextResponse.next({ request });
         for (const { name, value, options } of list) {
-          response.cookies.set(name, value, { ...options, httpOnly: true, sameSite: 'lax', secure });
+          response.cookies.set(name, value, {
+            ...options,
+            httpOnly: true,
+            sameSite: 'lax',
+            secure,
+          });
         }
       },
     },
@@ -69,7 +74,11 @@ export async function proxy(request: NextRequest) {
     url.pathname = '/admin/login';
     url.search = '';
     url.searchParams.set('next', `${pathname}${search}`);
-    if (request.cookies.getAll().some((c) => c.name.startsWith('sb-') && c.name.includes('auth-token'))) {
+    if (
+      request.cookies
+        .getAll()
+        .some((c) => c.name.startsWith('sb-') && c.name.includes('auth-token'))
+    ) {
       url.searchParams.set('expired', '1');
     }
     return NextResponse.redirect(url);

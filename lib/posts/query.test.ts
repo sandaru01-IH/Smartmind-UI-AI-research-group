@@ -33,8 +33,14 @@ describe('applyPublicQuery', () => {
     expect(posts.every((p) => p.type === 'article')).toBe(true);
   });
   it('filters by category and tag', () => {
-    expect(applyPublicQuery(visible, { category: 'Partnership' }).posts.every((p) => p.category === 'Partnership')).toBe(true);
-    expect(applyPublicQuery(visible, { tag: 'nbro' }).posts.every((p) => p.tags.includes('nbro'))).toBe(true);
+    expect(
+      applyPublicQuery(visible, { category: 'Partnership' }).posts.every(
+        (p) => p.category === 'Partnership',
+      ),
+    ).toBe(true);
+    expect(
+      applyPublicQuery(visible, { tag: 'nbro' }).posts.every((p) => p.tags.includes('nbro')),
+    ).toBe(true);
   });
   it('searches title and excerpt case-insensitively', () => {
     const { posts } = applyPublicQuery(visible, { q: 'MANCHESTER' });
@@ -55,7 +61,12 @@ describe('applyAdminQuery', () => {
     expect(r.length).toBe(2);
   });
   it('finds scheduled posts', () => {
-    const future = { ...SEED_POSTS[0], id: 'x', slug: 'future', published_at: '2027-01-01T00:00:00.000Z' };
+    const future = {
+      ...SEED_POSTS[0],
+      id: 'x',
+      slug: 'future',
+      published_at: '2027-01-01T00:00:00.000Z',
+    };
     expect(applyAdminQuery([future], { status: 'scheduled' }, now)).toHaveLength(1);
     expect(applyAdminQuery([future], { status: 'published' }, now)).toHaveLength(0);
   });

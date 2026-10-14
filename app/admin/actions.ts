@@ -85,7 +85,11 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
     loginThrottle.fail(key);
     return { error: GENERIC_LOGIN_ERROR };
   }
-  const profile = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle();
+  const profile = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', data.user.id)
+    .maybeSingle();
   if (profile.error || profile.data?.role !== 'admin') {
     await supabase.auth.signOut();
     loginThrottle.fail(key);
@@ -113,7 +117,10 @@ export async function savePostAction({ id, values }: SaveInput): Promise<ActionR
   const { supabase, user } = await requireAdmin();
   const parsed = postInputSchema.safeParse(values);
   if (!parsed.success) {
-    return fail('Fix the highlighted fields.', z.flattenError(parsed.error).fieldErrors as Record<string, string[]>);
+    return fail(
+      'Fix the highlighted fields.',
+      z.flattenError(parsed.error).fieldErrors as Record<string, string[]>,
+    );
   }
   const input: PostInput = {
     ...parsed.data,
@@ -125,7 +132,9 @@ export async function savePostAction({ id, values }: SaveInput): Promise<ActionR
       return fail('That slug is already used.', { slug: ['That slug is already used'] });
     }
     const before = id ? await adminGet(supabase, id) : null;
-    const saved = id ? await updatePostRow(supabase, id, input) : await insertPost(supabase, input, user.id);
+    const saved = id
+      ? await updatePostRow(supabase, id, input)
+      : await insertPost(supabase, input, user.id);
     refreshPublic([saved.slug, before?.slug ?? saved.slug]);
     return { ok: true, data: saved };
   } catch (e) {
@@ -146,11 +155,19 @@ export async function quickUpdateAction(
     cover_alt: formData.get('cover_alt'),
   });
   if (!parsed.success) {
-    return { error: 'Check the headline and link.', fieldErrors: z.flattenError(parsed.error).fieldErrors as Record<string, string[]> };
+    return {
+      error: 'Check the headline and link.',
+      fieldErrors: z.flattenError(parsed.error).fieldErrors as Record<string, string[]>,
+    };
   }
   const q = parsed.data;
-  if (q.cover_path && !isValidUploadPath(q.cover_path)) return { error: 'The image upload is not valid.' };
-  if (q.cover_path && !q.cover_alt) return { error: 'Describe the image for screen readers.', fieldErrors: { cover_alt: ['Required'] } };
+  if (q.cover_path && !isValidUploadPath(q.cover_path))
+    return { error: 'The image upload is not valid.' };
+  if (q.cover_path && !q.cover_alt)
+    return {
+      error: 'Describe the image for screen readers.',
+      fieldErrors: { cover_alt: ['Required'] },
+    };
 
   try {
     const slug = await freshSlug(supabase, q.title);
@@ -176,7 +193,10 @@ export async function quickUpdateAction(
   }
 }
 
-export async function setPublishedAction(id: string, publish: boolean): Promise<ActionResult<Post>> {
+export async function setPublishedAction(
+  id: string,
+  publish: boolean,
+): Promise<ActionResult<Post>> {
   const { supabase } = await requireAdmin();
   const idOk = z.uuid().safeParse(id);
   if (!idOk.success) return fail('Unknown post.');
@@ -185,7 +205,9 @@ export async function setPublishedAction(id: string, publish: boolean): Promise<
     if (!post) return fail('That post no longer exists.');
     const saved = await updatePostRow(supabase, id, {
       status: publish ? 'published' : 'draft',
-      published_at: publish ? resolvePublishedAt('published', post.published_at) : post.published_at,
+      published_at: publish
+        ? resolvePublishedAt('published', post.published_at)
+        : post.published_at,
     });
     refreshPublic([saved.slug]);
     return { ok: true, data: saved };
@@ -241,7 +263,9 @@ const uploadRequest = z.object({
 });
 
 /** Step 1: the server picks the storage path and hands the browser a one-use signed upload URL. */
-export async function requestUploadAction(input: unknown): Promise<ActionResult<{ path: string; token: string }>> {
+export async function requestUploadAction(
+  input: unknown,
+): Promise<ActionResult<{ path: string; token: string }>> {
   const { supabase } = await requireAdmin();
   const parsed = uploadRequest.safeParse(input);
   if (!parsed.success) return fail('Use a JPEG, PNG or WebP image of 5 MB or less.');

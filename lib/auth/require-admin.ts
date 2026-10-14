@@ -18,7 +18,11 @@ export const getAdmin = cache(async (): Promise<AdminContext | null> => {
   if (!supabase) return null;
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user) return null;
-  const profile = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle();
+  const profile = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', data.user.id)
+    .maybeSingle();
   if (profile.error || profile.data?.role !== 'admin') return null;
   return { supabase, user: { id: data.user.id, email: data.user.email ?? '' } };
 });

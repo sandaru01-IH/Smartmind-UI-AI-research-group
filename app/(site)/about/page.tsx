@@ -43,7 +43,10 @@ export default function AboutPage() {
             <p className="label-mono text-muted">Lab tagline</p>
             <p className="mt-2 font-display text-2xl tracking-tight">“{BRAND.tagline}”</p>
             <p className="mt-6">
-              <ExternalLink href={LINKS.labPage} className="inline-flex min-h-11 items-center underline underline-offset-4">
+              <ExternalLink
+                href={LINKS.labPage}
+                className="inline-flex min-h-11 items-center underline underline-offset-4"
+              >
                 {BRAND.lab} at the University of Moratuwa
               </ExternalLink>
             </p>

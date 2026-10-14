@@ -9,7 +9,12 @@ import { CommandPalette, type PaletteItem } from './command-palette';
 export async function PaletteLoader() {
   const { posts } = await listPosts({ type: 'article', limit: 50 });
   const items: PaletteItem[] = [
-    ...PAGE_INDEX.map((p) => ({ id: `page:${p.href}`, group: 'pages' as const, label: p.label, href: p.href })),
+    ...PAGE_INDEX.map((p) => ({
+      id: `page:${p.href}`,
+      group: 'pages' as const,
+      label: p.label,
+      href: p.href,
+    })),
     ...posts.map((p) => ({
       id: `news:${p.slug}`,
       group: 'news' as const,
@@ -19,7 +24,16 @@ export async function PaletteLoader() {
     })),
     ...[...CHATBOT_PAPERS, ...LAB_PAPERS].flatMap((p) =>
       p.href
-        ? [{ id: `pub:${p.id}`, group: 'publications' as const, label: p.title, hint: `${p.year} · ${p.venue}`, href: p.href, external: true }]
+        ? [
+            {
+              id: `pub:${p.id}`,
+              group: 'publications' as const,
+              label: p.title,
+              hint: `${p.year} · ${p.venue}`,
+              href: p.href,
+              external: true,
+            },
+          ]
         : [],
     ),
     ...confirmedOnly(TEAM).map((m) => ({

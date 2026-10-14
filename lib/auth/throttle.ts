@@ -31,7 +31,8 @@ export function createThrottle({ maxFailures, windowMs, lockMs, now = Date.now }
     check(key: string): ThrottleCheck {
       const r = records.get(key);
       const t = now();
-      if (r && r.lockedUntil > t) return { locked: true, retryAfterSeconds: Math.ceil((r.lockedUntil - t) / 1000) };
+      if (r && r.lockedUntil > t)
+        return { locked: true, retryAfterSeconds: Math.ceil((r.lockedUntil - t) / 1000) };
       return { locked: false, retryAfterSeconds: 0 };
     },
     fail(key: string): void {
@@ -45,7 +46,8 @@ export function createThrottle({ maxFailures, windowMs, lockMs, now = Date.now }
       }
       records.set(key, r);
       if (records.size > 5000) {
-        for (const [k, v] of records) if (v.lockedUntil < t && v.failures.length === 0) records.delete(k);
+        for (const [k, v] of records)
+          if (v.lockedUntil < t && v.failures.length === 0) records.delete(k);
       }
     },
     reset(key: string): void {
@@ -54,4 +56,8 @@ export function createThrottle({ maxFailures, windowMs, lockMs, now = Date.now }
   };
 }
 
-export const loginThrottle = createThrottle({ maxFailures: 5, windowMs: 15 * 60_000, lockMs: 15 * 60_000 });
+export const loginThrottle = createThrottle({
+  maxFailures: 5,
+  windowMs: 15 * 60_000,
+  lockMs: 15 * 60_000,
+});

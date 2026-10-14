@@ -38,7 +38,11 @@ async function main() {
     const { error } = await db.auth.admin.updateUserById(id, { password, email_confirm: true });
     if (error) throw error;
   } else {
-    const { data, error } = await db.auth.admin.createUser({ email, password, email_confirm: true });
+    const { data, error } = await db.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
     if (error || !data.user) throw error ?? new Error('No user returned');
     id = data.user.id;
     created = true;

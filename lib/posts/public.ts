@@ -74,7 +74,11 @@ export async function getFeaturedPost(): Promise<Post | null> {
   const db = createPublicClient();
   if (!db) {
     const pool = visibleSeedPosts(SEED_POSTS).filter((p) => p.type === 'article');
-    return applyPublicQuery(pool.filter((p) => p.featured)).posts[0] ?? applyPublicQuery(pool).posts[0] ?? null;
+    return (
+      applyPublicQuery(pool.filter((p) => p.featured)).posts[0] ??
+      applyPublicQuery(pool).posts[0] ??
+      null
+    );
   }
   const featured = await db
     .from('posts')

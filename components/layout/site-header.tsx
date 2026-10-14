@@ -38,7 +38,11 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 border-b border-line bg-bg/95 backdrop-blur-sm">
       <RouteChange onChange={() => setOpen(false)} />
       <div className="container-site flex h-[var(--header-h)] items-center justify-between gap-4">
-        <Link href="/" aria-label={`${t.nav.home}`} className="-ml-1 inline-flex min-h-11 items-center px-1">
+        <Link
+          href="/"
+          aria-label={`${t.nav.home}`}
+          className="-ml-1 inline-flex min-h-11 items-center px-1"
+        >
           <Wordmark />
         </Link>
 
@@ -49,7 +53,12 @@ export function SiteHeader() {
                 <NavLink
                   href={item.href}
                   className="relative inline-flex min-h-11 items-center px-3 text-[0.95rem] text-muted transition-colors hover:text-fg aria-[current=page]:text-fg"
-                  activeMark={<span aria-hidden="true" className="absolute inset-x-3 bottom-1.5 h-px bg-signal" />}
+                  activeMark={
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-x-3 bottom-1.5 h-px bg-signal"
+                    />
+                  }
                 >
                   {item.label}
                 </NavLink>

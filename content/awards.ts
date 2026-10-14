@@ -10,7 +10,8 @@ export interface Award extends Sourced {
   reason?: string;
 }
 
-const DEPT = 'Awards (table; 2018 and 2019 entries sourced to the department’s ongoing research page)';
+const DEPT =
+  'Awards (table; 2018 and 2019 entries sourced to the department’s ongoing research page)';
 const LINKEDIN = 'Awards (table; 2024 and 2025 entries sourced to team members’ LinkedIn profiles)';
 
 // Source: this.md > "Awards". Newest first.
@@ -32,7 +33,8 @@ export const AWARDS: Award[] = [
     when: '2024',
     award: 'Best Paper, Transport Planning category',
     who: 'Harini Sawandi',
-    event: '9th International Conference on Research for Transport and Logistics Industry (R4TLI 2024)',
+    event:
+      '9th International Conference on Research for Transport and Logistics Industry (R4TLI 2024)',
     reason: 'For a GeoAI walking-behaviour study',
     confirmation: 'tbc',
     source: LINKEDIN,

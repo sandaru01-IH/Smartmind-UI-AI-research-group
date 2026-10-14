@@ -21,7 +21,11 @@ export function Section({
 }) {
   const headingId = id ? `${id}-heading` : undefined;
   return (
-    <section id={id} aria-labelledby={headingId} className={`border-t border-line py-16 md:py-24 ${className}`}>
+    <section
+      id={id}
+      aria-labelledby={headingId}
+      className={`border-t border-line py-16 md:py-24 ${className}`}
+    >
       <div className="container-site">
         <Reveal className="grid-12 items-end gap-y-6">
           <div className="col-span-12 md:col-span-3">

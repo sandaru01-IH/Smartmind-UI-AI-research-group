@@ -40,7 +40,6 @@ export const NOT_RELATED = [
 
 /** Optional. Rendered only when set. The brief found no Smartmind email. */
 export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim() || null;
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'http://localhost:3000').replace(
-  /\/$/,
-  '',
-);
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'http://localhost:3000'
+).replace(/\/$/, '');

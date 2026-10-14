@@ -73,8 +73,18 @@ export const postInputSchema = z
     body_md: z.string().max(BODY_MAX).default(''),
     category: z.enum(CATEGORIES),
     tags: tags.default([]),
-    cover_path: z.string().trim().max(300).nullish().transform((v) => v || null),
-    cover_alt: z.string().trim().max(200).nullish().transform((v) => v || null),
+    cover_path: z
+      .string()
+      .trim()
+      .max(300)
+      .nullish()
+      .transform((v) => v || null),
+    cover_alt: z
+      .string()
+      .trim()
+      .max(200)
+      .nullish()
+      .transform((v) => v || null),
     link_url: optionalUrl,
     event_date: optionalDate,
     featured: z.boolean().default(false),
@@ -90,7 +100,11 @@ export const postInputSchema = z
       });
     }
     if (v.cover_path && !v.cover_alt) {
-      ctx.addIssue({ code: 'custom', path: ['cover_alt'], message: 'Describe the image for screen readers' });
+      ctx.addIssue({
+        code: 'custom',
+        path: ['cover_alt'],
+        message: 'Describe the image for screen readers',
+      });
     }
   });
 
@@ -100,8 +114,18 @@ export const quickUpdateSchema = z.object({
   title: z.string().trim().min(3, 'Add a headline').max(UPDATE_HEADLINE_MAX),
   category: z.enum(CATEGORIES).default('News'),
   link_url: optionalUrl,
-  cover_path: z.string().trim().max(300).nullish().transform((v) => v || null),
-  cover_alt: z.string().trim().max(200).nullish().transform((v) => v || null),
+  cover_path: z
+    .string()
+    .trim()
+    .max(300)
+    .nullish()
+    .transform((v) => v || null),
+  cover_alt: z
+    .string()
+    .trim()
+    .max(200)
+    .nullish()
+    .transform((v) => v || null),
 });
 export type QuickUpdateInput = z.output<typeof quickUpdateSchema>;
 

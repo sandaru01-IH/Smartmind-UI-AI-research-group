@@ -9,7 +9,11 @@ export interface EditResult {
 function wrap(value: string, s: number, e: number, mark: string, placeholder: string): EditResult {
   const sel = value.slice(s, e);
   // Already wrapped just outside the selection: remove the marks.
-  if (value.slice(s - mark.length, s) === mark && value.slice(e, e + mark.length) === mark && mark) {
+  if (
+    value.slice(s - mark.length, s) === mark &&
+    value.slice(e, e + mark.length) === mark &&
+    mark
+  ) {
     const next = value.slice(0, s - mark.length) + sel + value.slice(e + mark.length);
     return { value: next, start: s - mark.length, end: e - mark.length };
   }
@@ -28,7 +32,11 @@ function prefixLines(value: string, s: number, e: number, make: (i: number) => s
   const [from, to] = lineRange(value, s, e);
   const lines = value.slice(from, to).split('\n');
   const block = lines.map((l, i) => make(i) + l).join('\n');
-  return { value: value.slice(0, from) + block + value.slice(to), start: from, end: from + block.length };
+  return {
+    value: value.slice(0, from) + block + value.slice(to),
+    start: from,
+    end: from + block.length,
+  };
 }
 
 /** Pure Markdown formatting for the editor toolbar. Positions are textarea selection offsets. */

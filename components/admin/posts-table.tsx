@@ -24,7 +24,11 @@ export interface AdminRow {
   updated_at: string;
 }
 
-const STATE_LABEL: Record<PublicState, string> = { live: 'Published', scheduled: 'Scheduled', draft: 'Draft' };
+const STATE_LABEL: Record<PublicState, string> = {
+  live: 'Published',
+  scheduled: 'Scheduled',
+  draft: 'Draft',
+};
 
 export function PostsTable({ rows }: { rows: AdminRow[] }) {
   const router = useRouter();
@@ -60,17 +64,28 @@ export function PostsTable({ rows }: { rows: AdminRow[] }) {
           <caption className="sr-only">Posts</caption>
           <thead className="label-mono border-b border-line bg-surface text-muted">
             <tr>
-              <th scope="col" className="px-4 py-3 font-medium">Title</th>
-              <th scope="col" className="px-4 py-3 font-medium">Status</th>
-              <th scope="col" className="px-4 py-3 font-medium">Updated</th>
-              <th scope="col" className="px-4 py-3 text-right font-medium">Actions</th>
+              <th scope="col" className="px-4 py-3 font-medium">
+                Title
+              </th>
+              <th scope="col" className="px-4 py-3 font-medium">
+                Status
+              </th>
+              <th scope="col" className="px-4 py-3 font-medium">
+                Updated
+              </th>
+              <th scope="col" className="px-4 py-3 text-right font-medium">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.id} className="border-b border-line last:border-0 align-top">
                 <td className="px-4 py-3">
-                  <Link href={`/admin/posts/${r.id}`} className="font-semibold underline-offset-4 hover:underline">
+                  <Link
+                    href={`/admin/posts/${r.id}`}
+                    className="font-semibold underline-offset-4 hover:underline"
+                  >
                     {r.title}
                   </Link>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -82,12 +97,20 @@ export function PostsTable({ rows }: { rows: AdminRow[] }) {
                 </td>
                 <td className="px-4 py-3">
                   <span className="label-mono text-fg">{STATE_LABEL[r.state]}</span>
-                  {r.published_at ? <span className="label-mono block text-muted">{formatDateShort(r.published_at)}</span> : null}
+                  {r.published_at ? (
+                    <span className="label-mono block text-muted">
+                      {formatDateShort(r.published_at)}
+                    </span>
+                  ) : null}
                 </td>
                 <td className="label-mono px-4 py-3 text-muted">{formatDateShort(r.updated_at)}</td>
                 <td className="px-4 py-2">
                   <div className="flex justify-end gap-0.5">
-                    <Link href={`/admin/posts/${r.id}`} className={iconBtn} aria-label={`Edit ${r.title}`}>
+                    <Link
+                      href={`/admin/posts/${r.id}`}
+                      className={iconBtn}
+                      aria-label={`Edit ${r.title}`}
+                    >
                       <Pencil size={16} aria-hidden="true" />
                     </Link>
                     <button
@@ -95,9 +118,18 @@ export function PostsTable({ rows }: { rows: AdminRow[] }) {
                       className={iconBtn}
                       disabled={pending}
                       aria-label={`${r.state === 'draft' ? 'Publish' : 'Unpublish'} ${r.title}`}
-                      onClick={() => run(() => setPublishedAction(r.id, r.state === 'draft'), r.state === 'draft' ? 'Published.' : 'Unpublished. It is a draft again.')}
+                      onClick={() =>
+                        run(
+                          () => setPublishedAction(r.id, r.state === 'draft'),
+                          r.state === 'draft' ? 'Published.' : 'Unpublished. It is a draft again.',
+                        )
+                      }
                     >
-                      {r.state === 'draft' ? <Eye size={16} aria-hidden="true" /> : <EyeOff size={16} aria-hidden="true" />}
+                      {r.state === 'draft' ? (
+                        <Eye size={16} aria-hidden="true" />
+                      ) : (
+                        <EyeOff size={16} aria-hidden="true" />
+                      )}
                     </button>
                     <button
                       type="button"
@@ -108,7 +140,13 @@ export function PostsTable({ rows }: { rows: AdminRow[] }) {
                     >
                       <Copy size={16} aria-hidden="true" />
                     </button>
-                    <button type="button" className={iconBtn} disabled={pending} aria-label={`Delete ${r.title}`} onClick={() => ask(r)}>
+                    <button
+                      type="button"
+                      className={iconBtn}
+                      disabled={pending}
+                      aria-label={`Delete ${r.title}`}
+                      onClick={() => ask(r)}
+                    >
                       <Trash2 size={16} aria-hidden="true" />
                     </button>
                   </div>
@@ -125,12 +163,18 @@ export function PostsTable({ rows }: { rows: AdminRow[] }) {
         onClose={() => setConfirm(null)}
         className="m-auto w-[min(26rem,calc(100vw-2rem))] rounded-sharp border border-line-strong bg-surface p-6 text-fg backdrop:bg-black/60"
       >
-        <h2 id="del-title" className="text-xl">Delete this post?</h2>
+        <h2 id="del-title" className="text-xl">
+          Delete this post?
+        </h2>
         <p className="mt-3 text-muted">
           “{confirm?.title}” will be removed for good. This cannot be undone.
         </p>
         <div className="mt-6 flex justify-end gap-2">
-          <button type="button" className={buttonClass('secondary')} onClick={() => dialogRef.current?.close()}>
+          <button
+            type="button"
+            className={buttonClass('secondary')}
+            onClick={() => dialogRef.current?.close()}
+          >
             Cancel
           </button>
           <button

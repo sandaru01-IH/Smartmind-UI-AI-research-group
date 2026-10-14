@@ -1,6 +1,14 @@
 'use client';
 
-import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import { CheckCircle2, AlertTriangle, X } from 'lucide-react';
 
 type Kind = 'success' | 'error';
@@ -9,7 +17,9 @@ interface Toast {
   kind: Kind;
   message: string;
 }
-const Ctx = createContext<{ push: (message: string, kind?: Kind) => void }>({ push: () => undefined });
+const Ctx = createContext<{ push: (message: string, kind?: Kind) => void }>({
+  push: () => undefined,
+});
 
 export const useToast = () => useContext(Ctx);
 
@@ -44,7 +54,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             {t.kind === 'error' ? (
               <AlertTriangle size={18} aria-hidden="true" className="mt-0.5 shrink-0 text-danger" />
             ) : (
-              <CheckCircle2 size={18} aria-hidden="true" className="mt-0.5 shrink-0 text-flood-ink" />
+              <CheckCircle2
+                size={18}
+                aria-hidden="true"
+                className="mt-0.5 shrink-0 text-flood-ink"
+              />
             )}
             <p className="flex-1 text-[0.95rem]">{t.message}</p>
             <button

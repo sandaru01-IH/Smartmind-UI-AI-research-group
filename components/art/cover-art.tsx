@@ -44,17 +44,24 @@ export function CoverArt({
   hot.add(start);
   const origin = g.nodes[g.edges[start].a];
   g.edges.forEach((e, i) => {
-    const m = { x: (g.nodes[e.a].x + g.nodes[e.b].x) / 2, y: (g.nodes[e.a].y + g.nodes[e.b].y) / 2 };
+    const m = {
+      x: (g.nodes[e.a].x + g.nodes[e.b].x) / 2,
+      y: (g.nodes[e.a].y + g.nodes[e.b].y) / 2,
+    };
     if (Math.hypot(m.x - origin.x, m.y - origin.y) < 22) hot.add(i);
   });
   const r = (n: number) => Math.round(n * 10) / 10;
   const plain = g.edges
     .filter((_, i) => !hot.has(i))
-    .map((e) => `M${r(g.nodes[e.a].x)} ${r(g.nodes[e.a].y)}L${r(g.nodes[e.b].x)} ${r(g.nodes[e.b].y)}`)
+    .map(
+      (e) => `M${r(g.nodes[e.a].x)} ${r(g.nodes[e.a].y)}L${r(g.nodes[e.b].x)} ${r(g.nodes[e.b].y)}`,
+    )
     .join('');
   const flooded = g.edges
     .filter((_, i) => hot.has(i))
-    .map((e) => `M${r(g.nodes[e.a].x)} ${r(g.nodes[e.a].y)}L${r(g.nodes[e.b].x)} ${r(g.nodes[e.b].y)}`)
+    .map(
+      (e) => `M${r(g.nodes[e.a].x)} ${r(g.nodes[e.a].y)}L${r(g.nodes[e.b].x)} ${r(g.nodes[e.b].y)}`,
+    )
     .join('');
   return (
     <svg
@@ -63,7 +70,14 @@ export function CoverArt({
       aria-hidden="true"
       className={`h-full w-full bg-surface-2 ${className}`}
     >
-      <path d={plain} fill="none" stroke="var(--line-strong)" strokeWidth="0.5" strokeLinecap="round" opacity="0.7" />
+      <path
+        d={plain}
+        fill="none"
+        stroke="var(--line-strong)"
+        strokeWidth="0.5"
+        strokeLinecap="round"
+        opacity="0.7"
+      />
       <path d={flooded} fill="none" stroke={colour} strokeWidth="1.1" strokeLinecap="round" />
       <g fill="var(--muted)" opacity="0.8">
         {g.nodes.map((n, i) => (

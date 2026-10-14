@@ -14,7 +14,10 @@ export function PostBody({ source }: { source: string }) {
           a: ({ href, children }) => {
             const external = typeof href === 'string' && /^https?:\/\//.test(href);
             return (
-              <a href={href} {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+              <a
+                href={href}
+                {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+              >
                 {children}
               </a>
             );

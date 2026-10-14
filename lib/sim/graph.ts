@@ -55,7 +55,11 @@ export function delaunayEdges(points: Pt[]): [number, number][] {
     }
     const boundary = new Map<string, [number, number, number]>();
     for (const t of bad) {
-      for (const [u, v] of [[t.a, t.b], [t.b, t.c], [t.c, t.a]] as const) {
+      for (const [u, v] of [
+        [t.a, t.b],
+        [t.b, t.c],
+        [t.c, t.a],
+      ] as const) {
         const key = u < v ? `${u}:${v}` : `${v}:${u}`;
         const hit = boundary.get(key);
         if (hit) hit[2] += 1;
@@ -71,7 +75,11 @@ export function delaunayEdges(points: Pt[]): [number, number][] {
   const seen = new Set<string>();
   const out: [number, number][] = [];
   for (const t of tris) {
-    for (const [u, v] of [[t.a, t.b], [t.b, t.c], [t.c, t.a]] as const) {
+    for (const [u, v] of [
+      [t.a, t.b],
+      [t.b, t.c],
+      [t.c, t.a],
+    ] as const) {
       if (u >= n || v >= n) continue;
       const key = u < v ? `${u}:${v}` : `${v}:${u}`;
       if (seen.has(key)) continue;
@@ -141,7 +149,9 @@ export function generateGraph({ seed, nodeTarget, width, height }: GenerateOptio
   }
 
   const maxLen = Math.hypot(cw, ch) * 1.3;
-  let links = delaunayEdges(pts).filter(([a, b]) => Math.hypot(pts[a].x - pts[b].x, pts[a].y - pts[b].y) <= maxLen);
+  let links = delaunayEdges(pts).filter(
+    ([a, b]) => Math.hypot(pts[a].x - pts[b].x, pts[a].y - pts[b].y) <= maxLen,
+  );
 
   // Drop some redundant links so blocks are irregular, never leaving a node under two roads.
   const degree = new Uint16Array(pts.length);
@@ -185,7 +195,11 @@ export function generateGraph({ seed, nodeTarget, width, height }: GenerateOptio
     const na = remap.get(a);
     const nb = remap.get(b);
     if (na === undefined || nb === undefined) continue;
-    edges.push({ a: na, b: nb, len: Math.hypot(nodes[na].x - nodes[nb].x, nodes[na].y - nodes[nb].y) });
+    edges.push({
+      a: na,
+      b: nb,
+      len: Math.hypot(nodes[na].x - nodes[nb].x, nodes[na].y - nodes[nb].y),
+    });
   }
   return { nodes, edges, adj: buildAdj(nodes.length, edges), width, height };
 }

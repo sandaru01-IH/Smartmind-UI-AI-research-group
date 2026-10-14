@@ -15,7 +15,12 @@ export async function createSessionClient(): Promise<SupabaseClient | null> {
       setAll: (list) => {
         try {
           for (const { name, value, options } of list) {
-            store.set(name, value, { ...options, httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production' });
+            store.set(name, value, {
+              ...options,
+              httpOnly: true,
+              sameSite: 'lax',
+              secure: process.env.NODE_ENV === 'production',
+            });
           }
         } catch {
           // Called from a Server Component, where cookies are read-only. The proxy refreshes sessions.

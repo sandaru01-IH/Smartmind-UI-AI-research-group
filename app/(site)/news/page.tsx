@@ -10,7 +10,8 @@ import { pageMeta } from '@/lib/seo';
 
 export const metadata = pageMeta({
   title: 'News',
-  description: 'News, events, publications and partnerships from Smartmind and the Urban Simulation Lab.',
+  description:
+    'News, events, publications and partnerships from Smartmind and the Urban Simulation Lab.',
   path: '/news',
 });
 
@@ -32,7 +33,9 @@ function href(params: { category?: string; tag?: string; limit?: number }): stri
 async function Listing({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   const rawCategory = one(sp.category);
-  const category = CATEGORIES.includes(rawCategory as Category) ? (rawCategory as Category) : undefined;
+  const category = CATEGORIES.includes(rawCategory as Category)
+    ? (rawCategory as Category)
+    : undefined;
   const tag = one(sp.tag)?.slice(0, 30);
   const limit = Math.min(Math.max(Number(one(sp.limit)) || PAGE, PAGE), 60);
   const filtered = Boolean(category || tag);
@@ -57,7 +60,13 @@ async function Listing({ searchParams }: { searchParams: SearchParams }) {
       {tags.length > 0 ? (
         <nav aria-label="Filter news by tag" className="mt-3 flex flex-wrap gap-2">
           {tags.map((tg) => (
-            <FilterLink key={tg} to={href({ category, tag: tag === tg ? undefined : tg })} active={tag === tg} label={`#${tg}`} mono />
+            <FilterLink
+              key={tg}
+              to={href({ category, tag: tag === tg ? undefined : tg })}
+              active={tag === tg}
+              label={`#${tg}`}
+              mono
+            />
           ))}
         </nav>
       ) : null}
@@ -92,7 +101,11 @@ async function Listing({ searchParams }: { searchParams: SearchParams }) {
 
       {hasMore ? (
         <div className="mt-10">
-          <ButtonLink href={href({ category, tag, limit: limit + PAGE })} variant="secondary" scroll={false}>
+          <ButtonLink
+            href={href({ category, tag, limit: limit + PAGE })}
+            variant="secondary"
+            scroll={false}
+          >
             {t.common.loadMore}
           </ButtonLink>
         </div>
@@ -101,7 +114,17 @@ async function Listing({ searchParams }: { searchParams: SearchParams }) {
   );
 }
 
-function FilterLink({ to, active, label, mono = false }: { to: string; active: boolean; label: string; mono?: boolean }) {
+function FilterLink({
+  to,
+  active,
+  label,
+  mono = false,
+}: {
+  to: string;
+  active: boolean;
+  label: string;
+  mono?: boolean;
+}) {
   return (
     <Link
       href={to}
@@ -124,7 +147,13 @@ export default function NewsPage({ searchParams }: { searchParams: SearchParams 
         title="What is happening"
         lead="Milestones, events, papers and partnerships. Short updates also run in the Live bar at the top of the site."
       />
-      <Suspense fallback={<div className="container-site pb-24"><div className="h-96 border border-line bg-surface" aria-hidden="true" /></div>}>
+      <Suspense
+        fallback={
+          <div className="container-site pb-24">
+            <div className="h-96 border border-line bg-surface" aria-hidden="true" />
+          </div>
+        }
+      >
         <Listing searchParams={searchParams} />
       </Suspense>
     </>
