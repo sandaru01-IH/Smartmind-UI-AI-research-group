@@ -44,7 +44,7 @@
 :root {
   --gutter: 1rem;
   --header-h: 3.5rem;
-  --ticker-h: 2.25rem;
+  --ticker-h: 45px;
   --dur-fast: 150ms;
   --dur: 250ms;
   --dur-slow: 400ms;

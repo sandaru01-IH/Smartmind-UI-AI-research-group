@@ -1,5 +1,6 @@
 import { FALLBACK_SIZE, staticNetwork } from '@/lib/sim/static-network';
 import { t } from '@/content/strings';
+import { dotGroups } from '@/lib/svg-dots';
 
 /**
  * Static road network. Always rendered, so the hero has a picture before any script runs,
@@ -23,11 +24,17 @@ export function HeroFallback() {
         strokeLinecap="round"
         opacity="0.55"
       />
-      <g fill="var(--muted)" opacity="0.8">
-        {nodes.map((n, i) => (
-          <circle key={i} cx={n.x} cy={n.y} r={n.r} />
-        ))}
-      </g>
+      {dotGroups(nodes).map((g) => (
+        <path
+          key={g.r}
+          d={g.d}
+          fill="none"
+          stroke="var(--muted)"
+          strokeWidth={g.r * 2}
+          strokeLinecap="round"
+          opacity="0.8"
+        />
+      ))}
     </svg>
   );
 }

@@ -1,7 +1,8 @@
 import { Suspense, type ReactNode } from 'react';
-import { PaletteLoader } from '@/components/palette/palette-loader';
+import { LazyCommandPalette } from '@/components/palette/lazy-command-palette';
 import { t } from '@/content/strings';
 import { SiteFooter } from './site-footer';
+import { PAGE_INDEX } from './nav-items';
 import { SiteHeader } from './site-header';
 import { Ticker } from './ticker';
 
@@ -13,16 +14,18 @@ export function SiteShell({ children }: { children: ReactNode }) {
         {t.skipToContent}
       </a>
       <SiteHeader />
-      <Suspense fallback={null}>
+      <Suspense
+        fallback={
+          <div aria-hidden="true" className="border-b border-line bg-surface" style={{ height: 'var(--ticker-h)' }} />
+        }
+      >
         <Ticker />
       </Suspense>
       <main id="main" tabIndex={-1} className="outline-none">
         {children}
       </main>
       <SiteFooter />
-      <Suspense fallback={null}>
-        <PaletteLoader />
-      </Suspense>
+      <LazyCommandPalette pages={PAGE_INDEX} />
     </>
   );
 }

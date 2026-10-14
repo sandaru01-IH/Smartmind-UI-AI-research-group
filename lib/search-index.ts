@@ -1,20 +1,24 @@
-import { LAB_PAPERS, CHATBOT_PAPERS } from '@/content/publications';
+import 'server-only';
+import { PAGE_INDEX } from '@/components/layout/nav-items';
+import { CHATBOT_PAPERS, LAB_PAPERS } from '@/content/publications';
 import { TEAM } from '@/content/team';
 import { confirmedOnly } from '@/content/types';
-import { PAGE_INDEX } from '@/components/layout/nav-items';
 import { listPosts } from '@/lib/posts/public';
-import { CommandPalette, type PaletteItem } from './command-palette';
 
-/** Builds the search index on the server: pages, live news, publications and team. */
-export async function PaletteLoader() {
+export interface SearchEntry {
+  id: string;
+  group: 'pages' | 'news' | 'publications' | 'team';
+  label: string;
+  hint?: string;
+  href: string;
+  external?: boolean;
+}
+
+/** Everything the command palette can find: pages, live news, publications and team. */
+export async function buildSearchIndex(): Promise<SearchEntry[]> {
   const { posts } = await listPosts({ type: 'article', limit: 50 });
-  const items: PaletteItem[] = [
-    ...PAGE_INDEX.map((p) => ({
-      id: `page:${p.href}`,
-      group: 'pages' as const,
-      label: p.label,
-      href: p.href,
-    })),
+  return [
+    ...PAGE_INDEX.map((p) => ({ id: `page:${p.href}`, group: 'pages' as const, label: p.label, href: p.href })),
     ...posts.map((p) => ({
       id: `news:${p.slug}`,
       group: 'news' as const,
@@ -43,5 +47,4 @@ export async function PaletteLoader() {
       href: '/team',
     })),
   ];
-  return <CommandPalette items={items} />;
 }

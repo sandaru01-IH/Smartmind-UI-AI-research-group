@@ -9,14 +9,21 @@ const display = Bricolage_Grotesque({
   subsets: ['latin'],
   variable: '--font-bricolage',
   display: 'swap',
-  axes: ['opsz', 'wdth'],
+  // Static weights keep the file small. Headings use 400, the wordmark and bold labels use 600.
+  weight: ['400', '600'],
 });
 const sans = Instrument_Sans({
   subsets: ['latin'],
   variable: '--font-instrument',
   display: 'swap',
+  weight: ['400', '600'],
 });
-const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains', display: 'swap' });
+const mono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains',
+  display: 'swap',
+  weight: ['400', '500'],
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

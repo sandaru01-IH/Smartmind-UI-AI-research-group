@@ -33,13 +33,25 @@ function score(item: PaletteItem, q: string): number {
       : 1;
 }
 
-export function CommandPalette({ items }: { items: PaletteItem[] }) {
+export function CommandPalette({
+  pages,
+  openOnMount = false,
+}: {
+  pages: { href: string; label: string }[];
+  /** Open straight away. Used when the palette was loaded by a key press or click. */
+  openOnMount?: boolean;
+}) {
   const router = useRouter();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listId = useId();
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
+  // Pages are known up front. News, publications and team are fetched the first time the palette opens.
+  const [items, setItems] = useState<PaletteItem[]>(() =>
+    pages.map((p) => ({ id: `page:${p.href}`, group: 'pages' as const, label: p.label, href: p.href })),
+  );
+  const loading = useRef(false);
 
   const results = useMemo(() => {
     const ranked = items
@@ -55,8 +67,21 @@ export function CommandPalette({ items }: { items: PaletteItem[] }) {
     setQuery('');
     setActive(0);
     d.showModal();
+    if (!loading.current) {
+      loading.current = true;
+      fetch('/search-index.json')
+        .then((r) => (r.ok ? (r.json() as Promise<PaletteItem[]>) : Promise.reject(new Error(String(r.status)))))
+        .then(setItems)
+        .catch(() => {
+          loading.current = false;
+        });
+    }
     inputRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    if (openOnMount) open();
+  }, [openOnMount, open]);
 
   const close = useCallback(() => dialogRef.current?.close(), []);
 

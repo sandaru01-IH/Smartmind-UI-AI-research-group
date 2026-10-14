@@ -74,7 +74,7 @@ async function Listing({ searchParams }: { searchParams: SearchParams }) {
       {featured ? (
         <div className="mt-10">
           <p className="label-mono mb-3 text-muted">{t.common.featured}</p>
-          <PostCard post={featured} variant="feature" priority />
+          <PostCard post={featured} variant="feature" priority as="h2" />
         </div>
       ) : null}
 
@@ -93,7 +93,7 @@ async function Listing({ searchParams }: { searchParams: SearchParams }) {
         <ul className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {shown.map((p) => (
             <li key={p.id}>
-              <PostCard post={p} />
+              <PostCard post={p} as="h2" />
             </li>
           ))}
         </ul>

@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Suspense } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { PostBody } from '@/components/ui/markdown';
 import { PostCover } from '@/components/news/post-cover';
@@ -44,8 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-/** Renders the article. Reads the slug at request time, so it sits inside a Suspense boundary. */
-async function Article({ params }: Props) {
+export default async function PostPage({ params }: Props) {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
   if (!post) notFound();
@@ -126,10 +124,3 @@ async function Article({ params }: Props) {
   );
 }
 
-export default function PostPage({ params }: Props) {
-  return (
-    <Suspense fallback={<div className="container-site min-h-[60vh] py-16" aria-busy="true" />}>
-      <Article params={params} />
-    </Suspense>
-  );
-}

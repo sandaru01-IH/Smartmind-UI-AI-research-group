@@ -79,11 +79,14 @@ export function CoverArt({
         opacity="0.7"
       />
       <path d={flooded} fill="none" stroke={colour} strokeWidth="1.1" strokeLinecap="round" />
-      <g fill="var(--muted)" opacity="0.8">
-        {g.nodes.map((n, i) => (
-          <circle key={i} cx={r(n.x)} cy={r(n.y)} r="0.9" />
-        ))}
-      </g>
+      <path
+        d={g.nodes.map((n) => `M${r(n.x)} ${r(n.y)}h0`).join('')}
+        fill="none"
+        stroke="var(--muted)"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        opacity="0.8"
+      />
       <circle cx={r(origin.x)} cy={r(origin.y)} r="2.4" fill={colour} />
     </svg>
   );

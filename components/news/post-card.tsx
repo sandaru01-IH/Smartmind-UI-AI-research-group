@@ -9,10 +9,13 @@ export function PostCard({
   post,
   variant = 'default',
   priority = false,
+  as: Heading = 'h3',
 }: {
   post: Post;
   variant?: 'default' | 'feature' | 'compact';
   priority?: boolean;
+  /** Heading level. Use h2 when the card sits directly under the page's h1. */
+  as?: 'h2' | 'h3';
 }) {
   const date = post.published_at;
   if (variant === 'compact') {
@@ -49,14 +52,14 @@ export function PostCard({
             {formatDate(date)}
           </time>
         </div>
-        <h3 className={feature ? 'text-2xl md:text-3xl' : 'text-xl'}>
+        <Heading className={feature ? 'text-2xl md:text-3xl' : 'text-xl'}>
           <Link
             href={`/news/${post.slug}`}
             className="after:absolute after:inset-0 group-hover:underline"
           >
             {post.title}
           </Link>
-        </h3>
+        </Heading>
         {post.excerpt ? <p className="text-muted">{post.excerpt}</p> : null}
       </div>
     </article>

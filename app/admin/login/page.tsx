@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 import { LoginForm } from '@/components/admin/login-form';
 import { SetupScreen } from '@/components/admin/setup-screen';
-import { HeroCanvas } from '@/components/hero/hero-canvas';
+import { LazyHeroCanvas } from '@/components/hero/lazy-hero-canvas';
 import { HeroFallback } from '@/components/hero/hero-fallback';
 import { LogoMark } from '@/components/brand/logo';
 import { safeNext } from '@/lib/auth/safe-next';
@@ -26,7 +26,7 @@ export default function LoginPage({ searchParams }: { searchParams: SearchParams
       <div className="absolute inset-0 -z-10 opacity-60" aria-hidden="true">
         <HeroFallback />
         <div className="absolute inset-0">
-          <HeroCanvas />
+          <LazyHeroCanvas />
         </div>
         <div
           className="absolute inset-0"

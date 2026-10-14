@@ -19,27 +19,21 @@ export function ThemePattern({
   let body: React.ReactNode;
 
   if (theme === 'land') {
-    // Population grid: cell opacity follows a noisy density surface.
+    // Population grid: cell opacity follows a noisy density surface. Cells with the same opacity
+    // step share one path, so 240 cells become six short paths.
     const cols = 20;
     const rows = 12;
-    const cells = [];
+    const buckets = new Map<number, string>();
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
         const d = Math.max(0, 1 - Math.hypot(x - 13, y - 5) / 9) + rng() * 0.25;
-        cells.push(
-          <rect
-            key={`${x}-${y}`}
-            x={x * 10 + 1}
-            y={y * 10 + 1}
-            width="8"
-            height="8"
-            fill={colour}
-            opacity={r1(Math.min(0.95, d) * 0.9 + 0.04)}
-          />,
-        );
+        const opacity = Math.round((Math.min(0.95, d) * 0.9 + 0.04) * 6) / 6;
+        buckets.set(opacity, `${buckets.get(opacity) ?? ''}M${x * 10 + 1} ${y * 10 + 1}h8v8h-8z`);
       }
     }
-    body = cells;
+    body = Array.from(buckets, ([opacity, d]) => (
+      <path key={opacity} d={d} fill={colour} opacity={r1(opacity)} />
+    ));
   } else if (theme === 'flood') {
     // Contour lines of rising water.
     const lines = [];

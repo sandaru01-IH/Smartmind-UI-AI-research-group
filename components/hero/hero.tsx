@@ -1,7 +1,7 @@
 import { ButtonLink } from '@/components/ui/button';
 import { t } from '@/content/strings';
 import { BRAND } from '@/content/brand';
-import { HeroCanvas } from './hero-canvas';
+import { LazyHeroCanvas } from './lazy-hero-canvas';
 import { HeroFallback } from './hero-fallback';
 
 /**
@@ -17,7 +17,7 @@ export function Hero() {
       <div className="absolute inset-0 -z-10">
         <HeroFallback />
         <div className="absolute inset-0" id="hero-sim-host">
-          <HeroCanvas />
+          <LazyHeroCanvas />
         </div>
         <div
           aria-hidden="true"
