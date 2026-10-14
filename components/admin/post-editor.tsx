@@ -119,6 +119,11 @@ export function PostEditor({ post }: { post: Post | null }) {
 
   const valid = useMemo(() => postInputSchema.safeParse(toValues(d)).success, [d]);
   const isUpdate = d.type === 'update';
+  // Time is read after mount, never during render, so server and browser output always match.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const publishAt = fromLocalInput(d.published_at);
+  const isScheduled = mounted && d.status === 'published' && publishAt !== null && new Date(publishAt).getTime() > Date.now();
 
   const save = useCallback(
     async (opts: { silent?: boolean } = {}): Promise<boolean> => {
@@ -268,7 +273,7 @@ export function PostEditor({ post }: { post: Post | null }) {
             <Field id="publish-at" label="Publish at (optional)" hint="Leave empty to publish now. A future time schedules it." error={err('published_at')}>
               <input id="publish-at" type="datetime-local" value={d.published_at} onChange={(e) => set('published_at', e.target.value)} className={field} />
             </Field>
-            {d.status === 'published' && d.published_at && fromLocalInput(d.published_at) && new Date(fromLocalInput(d.published_at) as string) > new Date() ? (
+            {isScheduled ? (
               <p className="label-mono text-landslide-ink">Scheduled: goes live at the time above.</p>
             ) : null}
             {!isUpdate ? (

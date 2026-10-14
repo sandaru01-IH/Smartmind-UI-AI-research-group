@@ -8,7 +8,8 @@ export async function Ticker() {
     id: u.id,
     title: u.title,
     category: u.category,
-    href: u.link_url,
+    href: u.link_url ?? (u.type === 'article' ? `/news/${u.slug}` : null),
+    external: Boolean(u.link_url),
     date: u.published_at,
   }));
   return <TickerView items={items} />;

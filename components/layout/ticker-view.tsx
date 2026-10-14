@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type CSSProperties } from 'react';
+import Link from 'next/link';
 import { Pause, Play } from 'lucide-react';
 import { t } from '@/content/strings';
 
@@ -9,6 +10,7 @@ export interface TickerItem {
   title: string;
   category: string;
   href: string | null;
+  external: boolean;
   date: string | null;
 }
 
@@ -26,13 +28,22 @@ function Entry({ item }: { item: TickerItem }) {
     </>
   );
   const cls = 'inline-flex min-h-9 items-center gap-3 whitespace-nowrap px-6 text-sm';
-  return item.href ? (
-    <a href={item.href} target="_blank" rel="noopener noreferrer" className={`${cls} hover:underline`}>
-      {body}
-    </a>
-  ) : (
-    <span className={cls}>{body}</span>
-  );
+  if (item.href && item.external) {
+    return (
+      <a href={item.href} target="_blank" rel="noopener noreferrer" className={`${cls} hover:underline`}>
+        {body}
+        <span className="sr-only"> ({t.common.external})</span>
+      </a>
+    );
+  }
+  if (item.href) {
+    return (
+      <Link href={item.href} className={`${cls} hover:underline`}>
+        {body}
+      </Link>
+    );
+  }
+  return <span className={cls}>{body}</span>;
 }
 
 /**

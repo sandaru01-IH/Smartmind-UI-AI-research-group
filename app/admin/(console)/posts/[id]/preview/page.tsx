@@ -1,3 +1,4 @@
+import { connection } from 'next/server';
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import { PostCover } from '@/components/news/post-cover';
@@ -10,6 +11,7 @@ import { publicState } from '@/lib/visibility';
 
 /** Renders a post the way a visitor would see it, even if it is a draft or scheduled. Admin only. */
 export default async function PreviewPage({ params }: { params: Promise<{ id: string }> }) {
+  await connection();
   const { supabase } = await requireAdmin();
   const { id } = await params;
   if (!z.uuid().safeParse(id).success) notFound();

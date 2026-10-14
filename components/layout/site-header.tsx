@@ -1,27 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { Menu, Search, X } from 'lucide-react';
 import { Wordmark } from '@/components/brand/logo';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { buttonClass } from '@/components/ui/button';
 import { t } from '@/content/strings';
+import { NavLink, RouteChange } from './nav-link';
 import { CTA_ITEM, NAV_ITEMS } from './nav-items';
 
-function isActive(pathname: string, href: string): boolean {
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
-
 export function SiteHeader() {
-  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
   const openRef = useRef<HTMLButtonElement>(null);
-
-  // Close the menu when the route changes.
-  useEffect(() => setOpen(false), [pathname]);
 
   // Lock scroll, move focus into the menu, and close on Escape while it is open.
   useEffect(() => {
@@ -44,6 +36,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-bg/95 backdrop-blur-sm">
+      <RouteChange onChange={() => setOpen(false)} />
       <div className="container-site flex h-[var(--header-h)] items-center justify-between gap-4">
         <Link href="/" aria-label={`${t.nav.home}`} className="-ml-1 inline-flex min-h-11 items-center px-1">
           <Wordmark />
@@ -53,16 +46,13 @@ export function SiteHeader() {
           <ul className="flex items-center gap-1">
             {NAV_ITEMS.map((item) => (
               <li key={item.href}>
-                <Link
+                <NavLink
                   href={item.href}
-                  aria-current={isActive(pathname, item.href) ? 'page' : undefined}
                   className="relative inline-flex min-h-11 items-center px-3 text-[0.95rem] text-muted transition-colors hover:text-fg aria-[current=page]:text-fg"
+                  activeMark={<span aria-hidden="true" className="absolute inset-x-3 bottom-1.5 h-px bg-signal" />}
                 >
                   {item.label}
-                  {isActive(pathname, item.href) ? (
-                    <span aria-hidden="true" className="absolute inset-x-3 bottom-1.5 h-px bg-signal" />
-                  ) : null}
-                </Link>
+                </NavLink>
               </li>
             ))}
           </ul>
@@ -125,16 +115,15 @@ export function SiteHeader() {
             <ul className="divide-y divide-line">
               {[...NAV_ITEMS, CTA_ITEM].map((item, i) => (
                 <li key={item.href}>
-                  <Link
+                  <NavLink
                     href={item.href}
-                    aria-current={isActive(pathname, item.href) ? 'page' : undefined}
                     className="flex min-h-14 items-baseline gap-4 py-3 font-display text-3xl tracking-tight aria-[current=page]:text-fg"
                   >
                     <span aria-hidden="true" className="numeral w-8 text-sm text-muted">
                       {String(i + 1).padStart(2, '0')}
                     </span>
                     {item.label}
-                  </Link>
+                  </NavLink>
                 </li>
               ))}
             </ul>

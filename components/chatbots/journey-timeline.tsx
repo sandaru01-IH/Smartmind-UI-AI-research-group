@@ -78,8 +78,8 @@ export function JourneyTimeline({ milestones }: { milestones: Milestone[] }) {
               itemRefs.current[i] = el;
             }}
             aria-current={i === active ? 'step' : undefined}
-            className={`relative border-t border-line py-10 transition-opacity duration-300 md:py-14 ${
-              i === active ? 'opacity-100' : 'opacity-70'
+            className={`relative border-t py-10 transition-colors duration-300 md:py-14 ${
+              i === active ? 'border-t-signal' : 'border-t-line'
             }`}
           >
             <div className="flex flex-wrap items-center gap-3">

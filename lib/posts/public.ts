@@ -58,11 +58,12 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
   return parsePostRow(data);
 }
 
+/** Newest published items of any type: the ticker and the Latest strip share this. */
 export async function getLatestUpdates(limit: number): Promise<Post[]> {
   'use cache';
   cacheTag('posts', 'latest');
   cacheLife({ stale: 30, revalidate: 30, expire: 3600 });
-  return (await listPosts({ type: 'update', limit })).posts;
+  return (await listPosts({ limit })).posts;
 }
 
 export async function getFeaturedPost(): Promise<Post | null> {

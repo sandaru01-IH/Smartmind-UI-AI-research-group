@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "e2e": "playwright test",
+    "e2e": "next build && playwright test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "create-admin": "tsx scripts/create-admin.ts",
@@ -18,7 +18,8 @@
     "check:contrast": "tsx scripts/check-contrast.ts",
     "db:start": "supabase start",
     "db:reset": "supabase db reset",
-    "screenshots": "tsx scripts/screenshots.ts"
+    "screenshots": "tsx scripts/screenshots.ts",
+    "e2e:only": "playwright test"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

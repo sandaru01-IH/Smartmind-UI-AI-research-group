@@ -1,6 +1,30 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { SEED_POSTS } from '@/content/seed-posts';
+import { visibleSeedPosts } from '@/lib/posts/query';
 import { supabaseEnv } from '@/lib/supabase/env';
+
+/**
+ * Unknown /news/<slug> URLs get a real 404 status. The article page streams, so by the time it
+ * calls notFound() the 200 status has been sent. A cheap anonymous lookup here fixes the status;
+ * Row Level Security makes sure drafts and scheduled posts count as missing.
+ */
+async function newsSlugExists(slug: string): Promise<boolean> {
+  const env = supabaseEnv();
+  if (!env) return visibleSeedPosts(SEED_POSTS).some((p) => p.slug === slug);
+  try {
+    const base = env.url.replace(/\/$/, '');
+    const url = `${base}/rest/v1/posts?select=id&status=eq.published&limit=1&slug=eq.${encodeURIComponent(slug)}`;
+    const res = await fetch(url, {
+      headers: { apikey: env.anonKey, Authorization: `Bearer ${env.anonKey}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) return true; // On a lookup failure, let the page decide.
+    return ((await res.json()) as unknown[]).length > 0;
+  } catch {
+    return true;
+  }
+}
 
 /**
  * First line of defence for /admin/*: no valid Supabase session, no entry. It also refreshes the
@@ -9,6 +33,14 @@ import { supabaseEnv } from '@/lib/supabase/env';
  * rule in Postgres.
  */
 export async function proxy(request: NextRequest) {
+  if (request.nextUrl.pathname.startsWith('/news/')) {
+    const slug = decodeURIComponent(request.nextUrl.pathname.slice('/news/'.length));
+    if (slug && !(await newsSlugExists(slug))) {
+      return NextResponse.rewrite(new URL('/_missing-page', request.url), { status: 404 });
+    }
+    return NextResponse.next();
+  }
+
   const env = supabaseEnv();
   // Demo mode: the admin routes render a setup screen instead.
   if (!env) return NextResponse.next();
@@ -48,4 +80,4 @@ export async function proxy(request: NextRequest) {
   return response;
 }
 
-export const config = { matcher: ['/admin/:path*'] };
+export const config = { matcher: ['/admin/:path*', '/news/:slug'] };

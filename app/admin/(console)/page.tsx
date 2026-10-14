@@ -1,3 +1,4 @@
+import { connection } from 'next/server';
 import Link from 'next/link';
 import { PostsTable, type AdminRow } from '@/components/admin/posts-table';
 import { QuickUpdate } from '@/components/admin/quick-update';
@@ -15,6 +16,7 @@ const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) 
 const field = 'h-11 w-full rounded-sharp border border-line-strong bg-surface px-3 text-base text-fg placeholder:text-muted';
 
 export default async function Dashboard({ searchParams }: { searchParams: SearchParams }) {
+  await connection();
   const { supabase } = await requireAdmin();
   const sp = await searchParams;
   const status = (['draft', 'published', 'scheduled'] as const).find((s) => s === one(sp.status)) ?? 'all';
