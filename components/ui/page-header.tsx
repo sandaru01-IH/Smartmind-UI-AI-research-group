@@ -1,0 +1,23 @@
+import type { ReactNode } from 'react';
+
+/** Top of an inner page: mono eyebrow, large display title, lead. */
+export function PageHeader({
+  eyebrow,
+  title,
+  lead,
+  children,
+}: {
+  eyebrow: string;
+  title: ReactNode;
+  lead?: ReactNode;
+  children?: ReactNode;
+}) {
+  return (
+    <header className="container-site pb-12 pt-14 md:pb-20 md:pt-24">
+      <p className="label-mono text-muted">{eyebrow}</p>
+      <h1 className="mt-4 max-w-[18ch] text-4xl md:text-[length:var(--text-display)]">{title}</h1>
+      {lead ? <p className="mt-6 max-w-[58ch] text-lg text-muted md:text-xl">{lead}</p> : null}
+      {children}
+    </header>
+  );
+}
