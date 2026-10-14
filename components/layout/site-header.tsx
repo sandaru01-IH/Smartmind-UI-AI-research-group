@@ -79,9 +79,11 @@ export function SiteHeader() {
             <kbd className="label-mono hidden text-[0.7rem] md:inline">Ctrl K</kbd>
           </button>
           <ThemeToggle />
-          <Link href={CTA_ITEM.href} className={buttonClass('primary', 'hidden md:inline-flex')}>
-            {CTA_ITEM.label}
-          </Link>
+          <div className="hidden md:block">
+            <Link href={CTA_ITEM.href} className={buttonClass('primary')}>
+              {CTA_ITEM.label}
+            </Link>
+          </div>
           <button
             ref={openRef}
             type="button"

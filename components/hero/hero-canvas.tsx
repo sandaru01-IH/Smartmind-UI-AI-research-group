@@ -257,14 +257,14 @@ export function HeroCanvas({ onReady }: { onReady?: () => void }) {
       document.addEventListener('visibilitychange', onVisibility);
       start();
     };
-    const idle = (window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
+    const idle = typeof window.requestIdleCallback === 'function' ? window.requestIdleCallback.bind(window) : null;
     const handle = idle ? idle(boot, { timeout: 1200 }) : window.setTimeout(boot, 300);
 
     return () => {
       disposed = true;
       if (raf) cancelAnimationFrame(raf);
       window.clearTimeout(resizeTimer);
-      if (idle) (window as Window & { cancelIdleCallback?: (h: number) => void }).cancelIdleCallback?.(handle);
+      if (idle) window.cancelIdleCallback(handle);
       else window.clearTimeout(handle);
       io.disconnect();
       ro.disconnect();

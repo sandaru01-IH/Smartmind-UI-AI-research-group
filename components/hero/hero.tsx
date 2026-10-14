@@ -14,7 +14,7 @@ export function Hero() {
       aria-labelledby="hero-title"
       className="relative isolate flex min-h-[calc(100svh-var(--header-h)-var(--ticker-h))] flex-col justify-end overflow-hidden"
     >
-      <div className="absolute inset-0 -z-10" aria-hidden={false}>
+      <div className="absolute inset-0 -z-10">
         <HeroFallback />
         <div className="absolute inset-0" id="hero-sim-host">
           <HeroCanvas />
@@ -22,7 +22,10 @@ export function Hero() {
         <div
           aria-hidden="true"
           className="absolute inset-0"
-          style={{ background: 'linear-gradient(to top, var(--bg) 8%, transparent 62%)' }}
+          style={{
+            background:
+              'linear-gradient(to top, var(--bg) 6%, transparent 55%), linear-gradient(to right, color-mix(in oklab, var(--bg) 88%, transparent) 0%, color-mix(in oklab, var(--bg) 62%, transparent) 45%, transparent 85%)',
+          }}
         />
       </div>
 

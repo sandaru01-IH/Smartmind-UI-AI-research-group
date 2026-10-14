@@ -18,7 +18,7 @@ const SCHEMA_ESCAPE = /[%_,()]/g;
 export async function listPosts(query: PublicListQuery = {}): Promise<PublicListResult> {
   'use cache';
   cacheTag('posts');
-  cacheLife('posts');
+  cacheLife({ stale: 30, revalidate: 30, expire: 3600 });
 
   const db = createPublicClient();
   if (!db) return applyPublicQuery(visibleSeedPosts(SEED_POSTS), query);
@@ -44,7 +44,7 @@ export async function listPosts(query: PublicListQuery = {}): Promise<PublicList
 export async function getPostBySlug(slug: string): Promise<Post | null> {
   'use cache';
   cacheTag('posts', `post:${slug}`);
-  cacheLife('posts');
+  cacheLife({ stale: 30, revalidate: 30, expire: 3600 });
 
   const db = createPublicClient();
   if (!db) return visibleSeedPosts(SEED_POSTS).find((p) => p.slug === slug) ?? null;
@@ -61,14 +61,14 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 export async function getLatestUpdates(limit: number): Promise<Post[]> {
   'use cache';
   cacheTag('posts', 'latest');
-  cacheLife('posts');
+  cacheLife({ stale: 30, revalidate: 30, expire: 3600 });
   return (await listPosts({ type: 'update', limit })).posts;
 }
 
 export async function getFeaturedPost(): Promise<Post | null> {
   'use cache';
   cacheTag('posts', 'latest');
-  cacheLife('posts');
+  cacheLife({ stale: 30, revalidate: 30, expire: 3600 });
 
   const db = createPublicClient();
   if (!db) {
@@ -93,7 +93,7 @@ export async function getFeaturedPost(): Promise<Post | null> {
 export async function getSlugIndex(): Promise<{ slug: string; updated_at: string }[]> {
   'use cache';
   cacheTag('posts');
-  cacheLife('posts');
+  cacheLife({ stale: 30, revalidate: 30, expire: 3600 });
   const { posts } = await listPosts({ type: 'article', limit: 500 });
   return posts.map((p) => ({ slug: p.slug, updated_at: p.updated_at }));
 }
@@ -101,7 +101,7 @@ export async function getSlugIndex(): Promise<{ slug: string; updated_at: string
 export async function getFilterOptions(): Promise<{ categories: Category[]; tags: string[] }> {
   'use cache';
   cacheTag('posts');
-  cacheLife('posts');
+  cacheLife({ stale: 30, revalidate: 30, expire: 3600 });
   const { posts } = await listPosts({ type: 'article', limit: 500 });
   const present = new Set(posts.map((p) => p.category));
   const tags = Array.from(new Set(posts.flatMap((p) => p.tags))).sort();

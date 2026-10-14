@@ -49,11 +49,6 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
-  cacheLife: {
-    // Public posts. Admin changes also call updateTag, so this is the ceiling, not the delay.
-    // The short revalidate window lets scheduled posts appear within about half a minute.
-    posts: { stale: 30, revalidate: 30, expire: 3600 },
-  },
   images: {
     formats: ['image/avif', 'image/webp'],
     ...(supabase
