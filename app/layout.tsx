@@ -21,7 +21,8 @@ const sans = Instrument_Sans({
 const mono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-jetbrains',
-  display: 'swap',
+  // Labels only. `optional` never swaps in late, so wide fallback letters cannot wrap and then reflow.
+  display: 'optional',
   weight: ['400', '500'],
 });
 

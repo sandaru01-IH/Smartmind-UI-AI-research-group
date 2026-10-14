@@ -168,7 +168,40 @@ test.describe('features', () => {
     await expect(ticker.getByRole('button', { name: 'Play updates' })).toBeVisible();
   });
 
-  test('hero: canvas runs, and is replaced by the static network under reduced motion', async ({
+  test('hero: layered depth, no legend, and the first paint is already the final picture', async ({
+    page,
+  }) => {
+    await page.goto('/', { waitUntil: 'commit' });
+    await page.waitForSelector('#hero-title');
+    const map = page.getByRole('img', { name: /Layered road networks/ });
+    // Four sheets of roads, each fainter than the one in front of it.
+    const sheets = map.locator('> g');
+    await expect(sheets).toHaveCount(4);
+    const opacities = await sheets.evaluateAll((els) =>
+      els.map((g) => Number(g.querySelector('path')!.getAttribute('opacity'))),
+    );
+    expect([...opacities].sort((a, b) => a - b)).toEqual(opacities);
+    expect(opacities[0]).toBeLessThan(opacities[3]);
+    // The wording the client asked to remove is gone.
+    await expect(page.getByText(/agents rerouting/i)).toHaveCount(0);
+    await expect(page.getByText(/Point at a road/i)).toHaveCount(0);
+    // The canvas adds no second set of roads. It is transparent apart from agents and selections.
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('#hero-sim-host canvas')).toHaveCSS('opacity', '1', {
+      timeout: 8000,
+    });
+    const coverage = await page.evaluate(() => {
+      const c = document.querySelector<HTMLCanvasElement>('#hero-sim-host canvas')!;
+      const data = c.getContext('2d')!.getImageData(0, 0, c.width, c.height).data;
+      let painted = 0;
+      for (let i = 3; i < data.length; i += 4) if (data[i] > 0) painted++;
+      return painted / (c.width * c.height);
+    });
+    expect(coverage).toBeGreaterThan(0);
+    expect(coverage).toBeLessThan(0.02);
+  });
+
+  test('hero: the canvas runs only a few agents, and is replaced by the static network under reduced motion', async ({
     browser,
   }) => {
     const live = await (await browser.newContext()).newPage();
@@ -191,7 +224,7 @@ test.describe('features', () => {
     const calm = await (await browser.newContext({ reducedMotion: 'reduce' })).newPage();
     await calm.goto('/', { waitUntil: 'networkidle' });
     await expect(calm.locator('#hero-sim-host canvas')).toHaveCount(0);
-    await expect(calm.getByRole('img', { name: /road network drawn as nodes/ })).toBeVisible();
+    await expect(calm.getByRole('img', { name: /Layered road networks/ })).toBeVisible();
   });
 
   test('hero: moving the pointer floods roads', async ({ page }) => {

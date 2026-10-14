@@ -2,16 +2,17 @@
 
 import { useEffect, useRef } from 'react';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
-import { betweenness } from '@/lib/sim/centrality';
-import { generateGraph } from '@/lib/sim/graph';
-import { HERO_SEED } from '@/lib/sim/static-network';
 import { RoadSim, SELECT_LIFE } from '@/lib/sim/sim';
+import {
+  coverFrame,
+  depthField,
+  layerToView,
+  viewToLayer,
+  type DepthField,
+} from '@/lib/sim/static-network';
 
 interface Palette {
-  road: string;
-  node: string;
   agent: string;
-  agentEdge: string;
   flood: string;
 }
 
@@ -20,26 +21,23 @@ function readPalette(): Palette {
   const get = (name: string) => css.getPropertyValue(name).trim();
   const light = document.documentElement.dataset.theme === 'light';
   return {
-    road: get('--line-strong'),
-    node: get('--muted'),
     agent: light ? get('--fg') : get('--signal'),
-    agentEdge: light ? get('--signal') : get('--bg'),
     flood: light ? get('--flood-ink') : get('--flood'),
   };
 }
 
-/** Agent cap by device. Reduced further at run time if frames run long. */
+/** A few travellers, not a swarm. Shed further at run time if frames run long. */
 function agentBudget(width: number): number {
   const cores = navigator.hardwareConcurrency ?? 4;
   const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 4;
-  if (cores <= 2 || memory <= 2) return 80;
-  if (width < 768) return cores >= 8 ? 200 : 140;
-  return cores >= 8 ? 420 : 260;
+  if (cores <= 2 || memory <= 2) return 8;
+  if (width < 768) return 12;
+  return 22;
 }
 
 /**
- * Live road-network simulation. Mounts after first paint, pauses when off-screen or hidden,
- * and does nothing under reduced motion (the static SVG stays).
+ * Pointer response and a small number of slow agents, drawn on the same sheets as the static SVG.
+ * Roads themselves stay in the SVG, so the canvas never paints a second network over the first.
  */
 export function HeroCanvas({ onReady }: { onReady?: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -56,55 +54,21 @@ export function HeroCanvas({ onReady }: { onReady?: () => void }) {
     let raf = 0;
     let disposed = false;
     let visible = true;
-    let sim: RoadSim | null = null;
-    let centrality: number[] = [];
+    let field: DepthField[] = [];
+    let sims: RoadSim[] = [];
     let palette = readPalette();
     let cssW = 0;
     let cssH = 0;
     let dpr = 1;
-    let scale = 1; // px per world unit
-    let worldW = 160;
-    let lastAspect = 0;
-    let layer: HTMLCanvasElement | null = null;
-    let budget = 0;
+    let ox = 0;
+    let oy = 0;
+    let cover = 1;
     let slowFrames = 0;
     let last = performance.now();
 
-    const drawStatic = () => {
-      if (!sim) return;
-      layer = document.createElement('canvas');
-      layer.width = Math.round(cssW * dpr);
-      layer.height = Math.round(cssH * dpr);
-      const l = layer.getContext('2d');
-      if (!l) return;
-      l.scale(dpr, dpr);
-      const g = sim.graph;
-      l.lineCap = 'round';
-      l.strokeStyle = palette.road;
-      l.globalAlpha = 0.55;
-      l.lineWidth = Math.max(0.8, scale * 0.22);
-      l.beginPath();
-      for (const e of g.edges) {
-        l.moveTo(g.nodes[e.a].x * scale, g.nodes[e.a].y * scale);
-        l.lineTo(g.nodes[e.b].x * scale, g.nodes[e.b].y * scale);
-      }
-      l.stroke();
-      l.globalAlpha = 0.85;
-      l.fillStyle = palette.node;
-      g.nodes.forEach((n, i) => {
-        l.beginPath();
-        l.arc(
-          n.x * scale,
-          n.y * scale,
-          scale * (0.35 + 1.5 * Math.pow(centrality[i], 0.6)),
-          0,
-          Math.PI * 2,
-        );
-        l.fill();
-      });
-    };
+    const frontSim = () => sims.find((s, i) => field[i]?.spec.live) ?? null;
 
-    const build = () => {
+    const layout = () => {
       const rect = host.getBoundingClientRect();
       cssW = Math.max(1, Math.round(rect.width));
       cssH = Math.max(1, Math.round(rect.height));
@@ -113,79 +77,93 @@ export function HeroCanvas({ onReady }: { onReady?: () => void }) {
       canvas.height = Math.round(cssH * dpr);
       canvas.style.width = `${cssW}px`;
       canvas.style.height = `${cssH}px`;
-      scale = cssH / 100;
-      const aspect = cssW / cssH;
-      // Regenerate only when the shape changes a lot. Otherwise reuse the same network.
-      if (!sim || Math.abs(aspect - lastAspect) / lastAspect > 0.18) {
-        lastAspect = aspect;
-        worldW = 100 * aspect;
-        const graph = generateGraph({
-          seed: HERO_SEED,
-          nodeTarget: cssW < 768 ? 150 : 200,
-          width: worldW,
-          height: 100,
-        });
-        centrality = betweenness(graph, { samples: 40, seed: HERO_SEED });
-        budget = agentBudget(cssW);
-        sim = new RoadSim({ graph, agentCount: budget, seed: HERO_SEED, centrality });
-      }
-      palette = readPalette();
-      drawStatic();
+      const frame = coverFrame(cssW, cssH);
+      ox = frame.ox;
+      oy = frame.oy;
+      cover = frame.scale;
+    };
+
+    const screenOf = (x: number, y: number, spec: DepthField['spec']) => {
+      const v = layerToView(x, y, spec);
+      return { x: ox + v.x * cover, y: oy + v.y * cover };
     };
 
     const draw = () => {
-      if (!sim || !layer) return;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(layer, 0, 0);
-      ctx.scale(dpr, dpr);
-      const g = sim.graph;
-
-      // Selected roads. The road the pointer is on is drawn heavier; the roads joined to it are
-      // flooded too and drawn lighter. Both fade out together as the selection expires.
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.lineCap = 'round';
       ctx.strokeStyle = palette.flood;
       ctx.fillStyle = palette.flood;
-      for (const sel of sim.selections) {
-        const fade = 1 - Math.pow(sel.age / SELECT_LIFE, 2);
-        const line = (i: number, width: number, alpha: number) => {
-          const e = g.edges[i];
-          ctx.globalAlpha = alpha * fade;
-          ctx.lineWidth = width;
-          ctx.beginPath();
-          ctx.moveTo(g.nodes[e.a].x * scale, g.nodes[e.a].y * scale);
-          ctx.lineTo(g.nodes[e.b].x * scale, g.nodes[e.b].y * scale);
-          ctx.stroke();
-        };
-        for (const i of sim.connectedEdges(sel.edge)) {
-          if (i !== sel.edge) line(i, Math.max(1.2, scale * 0.38), 0.75);
-        }
-        line(sel.edge, Math.max(2, scale * 0.6), 1);
-        const e = g.edges[sel.edge];
-        ctx.globalAlpha = fade;
-        for (const n of [g.nodes[e.a], g.nodes[e.b]]) {
-          ctx.beginPath();
-          ctx.arc(n.x * scale, n.y * scale, Math.max(2.5, scale * 0.75), 0, Math.PI * 2);
-          ctx.fill();
+
+      for (let i = 0; i < sims.length; i++) {
+        const sim = sims[i];
+        const spec = field[i].spec;
+        const g = sim.graph;
+        const strength = spec.live ? 0.62 : spec.road * 1.15;
+        for (const sel of sim.selections) {
+          const fade = 1 - Math.pow(sel.age / SELECT_LIFE, 2);
+          const line = (edge: number, width: number, alpha: number) => {
+            const e = g.edges[edge];
+            const a = screenOf(g.nodes[e.a].x, g.nodes[e.a].y, spec);
+            const b = screenOf(g.nodes[e.b].x, g.nodes[e.b].y, spec);
+            ctx.globalAlpha = alpha * fade;
+            ctx.lineWidth = width;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          };
+          for (const edge of sim.connectedEdges(sel.edge)) {
+            if (edge !== sel.edge) line(edge, Math.max(1, cover * 0.28), strength * 0.55);
+          }
+          line(sel.edge, Math.max(1.6, cover * 0.48), strength);
         }
       }
 
-      // Agents
-      ctx.globalAlpha = 1;
-      const rad = Math.max(1.5, scale * 0.42);
-      ctx.fillStyle = palette.agent;
-      ctx.strokeStyle = palette.agentEdge;
-      ctx.lineWidth = 0.75;
-      for (const a of sim.agents) {
-        const from = g.nodes[a.from];
-        const to = g.nodes[a.to];
-        const x = (from.x + (to.x - from.x) * a.t) * scale;
-        const y = (from.y + (to.y - from.y) * a.t) * scale;
-        ctx.beginPath();
-        ctx.arc(x, y, rad, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
+      const live = frontSim();
+      const liveSpec = field.find((layer) => layer.spec.live)?.spec;
+      if (live && liveSpec) {
+        const g = live.graph;
+        const rad = Math.max(1.7, cover * 0.26);
+        ctx.fillStyle = palette.agent;
+        ctx.globalAlpha = 0.5;
+        for (const a of live.agents) {
+          const from = g.nodes[a.from];
+          const to = g.nodes[a.to];
+          const p = screenOf(
+            from.x + (to.x - from.x) * a.t,
+            from.y + (to.y - from.y) * a.t,
+            liveSpec,
+          );
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, rad, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
+      ctx.globalAlpha = 1;
+    };
+
+    const build = () => {
+      layout();
+      palette = readPalette();
+      if (sims.length === 0) {
+        field = depthField();
+        const budget = agentBudget(cssW);
+        sims = field.map(
+          (layer) =>
+            new RoadSim({
+              graph: layer.graph,
+              agentCount: layer.spec.live ? budget : 0,
+              seed: layer.spec.seed,
+              centrality: layer.centrality,
+              pace: layer.spec.live ? 0.28 : 1,
+            }),
+        );
+      } else {
+        frontSim()?.setAgentCount(agentBudget(cssW));
+      }
+      draw();
     };
 
     const frame = (now: number) => {
@@ -193,14 +171,14 @@ export function HeroCanvas({ onReady }: { onReady?: () => void }) {
       if (disposed || !visible || document.hidden) return;
       const dt = (now - last) / 1000;
       last = now;
-      if (sim) {
-        sim.step(dt);
-        draw();
-        // Shed agents if the device cannot hold the frame rate.
+      for (const sim of sims) sim.step(dt);
+      draw();
+      const live = frontSim();
+      if (live) {
         if (dt > 0.024) slowFrames += 1;
         else slowFrames = Math.max(0, slowFrames - 1);
-        if (slowFrames > 30 && sim.agents.length > 40) {
-          sim.setAgentCount(Math.floor(sim.agents.length * 0.75));
+        if (slowFrames > 30 && live.agents.length > 8) {
+          live.setAgentCount(Math.floor(live.agents.length * 0.75));
           slowFrames = 0;
         }
       }
@@ -213,18 +191,21 @@ export function HeroCanvas({ onReady }: { onReady?: () => void }) {
       }
     };
 
-    const toWorld = (clientX: number, clientY: number) => {
-      const r = canvas.getBoundingClientRect();
-      return {
-        x: (clientX - r.left) / scale,
-        y: (clientY - r.top) / scale,
-        inside: clientY >= r.top && clientY <= r.bottom && clientX >= r.left && clientX <= r.right,
-      };
-    };
     const onPointer = (e: PointerEvent) => {
-      if (!sim) return;
-      const p = toWorld(e.clientX, e.clientY);
-      if (p.inside) sim.addFlood(p.x, p.y);
+      if (sims.length === 0) return;
+      const rect = canvas.getBoundingClientRect();
+      const inside =
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom &&
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right;
+      if (!inside) return;
+      const vx = (e.clientX - rect.left - ox) / cover;
+      const vy = (e.clientY - rect.top - oy) / cover;
+      for (let i = 0; i < sims.length; i++) {
+        const p = viewToLayer(vx, vy, field[i].spec);
+        sims[i].addFlood(p.x, p.y);
+      }
     };
 
     const io = new IntersectionObserver(
@@ -241,7 +222,6 @@ export function HeroCanvas({ onReady }: { onReady?: () => void }) {
     let resizeTimer = 0;
     const theme = new MutationObserver(() => {
       palette = readPalette();
-      drawStatic();
     });
     const onVisibility = () => (document.hidden ? undefined : start());
 

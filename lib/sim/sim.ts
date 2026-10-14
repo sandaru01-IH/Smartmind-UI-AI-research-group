@@ -28,6 +28,8 @@ export interface RoadSimOptions {
   seed?: number;
   /** Optional 0..1 node weights. Busy junctions attract more trips. */
   centrality?: number[];
+  /** Travel-speed multiplier. 1 is the default pace used by tests. */
+  pace?: number;
 }
 
 function segmentDistSq(
@@ -64,11 +66,13 @@ export class RoadSim {
   private version = 0;
   private seenVersion = 0;
   private replanQueue: number[] = [];
+  private readonly pace: number;
 
-  constructor({ graph, agentCount, seed = 1, centrality }: RoadSimOptions) {
+  constructor({ graph, agentCount, seed = 1, centrality, pace = 1 }: RoadSimOptions) {
     this.graph = graph;
     this.blocked = new Uint8Array(graph.edges.length);
     this.rng = createRng(seed);
+    this.pace = pace;
     this.weights = graph.nodes.map((_, i) => 0.25 + (centrality?.[i] ?? 0));
     this.weightTotal = this.weights.reduce((a, b) => a + b, 0);
     for (let i = 0; i < agentCount; i++) this.agents.push(this.spawn());
@@ -208,7 +212,7 @@ export class RoadSim {
       from,
       to: first.to,
       t: this.rng(),
-      speed: 8 + this.rng() * 9,
+      speed: (8 + this.rng() * 9) * this.pace,
       path: [],
       pathIndex: 0,
       dest: from,

@@ -5,8 +5,8 @@ import { LazyHeroCanvas } from './lazy-hero-canvas';
 import { HeroFallback } from './hero-fallback';
 
 /**
- * Home hero. The static SVG and the text render on the server, so the largest contentful paint
- * never waits for the canvas. The canvas fades in over the SVG once it is running.
+ * Home hero. The static depth stack and the text render on the server, so the largest contentful
+ * paint never waits for the canvas. The canvas only fades in floods and agents on those same sheets.
  */
 export function Hero() {
   return (
@@ -44,11 +44,6 @@ export function Hero() {
             {t.hero.secondaryCta}
           </ButtonLink>
         </div>
-        <p className="label-mono mt-10 flex items-center gap-2.5 text-muted">
-          <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full bg-flood" />
-          {t.hero.legend}
-          <span className="hidden text-muted md:inline">· {t.hero.legendHint}</span>
-        </p>
       </div>
     </section>
   );
