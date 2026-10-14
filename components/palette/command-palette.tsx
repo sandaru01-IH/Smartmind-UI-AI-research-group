@@ -49,7 +49,12 @@ export function CommandPalette({
   const [active, setActive] = useState(0);
   // Pages are known up front. News, publications and team are fetched the first time the palette opens.
   const [items, setItems] = useState<PaletteItem[]>(() =>
-    pages.map((p) => ({ id: `page:${p.href}`, group: 'pages' as const, label: p.label, href: p.href })),
+    pages.map((p) => ({
+      id: `page:${p.href}`,
+      group: 'pages' as const,
+      label: p.label,
+      href: p.href,
+    })),
   );
   const loading = useRef(false);
 
@@ -70,7 +75,9 @@ export function CommandPalette({
     if (!loading.current) {
       loading.current = true;
       fetch('/search-index.json')
-        .then((r) => (r.ok ? (r.json() as Promise<PaletteItem[]>) : Promise.reject(new Error(String(r.status)))))
+        .then((r) =>
+          r.ok ? (r.json() as Promise<PaletteItem[]>) : Promise.reject(new Error(String(r.status))),
+        )
         .then(setItems)
         .catch(() => {
           loading.current = false;

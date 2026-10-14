@@ -16,9 +16,9 @@ export interface Agent {
   dest: number;
 }
 
-interface Flood {
-  x: number;
-  y: number;
+/** A road the pointer has selected. It and the roads joined to its two ends are flooded. */
+export interface Selection {
+  edge: number;
   age: number;
 }
 
@@ -45,14 +45,15 @@ function segmentDistSq(
   return (px - cx) ** 2 + (py - cy) ** 2;
 }
 
-const FLOOD_LIFE = 3.2; // seconds a ripple stays flooded
-const FLOOD_RADIUS = 13; // world units, where the world is 100 units tall
+export const SELECT_LIFE = 2.6; // seconds a selected road stays flooded
+const PICK_RADIUS = 7; // how close the pointer must be to a road to select it (world units, 100 tall)
+const MAX_SELECTIONS = 6;
 const REPLAN_BUDGET = 40; // agents re-planned per step, to keep frames short
 
 export class RoadSim {
   readonly graph: Graph;
   agents: Agent[] = [];
-  floods: Flood[] = [];
+  selections: Selection[] = [];
   /** 1 where an edge is currently flooded. */
   readonly blocked: Uint8Array;
   blockedCount = 0;
@@ -73,10 +74,6 @@ export class RoadSim {
     for (let i = 0; i < agentCount; i++) this.agents.push(this.spawn());
   }
 
-  get floodRadius(): number {
-    return FLOOD_RADIUS;
-  }
-
   isBlocked(edge: number): boolean {
     return this.blocked[edge] === 1;
   }
@@ -91,24 +88,44 @@ export class RoadSim {
     return shortestPath(this.graph, a.to, a.dest, this.blocked) !== null;
   }
 
-  /** Raise a flood ripple at a world position. Nearby ripples are refreshed, not stacked. */
-  addFlood(x: number, y: number): void {
-    const merge = FLOOD_RADIUS * 0.4;
-    for (const f of this.floods) {
-      if ((f.x - x) ** 2 + (f.y - y) ** 2 < merge * merge) {
-        f.age = 0;
-        f.x = x;
-        f.y = y;
-        return;
+  /** The road nearest to a world position, if one is within reach. */
+  nearestEdge(x: number, y: number): number {
+    const { nodes, edges } = this.graph;
+    let best = -1;
+    let bestDist = PICK_RADIUS * PICK_RADIUS;
+    for (let i = 0; i < edges.length; i++) {
+      const d = segmentDistSq(x, y, nodes[edges[i].a], nodes[edges[i].b]);
+      if (d < bestDist) {
+        bestDist = d;
+        best = i;
       }
     }
-    if (this.floods.length < 24) this.floods.push({ x, y, age: 0 });
+    return best;
   }
 
-  floodRadiusAt(f: Flood): number {
-    const life = Math.max(0, 1 - f.age / FLOOD_LIFE);
-    const grow = Math.min(1, f.age / 0.18 + 0.35);
-    return FLOOD_RADIUS * grow * Math.sqrt(life);
+  /**
+   * Select the road nearest to a world position. That road and the roads joined to its ends are
+   * flooded for a moment, so agents reroute around the whole connected stretch. Pointing at a
+   * selected road again keeps it flooded; pointing at empty space does nothing.
+   */
+  addFlood(x: number, y: number): void {
+    const edge = this.nearestEdge(x, y);
+    if (edge === -1) return;
+    const existing = this.selections.find((s) => s.edge === edge);
+    if (existing) {
+      existing.age = 0;
+      return;
+    }
+    if (this.selections.length >= MAX_SELECTIONS) this.selections.shift();
+    this.selections.push({ edge, age: 0 });
+  }
+
+  /** Roads flooded because of one selection: the road itself plus the roads at both of its ends. */
+  connectedEdges(edge: number): number[] {
+    const e = this.graph.edges[edge];
+    const out = new Set<number>([edge]);
+    for (const end of [e.a, e.b]) for (const link of this.graph.adj[end]) out.add(link.edge);
+    return Array.from(out);
   }
 
   setAgentCount(count: number): void {
@@ -129,27 +146,20 @@ export class RoadSim {
 
   // ---------------------------------------------------------------- floods
   private updateFloods(dt: number): void {
-    for (const f of this.floods) f.age += dt;
-    this.floods = this.floods.filter((f) => f.age < FLOOD_LIFE);
+    for (const s of this.selections) s.age += dt;
+    this.selections = this.selections.filter((s) => s.age < SELECT_LIFE);
+
+    const next = new Uint8Array(this.blocked.length);
+    for (const s of this.selections) for (const i of this.connectedEdges(s.edge)) next[i] = 1;
 
     let changed = false;
     let count = 0;
-    const { nodes, edges } = this.graph;
-    for (let i = 0; i < edges.length; i++) {
-      const e = edges[i];
-      let hit = 0;
-      for (const f of this.floods) {
-        const r = this.floodRadiusAt(f);
-        if (segmentDistSq(f.x, f.y, nodes[e.a], nodes[e.b]) <= r * r) {
-          hit = 1;
-          break;
-        }
-      }
-      if (hit !== this.blocked[i]) {
-        this.blocked[i] = hit;
+    for (let i = 0; i < next.length; i++) {
+      if (next[i] !== this.blocked[i]) {
+        this.blocked[i] = next[i];
         changed = true;
       }
-      count += hit;
+      count += next[i];
     }
     this.blockedCount = count;
     if (changed) this.version += 1;

@@ -36,7 +36,7 @@ const en = {
   hero: {
     eyebrow: 'GeoAI network · Urban Simulation Lab',
     legend: 'agents rerouting around flooded roads',
-    legendHint: 'Move across the map to flood roads.',
+    legendHint: 'Point at a road to flood it and the roads joined to it.',
     fallbackLabel: 'A road network drawn as nodes and links. Larger nodes carry more routes.',
     simulationLabel:
       'Road network simulation. Agents travel along roads and reroute around flooded sections.',

@@ -18,7 +18,12 @@ export interface SearchEntry {
 export async function buildSearchIndex(): Promise<SearchEntry[]> {
   const { posts } = await listPosts({ type: 'article', limit: 50 });
   return [
-    ...PAGE_INDEX.map((p) => ({ id: `page:${p.href}`, group: 'pages' as const, label: p.label, href: p.href })),
+    ...PAGE_INDEX.map((p) => ({
+      id: `page:${p.href}`,
+      group: 'pages' as const,
+      label: p.label,
+      href: p.href,
+    })),
     ...posts.map((p) => ({
       id: `news:${p.slug}`,
       group: 'news' as const,

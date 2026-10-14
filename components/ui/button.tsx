@@ -6,7 +6,15 @@ import { t } from '@/content/strings';
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
 const base =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-sharp px-5 py-2.5 font-sans text-[0.95rem] font-semibold leading-none transition-[background-color,transform,opacity] duration-150 active:translate-y-px disabled:pointer-events-none disabled:opacity-50';
+  'inline-flex min-h-11 items-center justify-center gap-2 rounded-sharp font-sans text-[0.95rem] font-semibold leading-none transition-[background-color,transform,opacity] duration-150 active:translate-y-px disabled:pointer-events-none disabled:opacity-50';
+
+type Size = 'md' | 'sm' | 'icon';
+
+const sizes: Record<Size, string> = {
+  md: 'px-5 py-2.5',
+  sm: 'px-3 py-2.5',
+  icon: 'h-11 w-11 shrink-0 p-0',
+};
 
 const variants: Record<Variant, string> = {
   primary: 'bg-signal text-signal-fg hover:brightness-95',
@@ -15,8 +23,8 @@ const variants: Record<Variant, string> = {
   danger: 'border border-danger text-danger hover:bg-surface-2',
 };
 
-export function buttonClass(variant: Variant = 'primary', extra = ''): string {
-  return `${base} ${variants[variant]} ${extra}`.trim();
+export function buttonClass(variant: Variant = 'primary', extra = '', size: Size = 'md'): string {
+  return `${base} ${sizes[size]} ${variants[variant]} ${extra}`.trim();
 }
 
 type LinkProps = {

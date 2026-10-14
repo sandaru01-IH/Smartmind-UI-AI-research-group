@@ -152,6 +152,41 @@ describe('RoadSim', () => {
     for (let i = 0; i < 60 * 8; i++) sim.step(1 / 60);
     expect(sim.blockedCount).toBe(0);
   });
+  it('selects the nearest road and floods the roads joined to it', () => {
+    const sim = make();
+    const edge = 10;
+    const e = sim.graph.edges[edge];
+    const mid = {
+      x: (sim.graph.nodes[e.a].x + sim.graph.nodes[e.b].x) / 2,
+      y: (sim.graph.nodes[e.a].y + sim.graph.nodes[e.b].y) / 2,
+    };
+    sim.addFlood(mid.x, mid.y);
+    sim.step(1 / 60);
+    expect(sim.selections.map((s) => s.edge)).toEqual([sim.nearestEdge(mid.x, mid.y)]);
+    const selected = sim.selections[0].edge;
+    const connected = sim.connectedEdges(selected);
+    expect(connected.length).toBeGreaterThan(1);
+    for (const i of connected) expect(sim.isBlocked(i)).toBe(true);
+    expect(sim.blockedCount).toBe(connected.length);
+  });
+  it('ignores a pointer that is far from every road', () => {
+    const sim = make();
+    sim.addFlood(-500, -500);
+    sim.step(1 / 60);
+    expect(sim.selections).toHaveLength(0);
+    expect(sim.blockedCount).toBe(0);
+  });
+  it('keeps a selection alive while the pointer stays on the road', () => {
+    const sim = make();
+    const n = sim.graph.nodes[5];
+    sim.addFlood(n.x, n.y);
+    for (let i = 0; i < 60 * 4; i++) {
+      if (i % 30 === 0) sim.addFlood(n.x, n.y);
+      sim.step(1 / 60);
+    }
+    expect(sim.blockedCount).toBeGreaterThan(0);
+    expect(sim.selections).toHaveLength(1);
+  });
   it('never routes an agent into a flooded edge it can avoid', () => {
     const sim = make(120);
     const c = sim.graph.nodes[Math.floor(sim.graph.nodes.length / 2)];

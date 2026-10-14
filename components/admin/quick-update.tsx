@@ -116,24 +116,27 @@ export function QuickUpdate() {
             altError={state.fieldErrors?.cover_alt?.[0]}
             name="cover"
           />
-        ) : (
-          <button
-            type="button"
-            onClick={() => setShowImage(true)}
-            className="min-h-11 text-[0.95rem] underline underline-offset-4"
-          >
-            Add an image
-          </button>
-        )}
+        ) : null}
         {/* The uploader writes cover_path and cover_alt as hidden inputs named cover_path / cover_alt. */}
-        <button
-          type="submit"
-          disabled={pending || headline.trim().length < 3}
-          className={buttonClass('primary')}
-        >
-          {pending ? <Loader2 size={16} aria-hidden="true" className="animate-spin" /> : null}
-          Publish update
-        </button>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          <button
+            type="submit"
+            disabled={pending || headline.trim().length < 3}
+            className={buttonClass('primary')}
+          >
+            {pending ? <Loader2 size={16} aria-hidden="true" className="animate-spin" /> : null}
+            Publish update
+          </button>
+          {showImage ? null : (
+            <button
+              type="button"
+              onClick={() => setShowImage(true)}
+              className="min-h-11 text-[0.95rem] underline underline-offset-4"
+            >
+              Add an image
+            </button>
+          )}
+        </div>
       </form>
     </section>
   );

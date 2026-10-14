@@ -4,7 +4,7 @@ import { PostsTable, type AdminRow } from '@/components/admin/posts-table';
 import { QuickUpdate } from '@/components/admin/quick-update';
 import { buttonClass } from '@/components/ui/button';
 import { requireAdmin } from '@/lib/auth/require-admin';
-import { formatDate } from '@/lib/format';
+import { formatDateShort } from '@/lib/format';
 import { adminList, adminStats } from '@/lib/posts/admin';
 import { hasTbcFlag, type AdminListQuery } from '@/lib/posts/types';
 import { CATEGORIES } from '@/lib/schemas';
@@ -53,11 +53,13 @@ export default async function Dashboard({ searchParams }: { searchParams: Search
             ['Published', String(stats.published)],
             ['Scheduled', String(stats.scheduled)],
             ['Drafts', String(stats.drafts)],
-            ['Last update', stats.lastUpdated ? formatDate(stats.lastUpdated) : 'None yet'],
+            ['Last update', stats.lastUpdated ? formatDateShort(stats.lastUpdated) : 'None yet'],
           ].map(([label, value]) => (
             <div key={label} className="bg-surface p-4">
               <dt className="label-mono text-muted">{label}</dt>
-              <dd className="numeral mt-2 text-3xl">{value}</dd>
+              <dd className={`numeral mt-2 ${label === 'Last update' ? 'text-xl' : 'text-3xl'}`}>
+                {value}
+              </dd>
             </div>
           ))}
         </dl>

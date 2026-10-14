@@ -5,7 +5,7 @@ import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
 import { betweenness } from '@/lib/sim/centrality';
 import { generateGraph } from '@/lib/sim/graph';
 import { HERO_SEED } from '@/lib/sim/static-network';
-import { RoadSim } from '@/lib/sim/sim';
+import { RoadSim, SELECT_LIFE } from '@/lib/sim/sim';
 
 interface Palette {
   road: string;
@@ -141,34 +141,33 @@ export function HeroCanvas({ onReady }: { onReady?: () => void }) {
       ctx.scale(dpr, dpr);
       const g = sim.graph;
 
-      // Flooded roads
+      // Selected roads. The road the pointer is on is drawn heavier; the roads joined to it are
+      // flooded too and drawn lighter. Both fade out together as the selection expires.
       ctx.lineCap = 'round';
       ctx.strokeStyle = palette.flood;
-      ctx.lineWidth = Math.max(1.4, scale * 0.5);
-      ctx.globalAlpha = 0.95;
-      ctx.beginPath();
-      for (let i = 0; i < g.edges.length; i++) {
-        if (!sim.blocked[i]) continue;
-        const e = g.edges[i];
-        ctx.moveTo(g.nodes[e.a].x * scale, g.nodes[e.a].y * scale);
-        ctx.lineTo(g.nodes[e.b].x * scale, g.nodes[e.b].y * scale);
-      }
-      ctx.stroke();
-
-      // Ripples
-      for (const f of sim.floods) {
-        const r = sim.floodRadiusAt(f) * scale;
-        if (r < 1) continue;
-        const life = 1 - f.age / 3.2;
-        ctx.globalAlpha = 0.18 * life;
-        ctx.fillStyle = palette.flood;
-        ctx.beginPath();
-        ctx.arc(f.x * scale, f.y * scale, r, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.globalAlpha = 0.5 * life;
-        ctx.strokeStyle = palette.flood;
-        ctx.lineWidth = 1;
-        ctx.stroke();
+      ctx.fillStyle = palette.flood;
+      for (const sel of sim.selections) {
+        const fade = 1 - Math.pow(sel.age / SELECT_LIFE, 2);
+        const line = (i: number, width: number, alpha: number) => {
+          const e = g.edges[i];
+          ctx.globalAlpha = alpha * fade;
+          ctx.lineWidth = width;
+          ctx.beginPath();
+          ctx.moveTo(g.nodes[e.a].x * scale, g.nodes[e.a].y * scale);
+          ctx.lineTo(g.nodes[e.b].x * scale, g.nodes[e.b].y * scale);
+          ctx.stroke();
+        };
+        for (const i of sim.connectedEdges(sel.edge)) {
+          if (i !== sel.edge) line(i, Math.max(1.2, scale * 0.38), 0.75);
+        }
+        line(sel.edge, Math.max(2, scale * 0.6), 1);
+        const e = g.edges[sel.edge];
+        ctx.globalAlpha = fade;
+        for (const n of [g.nodes[e.a], g.nodes[e.b]]) {
+          ctx.beginPath();
+          ctx.arc(n.x * scale, n.y * scale, Math.max(2.5, scale * 0.75), 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
 
       // Agents

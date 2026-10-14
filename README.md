@@ -47,18 +47,18 @@ Sign in at <http://localhost:3000/admin>. There is no public sign-up anywhere: a
 
 ## Scripts
 
-| Command                        | What it does                                                                 |
-| ------------------------------ | ---------------------------------------------------------------------------- |
-| `npm run dev`                  | Dev server.                                                                  |
-| `npm run build` / `start`      | Production build and server.                                                 |
-| `npm run lint`                 | ESLint.                                                                      |
-| `npm run typecheck`            | TypeScript, strict.                                                          |
-| `npm run format:check`         | Prettier.                                                                    |
-| `npm test`                     | Vitest: unit tests, contrast checks, content checks, RLS and security tests. |
-| `npm run e2e`                  | Builds, then runs the Playwright suite (needs local Supabase running).       |
-| `npm run seed`                 | Upserts the seed posts (service role).                                       |
-| `npm run create-admin -- EMAIL`| Creates or resets an admin (service role).                                   |
-| `npm run screenshots`          | Screenshots of every route at 390, 768 and 1440 px, dark and light.          |
+| Command                         | What it does                                                                 |
+| ------------------------------- | ---------------------------------------------------------------------------- |
+| `npm run dev`                   | Dev server.                                                                  |
+| `npm run build` / `start`       | Production build and server.                                                 |
+| `npm run lint`                  | ESLint.                                                                      |
+| `npm run typecheck`             | TypeScript, strict.                                                          |
+| `npm run format:check`          | Prettier.                                                                    |
+| `npm test`                      | Vitest: unit tests, contrast checks, content checks, RLS and security tests. |
+| `npm run e2e`                   | Builds, then runs the Playwright suite (needs local Supabase running).       |
+| `npm run seed`                  | Upserts the seed posts (service role).                                       |
+| `npm run create-admin -- EMAIL` | Creates or resets an admin (service role).                                   |
+| `npm run screenshots`           | Screenshots of every route at 390, 768 and 1440 px, dark and light.          |
 
 The RLS tests in `npm test` talk to the local Supabase and skip themselves when it is not running. They prove that anonymous visitors read only live posts and write nothing, that a signed-in non-admin cannot write, and that an admin can run the full lifecycle.
 

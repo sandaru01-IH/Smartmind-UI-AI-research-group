@@ -40,7 +40,7 @@ export default function LoginPage({ searchParams }: { searchParams: SearchParams
         <p className="flex items-center gap-2.5 font-display text-lg font-semibold">
           <LogoMark size={24} /> Smartmind
         </p>
-        <h1 className="mt-6 text-3xl">Admin sign-in</h1>
+        <h1 className="mt-6 text-2xl">Admin sign-in</h1>
         <p className="mt-2 text-[0.95rem] text-muted">
           For the team that publishes news. There is no public sign-up.
         </p>

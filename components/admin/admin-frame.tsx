@@ -24,7 +24,7 @@ export function AdminFrame({ email, children }: { email: string; children: React
             Smartmind <span className="label-mono text-muted">Admin</span>
           </Link>
           <nav aria-label="Admin" className="flex items-center gap-1">
-            <Link href="/admin/posts/new" className={buttonClass('primary', 'min-h-11 px-3')}>
+            <Link href="/admin/posts/new" className={buttonClass('primary', '', 'sm')}>
               <Plus size={16} aria-hidden="true" />
               <span className="hidden sm:inline">New post</span>
               <span className="sm:hidden">New</span>
@@ -32,7 +32,7 @@ export function AdminFrame({ email, children }: { email: string; children: React
             <Link
               href="/"
               target="_blank"
-              className={buttonClass('ghost', 'px-3')}
+              className={buttonClass('ghost', '', 'sm')}
               aria-label="View the public site (opens in a new tab)"
             >
               <ExternalLink size={16} aria-hidden="true" />
@@ -40,7 +40,7 @@ export function AdminFrame({ email, children }: { email: string; children: React
             </Link>
             <ThemeToggle />
             <form action={logoutAction}>
-              <button type="submit" className={buttonClass('ghost', 'px-3')}>
+              <button type="submit" className={buttonClass('ghost', '', 'sm')}>
                 <LogOut size={16} aria-hidden="true" />
                 <span className="sr-only sm:not-sr-only">Sign out</span>
               </button>

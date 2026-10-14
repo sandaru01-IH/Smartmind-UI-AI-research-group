@@ -16,7 +16,11 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <SiteHeader />
       <Suspense
         fallback={
-          <div aria-hidden="true" className="border-b border-line bg-surface" style={{ height: 'var(--ticker-h)' }} />
+          <div
+            aria-hidden="true"
+            className="border-b border-line bg-surface"
+            style={{ height: 'var(--ticker-h)' }}
+          />
         }
       >
         <Ticker />

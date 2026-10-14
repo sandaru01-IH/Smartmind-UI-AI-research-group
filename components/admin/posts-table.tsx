@@ -55,7 +55,7 @@ export function PostsTable({ rows }: { rows: AdminRow[] }) {
     return <p className="border border-line p-6 text-muted">No posts match these filters.</p>;
   }
 
-  const iconBtn = buttonClass('ghost', 'h-11 w-11 min-h-11 px-0');
+  const iconBtn = buttonClass('ghost', '', 'icon');
 
   return (
     <>
