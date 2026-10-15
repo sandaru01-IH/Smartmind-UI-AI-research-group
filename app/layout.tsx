@@ -21,8 +21,8 @@ const sans = Instrument_Sans({
 const mono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-jetbrains',
-  // Labels only. `optional` never swaps in late, so wide fallback letters cannot wrap and then reflow.
-  display: 'optional',
+  // Always load the real font, so years and labels look the same on every visit. The fallback in --font-mono is Courier New, which has the same letter width, so nothing reflows when the font arrives.
+  display: 'swap',
   weight: ['400', '500'],
 });
 
