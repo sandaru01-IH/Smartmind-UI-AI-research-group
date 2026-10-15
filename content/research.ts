@@ -19,7 +19,7 @@ export interface ResearchTheme {
 export const THEMES: ResearchTheme[] = [
   {
     id: 'land',
-    title: 'Land use and population',
+    title: 'Urban Science',
     colourVar: '--landslide',
     inkVar: '--landslide-ink',
     projects: [
@@ -30,7 +30,7 @@ export const THEMES: ResearchTheme[] = [
   },
   {
     id: 'flood',
-    title: 'Flood',
+    title: 'Disaster Management',
     colourVar: '--flood',
     inkVar: '--flood-ink',
     projects: [
@@ -49,7 +49,7 @@ export const THEMES: ResearchTheme[] = [
   },
   {
     id: 'traffic',
-    title: 'Traffic and transport',
+    title: 'Transport & Mobility Systems',
     colourVar: '--traffic',
     inkVar: '--traffic-ink',
     projects: [

@@ -2,10 +2,9 @@
 
 import { useEffect, useId, useState } from 'react';
 import { ImagePlus, Loader2, Trash2 } from 'lucide-react';
-import { finalizeUploadAction, requestUploadAction } from '@/app/admin/actions';
-import { IMAGE_TYPES, MAX_IMAGE_BYTES } from '@/lib/schemas';
-import { createUploadClient } from '@/lib/supabase/browser-client';
+import { IMAGE_TYPES } from '@/lib/schemas';
 import { mediaUrl } from '@/lib/supabase/env';
+import { uploadImage } from './upload-client';
 
 export interface CoverValue {
   path: string | null;
@@ -25,12 +24,14 @@ export function ImageUploader({
   onError,
   altError,
   name = 'cover',
+  noun = 'cover image',
 }: {
   value: CoverValue;
   onChange: (next: CoverValue) => void;
   onError: (message: string) => void;
   altError?: string;
   name?: string;
+  noun?: string;
 }) {
   const inputId = useId();
   const altId = useId();
@@ -49,28 +50,12 @@ export function ImageUploader({
 
   async function choose(file: File | undefined) {
     if (!file) return;
-    if (!(IMAGE_TYPES as readonly string[]).includes(file.type))
-      return onError('Use a JPEG, PNG or WebP image.');
-    if (file.size > MAX_IMAGE_BYTES) return onError('Images must be 5 MB or smaller.');
     setBusy(true);
-    try {
-      const req = await requestUploadAction({ type: file.type, size: file.size });
-      if (!req.ok) return onError(req.message);
-      const client = createUploadClient();
-      if (!client) return onError('Storage is not configured.');
-      const up = await client.storage
-        .from('media')
-        .uploadToSignedUrl(req.data.path, req.data.token, file, { contentType: file.type });
-      if (up.error) return onError('The upload failed. Try again.');
-      const done = await finalizeUploadAction(req.data.path);
-      if (!done.ok) return onError(done.message);
-      setPreview(URL.createObjectURL(file));
-      onChange({ path: done.data.path, alt: value.alt });
-    } catch {
-      onError('The upload failed. Try again.');
-    } finally {
-      setBusy(false);
-    }
+    const res = await uploadImage(file);
+    setBusy(false);
+    if (!res.ok) return onError(res.message);
+    setPreview(URL.createObjectURL(file));
+    onChange({ path: res.path, alt: value.alt });
   }
 
   return (
@@ -96,7 +81,7 @@ export function ImageUploader({
           ) : (
             <ImagePlus size={16} aria-hidden="true" />
           )}
-          {value.path ? 'Replace image' : 'Add cover image'}
+          {value.path ? 'Replace image' : `Add ${noun}`}
           <input
             id={inputId}
             type="file"

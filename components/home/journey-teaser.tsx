@@ -2,7 +2,7 @@ import { MILESTONES } from '@/content/chatbots';
 import { confirmedOnly } from '@/content/types';
 import { Reveal } from '@/components/ui/reveal';
 
-/** Home teaser. Confirmed milestones only: LinkedIn-sourced items stay on /chatbots with their flag. */
+/** Home teaser. Confirmed milestones only: LinkedIn-sourced items stay on the research page with their flag. */
 export function JourneyTeaser() {
   const items = confirmedOnly(MILESTONES);
   return (

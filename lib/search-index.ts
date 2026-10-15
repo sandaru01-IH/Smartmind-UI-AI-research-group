@@ -1,9 +1,8 @@
 import 'server-only';
 import { PAGE_INDEX } from '@/components/layout/nav-items';
 import { CHATBOT_PAPERS, LAB_PAPERS } from '@/content/publications';
-import { TEAM } from '@/content/team';
-import { confirmedOnly } from '@/content/types';
 import { listPosts } from '@/lib/posts/public';
+import { getTeamNetwork } from '@/lib/team/public';
 
 export interface SearchEntry {
   id: string;
@@ -16,7 +15,10 @@ export interface SearchEntry {
 
 /** Everything the command palette can find: pages, live news, publications and team. */
 export async function buildSearchIndex(): Promise<SearchEntry[]> {
-  const { posts } = await listPosts({ type: 'article', limit: 50 });
+  const [{ posts }, { members }] = await Promise.all([
+    listPosts({ type: 'article', limit: 50 }),
+    getTeamNetwork(),
+  ]);
   return [
     ...PAGE_INDEX.map((p) => ({
       id: `page:${p.href}`,
@@ -45,7 +47,7 @@ export async function buildSearchIndex(): Promise<SearchEntry[]> {
           ]
         : [],
     ),
-    ...confirmedOnly(TEAM).map((m) => ({
+    ...members.map((m) => ({
       id: `team:${m.slug}`,
       group: 'team' as const,
       label: m.name,

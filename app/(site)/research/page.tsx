@@ -1,16 +1,19 @@
+import { ArchitectureDiagram } from '@/components/chatbots/architecture-diagram';
+import { JourneyTimeline } from '@/components/chatbots/journey-timeline';
 import { ResearchBento } from '@/components/research/research-bento';
 import { ExternalLink } from '@/components/ui/external-link';
 import { PageHeader } from '@/components/ui/page-header';
 import { Section } from '@/components/ui/section';
 import { Tag, TbcFlag } from '@/components/ui/tag';
 import { LINKS } from '@/content/brand';
+import { CHATBOT_PHILOSOPHY, MILESTONES } from '@/content/chatbots';
 import { FOURONSE, SRC_FUNDED_COUNT, WIDER_TOPICS } from '@/content/research';
 import { pageMeta } from '@/lib/seo';
 
 export const metadata = pageMeta({
   title: 'Research',
   description:
-    'Four research themes from the Urban Simulation Lab: land use and population, flood, traffic and transport, and AI and machine learning.',
+    'Four research themes from the Urban Simulation Lab: urban science, disaster management, transport and mobility systems, and AI and machine learning. Plus the Smartmind chatbot journey.',
   path: '/research',
 });
 
@@ -28,8 +31,35 @@ export default function ResearchPage() {
       </Section>
 
       <Section
-        id="wider"
+        id="journey"
         numeral="02"
+        title="The journey of Smartmind"
+        lead="Research turned into chatbots: urban-planning Q&A in 2023, flood and landslide warnings in 2026."
+      >
+        <JourneyTimeline milestones={MILESTONES} />
+        <div className="mt-20 md:mt-28">
+          <h3 className="text-2xl md:text-3xl">How the 2026 chatbot is built</h3>
+          <p className="mt-4 max-w-[60ch] text-muted">
+            A WhatsApp-based, multilingual, multi-agent design. It gives residents preparedness
+            guidance and lets planners interpret risk-sensitive zoning.
+          </p>
+          <div className="mt-8">
+            <ArchitectureDiagram />
+          </div>
+        </div>
+        <figure className="mt-20 md:mt-28">
+          <blockquote className="max-w-[24ch] font-display text-3xl leading-tight tracking-tight md:text-5xl">
+            {CHATBOT_PHILOSOPHY.statement}
+          </blockquote>
+          <figcaption className="mt-6 max-w-[56ch] text-lg text-muted">
+            {CHATBOT_PHILOSOPHY.invitation}
+          </figcaption>
+        </figure>
+      </Section>
+
+      <Section
+        id="wider"
+        numeral="03"
         title="Wider topics in the department"
         lead="The department’s ongoing research page names seven further topics."
       >
@@ -53,7 +83,7 @@ export default function ResearchPage() {
         </p>
       </Section>
 
-      <Section id="4onse" numeral="03" title={FOURONSE.name}>
+      <Section id="4onse" numeral="04" title={FOURONSE.name}>
         <article className="grid-12 gap-y-6 border border-line bg-surface p-6 md:p-10">
           <div className="col-span-12 flex flex-wrap items-center gap-3">
             <Tag>Weather station</Tag>

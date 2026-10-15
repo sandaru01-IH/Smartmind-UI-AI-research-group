@@ -39,6 +39,8 @@ function refreshPublic(slugs: string[] = []): void {
   for (const slug of new Set(slugs)) updateTag(`post:${slug}`);
   revalidatePath('/');
   revalidatePath('/news');
+  revalidatePath('/gallery');
+  updateTag('gallery');
   revalidatePath('/sitemap.xml');
   for (const slug of new Set(slugs)) revalidatePath(`/news/${slug}`);
 }
@@ -182,6 +184,8 @@ export async function quickUpdateAction(
       cover_path: q.cover_path,
       cover_alt: q.cover_alt,
       link_url: q.link_url,
+      show_in_news: false,
+      show_in_ticker: true,
       status: 'published',
       published_at: new Date().toISOString(),
     });

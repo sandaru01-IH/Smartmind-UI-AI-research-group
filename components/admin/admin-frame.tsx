@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { ExternalLink, LogOut, Plus } from 'lucide-react';
+import { ExternalLink, LogOut, Plus, Users } from 'lucide-react';
 import { logoutAction } from '@/app/admin/actions';
 import { LogoMark } from '@/components/brand/logo';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
@@ -28,6 +28,11 @@ export function AdminFrame({ email, children }: { email: string; children: React
               <Plus size={16} aria-hidden="true" />
               <span className="hidden sm:inline">New post</span>
               <span className="sm:hidden">New</span>
+            </Link>
+            <Link href="/admin/team" className={buttonClass('ghost', '', 'sm')}>
+              <Users size={16} aria-hidden="true" />
+              <span className="hidden sm:inline">Team</span>
+              <span className="sr-only sm:hidden">Team</span>
             </Link>
             <Link
               href="/"

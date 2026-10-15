@@ -1,26 +1,31 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { Hero } from '@/components/hero/hero';
-import { CollaborateCta } from '@/components/home/collaborate-cta';
+import { ContactBeacon } from '@/components/home/contact-beacon';
 import { JourneyTeaser } from '@/components/home/journey-teaser';
-import { LatestBento } from '@/components/home/latest-bento';
+import { LatestSection } from '@/components/home/latest-bento';
 import { NumbersStrip } from '@/components/home/numbers-strip';
-import { PartnersInline } from '@/components/home/partners-wall';
 import { ResearchBento } from '@/components/research/research-bento';
 import { ButtonLink } from '@/components/ui/button';
 import { Section } from '@/components/ui/section';
 import { JsonLd } from '@/components/seo/json-ld';
 import { BRAND, LINKS, SITE_URL, UNIVERSITY_CONTACT } from '@/content/brand';
-import { PARTNERS } from '@/content/partners';
+import { getNumbers } from '@/content/numbers';
 import { t } from '@/content/strings';
+import { getTeamNetwork } from '@/lib/team/public';
 
 export const metadata: Metadata = {
   title: {
     absolute: `${BRAND.name}, GeoAI for urban simulation | ${BRAND.lab}, ${BRAND.university}`,
   },
-  description: `${BRAND.name} is a GeoAI network of Town & Country Planning alumni and students at the ${BRAND.university}. Research on flood, land use, traffic and AI, and chatbots for planners and residents.`,
+  description: `${BRAND.name} is a GeoAI network of Town & Country Planning alumni and students at the ${BRAND.university}. Research on urban science, disaster management, transport and mobility systems, and AI.`,
   alternates: { canonical: '/' },
 };
+
+async function Numbers() {
+  const { members } = await getTeamNetwork();
+  return <NumbersStrip stats={getNumbers(members.length)} />;
+}
 
 export default function HomePage() {
   return (
@@ -50,21 +55,22 @@ export default function HomePage() {
       />
       <Hero />
 
-      <Section id="latest" numeral="01" title={t.home.latest} lead={t.home.latestLead}>
-        <Suspense
-          fallback={<div className="h-96 border border-line bg-surface" aria-hidden="true" />}
-        >
-          <LatestBento />
-        </Suspense>
-      </Section>
+      {/* Appears only once the admin has published news; renders nothing before that. */}
+      <Suspense fallback={null}>
+        <LatestSection />
+      </Suspense>
 
-      <Section id="numbers" numeral="02" title={t.home.numbers}>
-        <NumbersStrip />
+      <Section id="numbers" numeral="01" title={t.home.numbers}>
+        <Suspense
+          fallback={<div className="h-44 border border-line bg-surface" aria-hidden="true" />}
+        >
+          <Numbers />
+        </Suspense>
       </Section>
 
       <Section
         id="research"
-        numeral="03"
+        numeral="02"
         title={t.home.researchTitle}
         lead={t.home.researchLead}
         action={
@@ -77,36 +83,22 @@ export default function HomePage() {
       </Section>
 
       <Section
-        id="chatbots"
-        numeral="04"
-        title={t.home.chatbotsTitle}
-        lead={t.home.chatbotsLead}
+        id="journey"
+        numeral="03"
+        title={t.home.journeyTitle}
+        lead={t.home.journeyLead}
         action={
-          <ButtonLink href="/chatbots" variant="secondary">
-            {t.home.chatbotsCta}
+          <ButtonLink href="/research#journey" variant="secondary">
+            {t.home.journeyCta}
           </ButtonLink>
         }
       >
         <JourneyTeaser />
       </Section>
 
-      <Section
-        id="partners"
-        numeral="05"
-        title={`${PARTNERS.length} ${t.home.partnersTitle.toLowerCase()}`}
-        lead={t.home.partnersLead}
-        action={
-          <ButtonLink href="/partners" variant="secondary">
-            {t.nav.partners}
-          </ButtonLink>
-        }
-      >
-        <PartnersInline />
-      </Section>
-
-      <section className="border-t border-line py-16 md:py-24">
+      <section id="contact" className="border-t border-line py-16 md:py-24">
         <div className="container-site">
-          <CollaborateCta />
+          <ContactBeacon />
         </div>
       </section>
     </>

@@ -1,9 +1,9 @@
-import { getLatestUpdates } from '@/lib/posts/public';
+import { getTickerItems } from '@/lib/posts/public';
 import { TickerView } from './ticker-view';
 
-/** Newest short updates for the ticker. Cached and tagged, refreshed when an admin publishes. */
+/** Items the admin flagged for the "now" ticker. Cached and tagged, refreshed when an admin publishes. */
 export async function Ticker() {
-  const updates = await getLatestUpdates(8);
+  const updates = await getTickerItems(8);
   const items = updates.map((u) => ({
     id: u.id,
     title: u.title,

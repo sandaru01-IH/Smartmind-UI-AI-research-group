@@ -43,7 +43,7 @@ async function Listing({ searchParams }: { searchParams: SearchParams }) {
   const [{ categories, tags }, featured, { posts }] = await Promise.all([
     getFilterOptions(),
     filtered ? Promise.resolve(null) : getFeaturedPost(),
-    listPosts({ type: 'article', category, tag, limit: limit + 2 }),
+    listPosts({ type: 'article', news: true, category, tag, limit: limit + 2 }),
   ]);
   const rest = posts.filter((p) => p.id !== featured?.id);
   const shown = rest.slice(0, limit);

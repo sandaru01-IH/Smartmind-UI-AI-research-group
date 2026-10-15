@@ -2,7 +2,7 @@
 
 The website of **Smartmind**, a GeoAI research network of Town & Country Planning alumni and students at the University of Moratuwa (Urban Simulation Lab). Public site, a small admin for publishing news, a Supabase database with Row Level Security, and tests.
 
-- **Public site:** home with a live road-network simulation, research, chatbots, team, publications, awards, partners, news, collaborate, contact.
+- **Public site:** home with a live road-network simulation, research (with the Smartmind journey), team network, publications, awards, gallery and partners, news, contact. Admins manage the team network, gallery moments, the "now" ticker and news placement.
 - **Admin:** sign in, publish quick updates and full articles, schedule posts, upload cover images.
 - **Source of truth for facts:** `this.md`. All copy lives in `/content`, one module per section, each block commented with the section of `this.md` it came from.
 
@@ -89,11 +89,11 @@ docs/                design-spec.md, plan.md, screenshots/
 
 ## Deploy to Vercel
 
-1. Create a hosted Supabase project. Run `npx supabase link --project-ref <ref>` then `npx supabase db push`.
+1. Create a hosted Supabase project. Run `npx supabase login`, `npx supabase link --project-ref <ref>`, then `npx supabase db push` (applies every migration, including the storage bucket).
 2. In Supabase: Authentication, turn **off** "Allow new users to sign up". Set the Site URL to your domain.
-3. In Vercel, import the repository and set the environment variables from `.env.example` (`NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, optional `NEXT_PUBLIC_CONTACT_EMAIL`). Do **not** add the service-role key to Vercel; it is only for the scripts.
-4. From your own machine, point `.env.local` at the hosted project and run `npm run seed` and `npm run create-admin -- you@example.com`.
-5. Deploy.
+3. In Vercel, import the repository and set `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` before the first build (they are baked in at build time). Do **not** add the service-role key to Vercel; it is only for the scripts.
+4. From your own machine, set the hosted project's URL and service-role key in the shell (not in a committed file) and run `npm run create-admin -- you@example.com`.
+5. Sign in at `/admin/login`. Use the Team page's "Import the starter team" button, or add people by hand. `npm run seed` is optional: it adds sample news and the starter team.
 
 ## Editing content
 

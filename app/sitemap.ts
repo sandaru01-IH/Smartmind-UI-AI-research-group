@@ -6,13 +6,11 @@ const STATIC_PATHS = [
   '/',
   '/about',
   '/research',
-  '/chatbots',
   '/team',
   '/publications',
   '/awards',
-  '/partners',
+  '/gallery',
   '/news',
-  '/collaborate',
   '/contact',
 ];
 

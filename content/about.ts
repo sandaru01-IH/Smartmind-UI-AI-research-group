@@ -7,10 +7,4 @@ export const ABOUT = {
     'Cities are now systems of systems, so conventional simulation hits its limits. Smartmind aims to simplify and reimagine how future cities are simulated.',
   mostVisibleWork:
     'The most visible work is a line of AI chatbots, from urban-planning Q&A in 2023 to disaster-awareness bots for landslides and floods.',
-  facts: [
-    { label: 'Network', value: 'Town & Country Planning alumni and students' },
-    { label: 'Home', value: 'Urban Simulation Lab, University of Moratuwa' },
-    { label: 'Focus', value: 'GeoAI for urban simulation and planning' },
-    { label: 'Lab tagline', value: 'Envisaging Cities: Makes Simulation Simplified' },
-  ],
 } as const;

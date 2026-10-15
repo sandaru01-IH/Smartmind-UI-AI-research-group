@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { ADMIN_EMAIL, TITLE_PREFIX, eventually, signIn } from './support';
+import { ADMIN_EMAIL, TITLE_PREFIX, addThumbnail, eventually, signIn } from './support';
 
 test.describe('admin access', () => {
   test('anonymous visitors are sent to the login page', async ({ page }) => {
@@ -89,6 +89,11 @@ test.describe('admin lifecycle', () => {
 
     // 2. Publish.
     await page.getByLabel('Status').selectOption('published');
+    // Without a thumbnail an article cannot be published.
+    await expect(page.getByText('Add a thumbnail image to publish')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeDisabled();
+    await addThumbnail(page);
+    await page.getByLabel(/Roll in the .now. ticker/).check();
     await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(page.getByText('Saved and published.')).toBeVisible();
 
@@ -163,6 +168,7 @@ test.describe('admin lifecycle', () => {
     await page.getByLabel('Title', { exact: true }).fill(scheduled);
     await page.getByLabel('Body (Markdown)').fill('Scheduled body.');
     await page.getByLabel('Status').selectOption('published');
+    await addThumbnail(page);
     const when = new Date(Date.now() + 20_000);
     const pad = (n: number) => String(n).padStart(2, '0');
     // datetime-local has minute precision, so schedule for the next full minute boundary after 20 s.

@@ -10,8 +10,17 @@ import { TbcFlag } from '@/components/ui/tag';
 import { fromLocalInput, toLocalInput } from '@/lib/datetime';
 import type { Post } from '@/lib/posts/types';
 import { hasTbcFlag } from '@/lib/posts/types';
-import { CATEGORIES, TITLE_MAX, UPDATE_HEADLINE_MAX, postInputSchema } from '@/lib/schemas';
+import {
+  CATEGORIES,
+  PLATFORMS,
+  PLATFORM_LABEL,
+  TITLE_MAX,
+  UPDATE_HEADLINE_MAX,
+  postInputSchema,
+  type Platform,
+} from '@/lib/schemas';
 import { isValidSlug, slugify } from '@/lib/slug';
+import { GalleryPhotos } from './gallery-photos';
 import { ImageUploader } from './image-uploader';
 import { MarkdownEditor } from './markdown-editor';
 import { useToast } from './toast';
@@ -31,6 +40,12 @@ interface Draft {
   featured: boolean;
   status: 'draft' | 'published';
   published_at: string;
+  show_in_news: boolean;
+  show_in_ticker: boolean;
+  in_gallery: boolean;
+  video_url: string;
+  gallery_paths: string[];
+  external_links: { platform: Platform; url: string }[];
 }
 
 const blank = (type: 'article' | 'update'): Draft => ({
@@ -48,6 +63,12 @@ const blank = (type: 'article' | 'update'): Draft => ({
   featured: false,
   status: 'draft',
   published_at: '',
+  show_in_news: type === 'article',
+  show_in_ticker: type === 'update',
+  in_gallery: false,
+  video_url: '',
+  gallery_paths: [],
+  external_links: [],
 });
 
 const fromPost = (p: Post): Draft => ({
@@ -65,6 +86,12 @@ const fromPost = (p: Post): Draft => ({
   featured: p.featured,
   status: p.status,
   published_at: toLocalInput(p.published_at),
+  show_in_news: p.show_in_news,
+  show_in_ticker: p.show_in_ticker,
+  in_gallery: p.in_gallery,
+  video_url: p.video_url ?? '',
+  gallery_paths: p.gallery_paths,
+  external_links: p.external_links,
 });
 
 const toValues = (d: Draft) => ({
@@ -74,6 +101,8 @@ const toValues = (d: Draft) => ({
     .map((t) => t.trim())
     .filter(Boolean),
   published_at: fromLocalInput(d.published_at),
+  video_url: d.video_url.trim(),
+  external_links: d.external_links.filter((l) => l.url.trim() !== ''),
 });
 
 /** True when the draft is set to publish at a time that has not arrived yet. */
@@ -154,6 +183,7 @@ export function PostEditor({ post }: { post: Post | null }) {
 
   const valid = useMemo(() => postInputSchema.safeParse(toValues(d)).success, [d]);
   const isUpdate = d.type === 'update';
+  const needsThumbnail = d.status === 'published' && d.type === 'article' && !d.cover_path;
 
   const save = useCallback(
     async (opts: { silent?: boolean } = {}): Promise<boolean> => {
@@ -242,6 +272,11 @@ export function PostEditor({ post }: { post: Post | null }) {
                     : 'No changes'}
             </p>
             {tbc ? <TbcFlag /> : null}
+            {needsThumbnail ? (
+              <p role="alert" className="label-mono text-danger">
+                Add a thumbnail image to publish
+              </p>
+            ) : null}
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -279,7 +314,12 @@ export function PostEditor({ post }: { post: Post | null }) {
                   name="type"
                   value={t}
                   checked={d.type === t}
-                  onChange={() => set('type', t)}
+                  onChange={() => {
+                    set('type', t);
+                    set('show_in_news', t === 'article');
+                    set('show_in_ticker', t === 'update');
+                    if (t === 'update') set('in_gallery', false);
+                  }}
                   className="sr-only"
                 />
                 {t === 'article' ? 'Article' : 'Update (ticker)'}
@@ -344,6 +384,111 @@ export function PostEditor({ post }: { post: Post | null }) {
                   error={err('body_md')}
                 />
               </div>
+
+              {d.in_gallery ? (
+                <section className="space-y-5 border border-line p-4" aria-labelledby="moment-h">
+                  <h2 id="moment-h" className="text-lg">
+                    Gallery moment
+                  </h2>
+                  <Field
+                    id="video"
+                    label="Video link (optional)"
+                    hint="A YouTube or Vimeo link, for example the recording of a talk. It plays on the gallery page."
+                    error={err('video_url')}
+                  >
+                    <input
+                      id="video"
+                      type="url"
+                      value={d.video_url}
+                      placeholder="https://www.youtube.com/watch?v="
+                      onChange={(e) => set('video_url', e.target.value)}
+                      className={field}
+                    />
+                  </Field>
+                  <div>
+                    <p className="label-mono mb-2 text-muted">More photos</p>
+                    <GalleryPhotos
+                      value={d.gallery_paths}
+                      onChange={(v) => set('gallery_paths', v)}
+                      onError={(m) => toast.push(m, 'error')}
+                    />
+                  </div>
+                </section>
+              ) : null}
+
+              <section className="space-y-4 border border-line p-4" aria-labelledby="ext-h">
+                <h2 id="ext-h" className="text-lg">
+                  Read more elsewhere
+                </h2>
+                <p className="text-[0.9rem] text-muted">
+                  Link the same story on Medium, LinkedIn or another platform for further reading.
+                </p>
+                {d.external_links.map((l, i) => (
+                  <div key={i} className="flex flex-wrap gap-2">
+                    <select
+                      aria-label={`Platform for link ${i + 1}`}
+                      value={l.platform}
+                      onChange={(e) =>
+                        set(
+                          'external_links',
+                          d.external_links.map((x, j) =>
+                            j === i ? { ...x, platform: e.target.value as Platform } : x,
+                          ),
+                        )
+                      }
+                      className={`${field} w-40`}
+                    >
+                      {PLATFORMS.map((p) => (
+                        <option key={p} value={p}>
+                          {PLATFORM_LABEL[p]}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      aria-label={`Address for link ${i + 1}`}
+                      type="url"
+                      placeholder="https://"
+                      value={l.url}
+                      onChange={(e) =>
+                        set(
+                          'external_links',
+                          d.external_links.map((x, j) =>
+                            j === i ? { ...x, url: e.target.value } : x,
+                          ),
+                        )
+                      }
+                      className={`${field} min-w-0 flex-1 basis-56`}
+                    />
+                    <button
+                      type="button"
+                      aria-label={`Remove link ${i + 1}`}
+                      onClick={() =>
+                        set(
+                          'external_links',
+                          d.external_links.filter((_, j) => j !== i),
+                        )
+                      }
+                      className={buttonClass('ghost', '', 'icon')}
+                    >
+                      <Trash2 size={16} aria-hidden="true" />
+                    </button>
+                  </div>
+                ))}
+                {err('external_links') ? (
+                  <p className="text-[0.9rem] text-danger">{err('external_links')}</p>
+                ) : null}
+                {d.external_links.length < 6 ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      set('external_links', [...d.external_links, { platform: 'medium', url: '' }])
+                    }
+                    className={buttonClass('secondary', '', 'sm')}
+                  >
+                    Add a link
+                  </button>
+                ) : null}
+              </section>
             </>
           ) : null}
         </div>
@@ -396,6 +541,34 @@ export function PostEditor({ post }: { post: Post | null }) {
             ) : null}
           </section>
 
+          {!isUpdate ? (
+            <section className="space-y-3 border border-line p-4" aria-labelledby="where-h">
+              <h2 id="where-h" className="text-lg">
+                Where it appears
+              </h2>
+              {(
+                [
+                  ['show_in_news', 'In the news section'],
+                  ['show_in_ticker', 'Roll in the “now” ticker at the top of every page'],
+                  ['in_gallery', 'In the gallery, as a moment'],
+                ] as const
+              ).map(([key, label]) => (
+                <label key={key} className="flex min-h-11 cursor-pointer items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={d[key]}
+                    onChange={(e) => set(key, e.target.checked)}
+                    className="h-5 w-5 shrink-0 accent-[var(--signal)]"
+                  />
+                  <span>{label}</span>
+                </label>
+              ))}
+              <p className="text-[0.9rem] text-muted">
+                The home page always shows the newest news items with their thumbnails.
+              </p>
+            </section>
+          ) : null}
+
           <section className="space-y-4 border border-line p-4" aria-labelledby="meta-h">
             <h2 id="meta-h" className="text-lg">
               Details
@@ -445,7 +618,7 @@ export function PostEditor({ post }: { post: Post | null }) {
 
           <section className="space-y-4 border border-line p-4" aria-labelledby="cover-h">
             <h2 id="cover-h" className="text-lg">
-              Cover image
+              Thumbnail image
             </h2>
             <ImageUploader
               value={{ path: d.cover_path, alt: d.cover_alt }}
@@ -455,10 +628,17 @@ export function PostEditor({ post }: { post: Post | null }) {
               }}
               onError={(m) => toast.push(m, 'error')}
               altError={err('cover_alt')}
+              noun="thumbnail"
             />
-            <p className="text-[0.9rem] text-muted">
-              Without a cover, the site draws a road-network artwork from the slug.
-            </p>
+            {err('cover_path') ? (
+              <p className="text-[0.9rem] text-danger">{err('cover_path')}</p>
+            ) : (
+              <p className="text-[0.9rem] text-muted">
+                {isUpdate
+                  ? 'Optional for ticker updates.'
+                  : 'Required to publish. It is the card people see on the home page, news and gallery.'}
+              </p>
+            )}
           </section>
 
           {id ? (

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { ArrowLeft } from 'lucide-react';
+import Image from 'next/image';
 import { PostBody } from '@/components/ui/markdown';
 import { PostCover } from '@/components/news/post-cover';
 import { ButtonLink } from '@/components/ui/button';
@@ -11,7 +12,9 @@ import { Tag } from '@/components/ui/tag';
 import { BRAND, SITE_URL } from '@/content/brand';
 import { formatDate } from '@/lib/format';
 import { getPublicPost, getSlugIndex } from '@/lib/posts/public';
+import { PLATFORM_LABEL } from '@/lib/schemas';
 import { mediaUrl } from '@/lib/supabase/env';
+import { embedUrl } from '@/lib/video';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -51,6 +54,8 @@ async function Article({ params }: Props) {
   if (!post) notFound();
 
   const cover = mediaUrl(post.cover_path);
+  const video = embedUrl(post.video_url);
+  const photos = post.gallery_paths.map((p) => mediaUrl(p)).filter((u): u is string => Boolean(u));
   return (
     <article>
       <JsonLd
@@ -95,9 +100,54 @@ async function Article({ params }: Props) {
         <PostCover post={post} priority sizes="(min-width: 1100px) 1100px, 100vw" />
       </div>
 
+      {video ? (
+        <div className="container-site mt-8 max-w-[1100px]">
+          <div className="relative aspect-video w-full border border-line bg-surface-2">
+            <iframe
+              src={video}
+              title={`Video: ${post.title}`}
+              loading="lazy"
+              allow="accelerometer; encrypted-media; picture-in-picture; fullscreen"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+              className="absolute inset-0 h-full w-full"
+            />
+          </div>
+        </div>
+      ) : null}
+
       <div className="container-site grid-12 mt-12 gap-y-10 pb-24">
         <div className="col-span-12 lg:col-span-8">
           {post.body_md ? <PostBody source={post.body_md} /> : null}
+          {photos.length > 0 ? (
+            <ul className="mt-10 grid grid-cols-2 gap-3 md:grid-cols-3">
+              {photos.map((src, i) => (
+                <li key={src} className="relative aspect-[4/3] overflow-hidden border border-line">
+                  <Image
+                    src={src}
+                    alt={`${post.title}, photo ${i + 2}`}
+                    fill
+                    sizes="(min-width: 1024px) 25vw, 50vw"
+                    className="object-cover"
+                  />
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {post.external_links.length > 0 ? (
+            <div className="mt-10">
+              <p className="label-mono text-muted">Read more</p>
+              <ul className="mt-3 flex flex-wrap gap-3">
+                {post.external_links.map((l) => (
+                  <li key={l.url}>
+                    <ButtonLink href={l.url} variant="secondary">
+                      {PLATFORM_LABEL[l.platform]}
+                    </ButtonLink>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
           {post.link_url ? (
             <p className="mt-10">
               <ButtonLink href={post.link_url}>Read the source</ButtonLink>

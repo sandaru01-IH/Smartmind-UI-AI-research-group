@@ -31,15 +31,8 @@ export const LINKS = {
   departmentResearch: 'https://uom.lk/tcp/research/ongoing-research',
 } as const;
 
-// Source: paragraph after the "What SmartMind is" table.
-export const NOT_RELATED = [
-  { name: 'smartmind.net', description: 'a Spanish e-learning company' },
-  { name: 'smartmind.ro', description: 'a Romanian HR consultancy' },
-  { name: 'SMARTMIND', description: 'a neuroscience programme at UTEP' },
-] as const;
-
-/** Optional. Rendered only when set. The brief found no Smartmind email. */
-export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim() || null;
+/** The address every "contact us" action opens. */
+export const CONTACT_EMAIL = 'info@smartminduiai.com';
 export const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'http://localhost:3000'
 ).replace(/\/$/, '');

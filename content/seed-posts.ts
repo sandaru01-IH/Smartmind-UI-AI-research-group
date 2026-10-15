@@ -16,6 +16,15 @@ const base = {
   event_date: null,
   link_url: null,
   tags: [] as string[],
+  show_in_news: true,
+  show_in_ticker: false,
+  in_gallery: false,
+  video_url: null,
+  gallery_paths: [] as string[],
+  external_links: [] as {
+    platform: 'medium' | 'linkedin' | 'youtube' | 'facebook' | 'website';
+    url: string;
+  }[],
 } as const;
 
 const NBRO_URL =
@@ -29,6 +38,7 @@ export const SEED_POSTS: Post[] = [
     type: 'article',
     title: 'A participatory chatbot for flood and landslide resilience',
     slug: 'participatory-chatbot-flood-landslide-resilience',
+    in_gallery: true,
     excerpt:
       'A WhatsApp-based, multilingual, multi-agent chatbot gives residents preparedness guidance and lets planners interpret risk-sensitive zoning.',
     body_md: [
@@ -56,6 +66,7 @@ export const SEED_POSTS: Post[] = [
     type: 'article',
     title: 'Smartmind meets NBRO and the University of Manchester on a landslide chatbot',
     slug: 'nbro-manchester-landslide-chatbot-meeting',
+    in_gallery: true,
     excerpt:
       'On 29 December 2023 the team agreed a research project on an AI chatbot for landslide risk, supported by a Manchester grant.',
     body_md: [
@@ -118,6 +129,8 @@ export const SEED_POSTS: Post[] = [
     ...base,
     id: '00000000-0000-4000-8000-000000000011',
     type: 'update',
+    show_in_news: false,
+    show_in_ticker: true,
     title: 'Participatory flood and landslide chatbot paper published on Sciforum',
     slug: 'update-sciforum-paper-published',
     category: 'Publication',
@@ -132,6 +145,8 @@ export const SEED_POSTS: Post[] = [
     ...base,
     id: '00000000-0000-4000-8000-000000000012',
     type: 'update',
+    show_in_news: false,
+    show_in_ticker: true,
     title: 'Chatbot paper at the 1st International Online Conference on Urban Sciences, 20–22 May',
     slug: 'update-urban-sciences-conference',
     category: 'Event',
@@ -147,6 +162,8 @@ export const SEED_POSTS: Post[] = [
     ...base,
     id: '00000000-0000-4000-8000-000000000013',
     type: 'update',
+    show_in_news: false,
+    show_in_ticker: true,
     title: 'NBRO and Manchester meeting agrees an AI chatbot project for landslide risk',
     slug: 'update-nbro-manchester-meeting',
     category: 'Partnership',

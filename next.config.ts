@@ -31,6 +31,7 @@ const csp = [
   "base-uri 'self'",
   "form-action 'self'",
   "frame-ancestors 'none'",
+  'frame-src https://www.youtube-nocookie.com https://player.vimeo.com',
   ...(isDev ? [] : ['upgrade-insecure-requests']),
 ].join('; ');
 
@@ -66,6 +67,13 @@ const nextConfig: NextConfig = {
           dangerouslyAllowLocalIP: supabaseIsLocal,
         }
       : {}),
+  },
+  async redirects() {
+    return [
+      { source: '/chatbots', destination: '/research#journey', permanent: true },
+      { source: '/partners', destination: '/gallery#partners', permanent: true },
+      { source: '/collaborate', destination: '/contact', permanent: true },
+    ];
   },
   async headers() {
     return [

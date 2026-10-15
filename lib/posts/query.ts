@@ -15,6 +15,9 @@ export function applyPublicQuery(
   const q = query.q?.trim().toLowerCase();
   const filtered = posts
     .filter((p) => !query.type || p.type === query.type)
+    .filter((p) => query.news === undefined || p.show_in_news === query.news)
+    .filter((p) => query.ticker === undefined || p.show_in_ticker === query.ticker)
+    .filter((p) => query.gallery === undefined || p.in_gallery === query.gallery)
     .filter((p) => !query.category || p.category === query.category)
     .filter((p) => !query.tag || p.tags.includes(query.tag))
     .filter((p) => !q || p.title.toLowerCase().includes(q) || p.excerpt.toLowerCase().includes(q))

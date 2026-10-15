@@ -111,3 +111,52 @@ describe('loginSchema', () => {
     expect(loginSchema.safeParse({ email: 'a@b.co', password: '' }).success).toBe(false);
   });
 });
+
+describe('thumbnail, placement and links', () => {
+  const published = {
+    ...article,
+    status: 'published' as const,
+    cover_path: 'a/b.jpg',
+    cover_alt: 'A talk',
+  };
+
+  it('needs a thumbnail before an article can be published', () => {
+    const r = postInputSchema.safeParse({ ...article, status: 'published' });
+    expect(r.success).toBe(false);
+    expect(postInputSchema.safeParse(published).success).toBe(true);
+    // Drafts and ticker updates do not need one.
+    expect(postInputSchema.safeParse(article).success).toBe(true);
+    expect(
+      postInputSchema.safeParse({ ...article, type: 'update', status: 'published' }).success,
+    ).toBe(true);
+  });
+
+  it('defaults to news only and accepts gallery, ticker, video and platform links', () => {
+    const d = postInputSchema.parse(published);
+    expect(d).toMatchObject({ show_in_news: true, show_in_ticker: false, in_gallery: false });
+    const r = postInputSchema.safeParse({
+      ...published,
+      in_gallery: true,
+      show_in_ticker: true,
+      video_url: 'https://youtu.be/dQw4w9WgXcQ',
+      gallery_paths: ['x/y.jpg'],
+      external_links: [
+        { platform: 'medium', url: 'https://medium.com/@smartmind/story' },
+        { platform: 'linkedin', url: 'https://www.linkedin.com/posts/abc' },
+      ],
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it('refuses insecure video links and unknown platforms', () => {
+    expect(postInputSchema.safeParse({ ...published, video_url: 'http://x.com/v' }).success).toBe(
+      false,
+    );
+    expect(
+      postInputSchema.safeParse({
+        ...published,
+        external_links: [{ platform: 'myspace', url: 'https://x.com' }],
+      }).success,
+    ).toBe(false);
+  });
+});

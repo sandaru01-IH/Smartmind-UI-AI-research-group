@@ -1,81 +1,44 @@
+import { Suspense } from 'react';
+import { HeroFallback } from '@/components/hero/hero-fallback';
+import { TeamNetwork } from '@/components/team/team-network';
 import { PageHeader } from '@/components/ui/page-header';
-import { Reveal } from '@/components/ui/reveal';
-import { Section } from '@/components/ui/section';
-import { TbcFlag } from '@/components/ui/tag';
-import { TEAM, initials, type Person } from '@/content/team';
+import { getTeamNetwork } from '@/lib/team/public';
 import { pageMeta } from '@/lib/seo';
 
 export const metadata = pageMeta({
   title: 'Team',
   description:
-    'The eight core members of Smartmind, the authors of its chatbot papers and its named collaborators.',
+    'The Smartmind team as a network: the people behind the Urban Simulation Lab and how they work together.',
   path: '/team',
 });
 
-function PersonCard({ person, index }: { person: Person; index: number }) {
-  return (
-    <Reveal as="li" index={index} className="flex gap-5 border border-line bg-surface p-5">
-      {/* Initials avatar. Replace with a photo once members give consent (see CONTENT_TODO.md). */}
-      <div
-        aria-hidden="true"
-        className="flex h-16 w-16 shrink-0 items-center justify-center border border-line-strong font-mono text-xl text-fg"
-      >
-        {initials(person.name)}
-      </div>
-      <div className="min-w-0">
-        <h3 className="text-xl">{person.name}</h3>
-        {person.affiliation ? (
-          <p className="label-mono mt-1 text-muted">{person.affiliation}</p>
-        ) : null}
-        <ul className="mt-3 space-y-1 text-[0.95rem] text-muted">
-          {person.appears.map((a) => (
-            <li key={a}>{a}</li>
-          ))}
-        </ul>
-        {person.confirmation === 'tbc' ? <TbcFlag className="mt-3" /> : null}
-      </div>
-    </Reveal>
-  );
+async function Network() {
+  const { members, links } = await getTeamNetwork();
+  if (members.length === 0) {
+    return (
+      <p className="border border-dashed border-line-strong p-6 text-muted">
+        The team will appear here soon.
+      </p>
+    );
+  }
+  return <TeamNetwork members={members} links={links} backdrop={<HeroFallback />} />;
 }
 
 export default function TeamPage() {
-  const group = (g: Person['group']) => TEAM.filter((p) => p.group === g);
   return (
     <>
       <PageHeader
         eyebrow="Team"
-        title="The people behind Smartmind"
-        lead="Eight people are named as the core team in a January 2024 article by Amila Jayasinghe. Roles are not yet published, so each entry shows where the person appears."
+        title="The team network"
+        lead="Every person is a node, every line a way of working together."
       />
-
-      <Section id="core" numeral="01" title="Core team">
-        <ul className="grid gap-4 md:grid-cols-2">
-          {group('core').map((p, i) => (
-            <PersonCard key={p.slug} person={p} index={i} />
-          ))}
-        </ul>
-      </Section>
-
-      <Section id="authors" numeral="02" title="Authors and project team">
-        <ul className="grid gap-4 md:grid-cols-2">
-          {group('authors').map((p, i) => (
-            <PersonCard key={p.slug} person={p} index={i} />
-          ))}
-        </ul>
-      </Section>
-
-      <Section
-        id="collaborators"
-        numeral="03"
-        title="Collaborators"
-        lead="Named on the 2026 participatory chatbot paper."
-      >
-        <ul className="grid gap-4 md:grid-cols-2">
-          {group('collaborator').map((p, i) => (
-            <PersonCard key={p.slug} person={p} index={i} />
-          ))}
-        </ul>
-      </Section>
+      <div className="container-site pb-24">
+        <Suspense
+          fallback={<div className="h-[32rem] border border-line bg-surface" aria-hidden="true" />}
+        >
+          <Network />
+        </Suspense>
+      </div>
     </>
   );
 }

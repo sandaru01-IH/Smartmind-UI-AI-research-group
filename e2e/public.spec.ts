@@ -5,14 +5,12 @@ const ROUTES = [
   '/',
   '/about',
   '/research',
-  '/chatbots',
   '/team',
   '/publications',
   '/awards',
-  '/partners',
+  '/gallery',
   '/news',
   '/news/participatory-chatbot-flood-landslide-resilience',
-  '/collaborate',
   '/contact',
 ];
 const VIEWPORTS = [
@@ -65,11 +63,10 @@ test.describe('accessibility (axe, WCAG 2.2 AA)', () => {
     '/news',
     '/news/participatory-chatbot-flood-landslide-resilience',
     '/research',
-    '/chatbots',
     '/publications',
     '/team',
     '/awards',
-    '/partners',
+    '/gallery',
     '/contact',
     '/admin/login',
   ];
@@ -142,6 +139,9 @@ test.describe('features', () => {
     await page.getByRole('button', { name: 'Menu' }).click();
     const menu = page.getByRole('dialog', { name: 'Menu' });
     await expect(menu).toBeVisible();
+    // It must fill the screen, not sit clipped inside the 56px header.
+    expect((await menu.boundingBox())?.height).toBeGreaterThan(700);
+    await expect(menu.getByRole('link', { name: 'Gallery & Partners' })).toBeInViewport();
     await page.keyboard.press('Escape');
     await expect(menu).toBeHidden();
     await page.getByRole('button', { name: 'Menu' }).click();
@@ -240,22 +240,120 @@ test.describe('features', () => {
     expect(Buffer.compare(before, after)).not.toBe(0);
   });
 
-  test('numbers strip shows sourced figures with a source note', async ({ page }) => {
+  test('numbers strip shows plain figures and no hover pop-ups', async ({ page }) => {
     await page.goto('/');
     const strip = page.locator('#numbers');
     for (const [value, label] of [
       ['12', 'Listed papers'],
-      ['8', 'Core team members'],
+      ['14', 'People in the network'],
       ['4', 'Research themes'],
       ['7', 'Awards, 2018 and 2019'],
       ['14', 'Listed partners'],
     ]) {
-      const stat = strip.getByRole('button', { name: new RegExp(label) });
+      const stat = strip.getByRole('listitem').filter({ hasText: label });
       await stat.scrollIntoViewIfNeeded();
-      await expect(stat.getByLabel(value, { exact: true })).toBeVisible();
+      await expect(stat.locator('.sr-only')).toHaveText(value);
     }
-    await strip.getByRole('button', { name: /Listed papers/ }).hover();
-    await expect(strip.getByRole('note').first()).toContainText('this.md');
+    await strip.getByRole('listitem').first().hover();
+    await expect(strip.getByRole('note')).toHaveCount(0);
+    await expect(strip.getByRole('button')).toHaveCount(0);
+  });
+
+  test('hero headline rolls in word by word', async ({ page }) => {
+    await page.goto('/');
+    const h1 = page.getByRole('heading', { level: 1 });
+    await expect(h1).toHaveText('The city as an adaptive & dynamic system.');
+    await expect(h1.locator('.roll-word')).toHaveCount(8);
+  });
+
+  test('home: themes are renamed, partners are not repeated, journey replaces the chatbot teaser', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const main = page.locator('main');
+    for (const t of [
+      'Urban Science',
+      'Disaster Management',
+      'Transport & Mobility Systems',
+      'AI and machine learning',
+    ])
+      await expect(main.getByRole('heading', { name: t })).toBeVisible();
+    await expect(main.getByRole('heading', { name: 'The Journey of Smartmind' })).toBeVisible();
+    await expect(main.getByText('Build a chatbot with us')).toHaveCount(0);
+    await expect(main.getByRole('heading', { name: /partners/i })).toHaveCount(0);
+  });
+
+  test('contact beacon opens an email to the team', async ({ page }) => {
+    await page.goto('/');
+    const beacon = page.locator('#contact a');
+    await expect(beacon).toHaveAttribute('href', /^mailto:info@smartminduiai\.com/);
+    await expect(page.locator('#contact')).toContainText('Spark your idea');
+    await expect(page.locator('#contact')).toContainText('Project with the support of Smartmind');
+  });
+
+  test('old routes redirect to their new homes', async ({ page }) => {
+    await page.goto('/chatbots');
+    await expect(page).toHaveURL(/\/research#journey$/);
+    await page.goto('/partners');
+    await expect(page).toHaveURL(/\/gallery#partners$/);
+    await page.goto('/collaborate');
+    await expect(page).toHaveURL(/\/contact$/);
+  });
+
+  test('team network: hover traces links, select shows only personal details', async ({ page }) => {
+    await page.goto('/team', { waitUntil: 'networkidle' });
+    const amila = page.getByRole('button', { name: /^Amila Jayasinghe/ });
+    await amila.focus();
+    await expect(page.locator('svg .team-edge-active').first()).toBeAttached();
+    await amila.press('Enter');
+    const panel = page.getByRole('complementary', { name: 'Person details' });
+    await expect(panel.getByRole('heading', { name: 'Amila Jayasinghe' })).toBeVisible();
+    await expect(panel.getByText('Works with')).toHaveCount(0);
+    await panel.getByRole('button', { name: 'Close details' }).click();
+    await expect(panel.getByRole('heading', { name: 'Amila Jayasinghe' })).toHaveCount(0);
+  });
+
+  test('team network: search finds people by name', async ({ page }) => {
+    await page.goto('/team', { waitUntil: 'networkidle' });
+    const box = page.getByRole('combobox', { name: 'Search the team by name' });
+    await box.fill('chethika');
+    await expect(page.getByRole('status').filter({ hasText: 'found' })).toContainText('1 found');
+    await box.press('Enter');
+    const panel = page.getByRole('complementary', { name: 'Person details' });
+    await expect(panel.getByRole('heading', { name: 'Chethika Abenayake' })).toBeVisible();
+    await box.fill('zzzz');
+    await expect(page.getByRole('status').filter({ hasText: 'No one' })).toBeVisible();
+  });
+
+  test('team network: circles can be dragged, and the layout can be reset', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/team', { waitUntil: 'networkidle' });
+    const node = page.getByRole('button', { name: /^Malith Deshan/ });
+    await page.getByRole('group', { name: /Team network/ }).scrollIntoViewIfNeeded();
+    const before = await node.boundingBox();
+    const reset = page.getByRole('button', { name: 'Reset layout' });
+    await expect(reset).toBeDisabled();
+    await page.mouse.move(before!.x + before!.width / 2, before!.y + before!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(before!.x + 160, before!.y + 120, { steps: 8 });
+    await page.mouse.up();
+    // A drag moves the circle and does not open the profile.
+    await page.waitForTimeout(300);
+    const after = await node.boundingBox();
+    expect(Math.abs(after!.x - before!.x) + Math.abs(after!.y - before!.y)).toBeGreaterThan(60);
+    await expect(page.getByRole('heading', { name: 'Malith Deshan' })).toHaveCount(0);
+    await expect(reset).toBeEnabled();
+    await reset.click();
+    await expect(reset).toBeDisabled();
+  });
+
+  test('gallery comes first and partners follow as linked grey tiles', async ({ page }) => {
+    await page.goto('/gallery', { waitUntil: 'networkidle' });
+    const headings = await page.getByRole('heading', { level: 2 }).allInnerTexts();
+    expect(headings.indexOf('Gallery')).toBeLessThan(headings.indexOf('Partners'));
+    const nbro = page.getByRole('link', { name: /National Building Research Organization/ });
+    await expect(nbro).toHaveAttribute('href', 'https://www.nbro.gov.lk');
+    await expect(nbro).toHaveAttribute('target', '_blank');
   });
 
   test('numbers strip never shows the unconfirmed 4ONSE station count', async ({ page }) => {
@@ -271,13 +369,11 @@ test.describe('features', () => {
     await page.goto('/awards');
     await expect(page.getByText('To be confirmed').first()).toBeVisible();
     await page.goto('/research');
-    await expect(page.getByText('To be confirmed')).toBeVisible();
-    await page.goto('/chatbots');
-    await expect(page.getByText('To be confirmed')).toHaveCount(2);
+    await expect(page.getByText('To be confirmed')).toHaveCount(3);
   });
 
-  test('chatbots timeline progresses with native scrolling', async ({ page }) => {
-    await page.goto('/chatbots');
+  test('journey timeline progresses with native scrolling', async ({ page }) => {
+    await page.goto('/research');
     await expect(
       page
         .getByRole('list')
@@ -298,7 +394,7 @@ test.describe('features', () => {
   });
 
   test('architecture diagram is drawn from named components only', async ({ page }) => {
-    await page.goto('/chatbots');
+    await page.goto('/research');
     const svg = page.getByRole('img', { name: /Architecture of the participatory/ });
     await svg.scrollIntoViewIfNeeded();
     for (const label of [
@@ -330,25 +426,22 @@ test.describe('features', () => {
     );
   });
 
-  test('contact shows a coming-soon state until an email is configured', async ({ page }) => {
+  test('contact page: one big email button, plus the university details', async ({ page }) => {
     await page.goto('/contact');
-    if (process.env.NEXT_PUBLIC_CONTACT_EMAIL) {
-      await expect(page.getByRole('link', { name: 'Email the team' })).toBeVisible();
-    } else {
-      await expect(page.getByTestId('contact-soon')).toContainText('Contact details coming soon');
-      await expect(page.getByRole('link', { name: 'Email the team' })).toHaveCount(0);
-    }
+    await expect(page.getByRole('link', { name: /Contact us/ }).first()).toBeVisible();
+    await expect(page.locator('main a[href^="mailto:info@smartminduiai.com"]')).toHaveCount(1);
     await expect(page.locator('main').getByText('+94 11 2640051')).toBeVisible();
     await expect(page.getByRole('link', { name: 'info@uom.lk' })).toBeVisible();
   });
 
-  test('footer carries the university details and the same-name note', async ({ page }) => {
+  test('footer carries the university details and no same-name disclaimer', async ({ page }) => {
     await page.goto('/');
     const footer = page.getByRole('contentinfo');
     await expect(footer).toContainText('Bandaranayake Mawatha');
     await expect(footer).toContainText('Moratuwa 10400');
     await expect(footer).toContainText('+94 11 2650301');
-    await expect(footer).toContainText('smartmind.net');
+    await expect(footer).not.toContainText('smartmind.net');
+    await expect(footer).not.toContainText('Not related to other organisations');
     await expect(footer.getByRole('link', { name: /Facebook/ })).toHaveAttribute(
       'href',
       /facebook\.com\/share/,

@@ -248,6 +248,164 @@ html:not(.js) [data-reveal] {
   }
 }
 
+/* Mobile menu: fades and slides in, links follow one after another, and it eases out on close. */
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-1.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes menu-out {
+  to {
+    opacity: 0;
+    transform: translateY(-0.75rem);
+  }
+}
+@keyframes menu-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.menu-panel[data-state='open'] {
+  animation: menu-in 280ms var(--ease-out-signal) both;
+}
+.menu-panel[data-state='closing'] {
+  animation: menu-out 200ms ease-in forwards;
+  pointer-events: none;
+}
+.menu-item {
+  animation: menu-item-in 420ms var(--ease-out-signal) both;
+  animation-delay: calc(90ms + var(--i, 0) * 45ms);
+}
+
+/* Rolling headline: each word rises out of its own mask, staggered. */
+.roll-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  /* Room for descenders and the accent underline without letting words escape the mask. */
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+.roll-word {
+  display: inline-block;
+  position: relative;
+  animation: roll-up 900ms var(--ease-out-signal) both;
+  animation-delay: calc(var(--roll-i, 0) * 110ms + 150ms);
+}
+@keyframes roll-up {
+  from {
+    transform: translateY(105%) rotate(4deg);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+/* Team network: gentle float, travelling pulses and flowing links. */
+@keyframes team-float {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(var(--fx, 2px), var(--fy, -3px));
+  }
+}
+.team-float {
+  animation: team-float var(--fd, 7s) ease-in-out infinite;
+  animation-delay: var(--fdelay, 0s);
+}
+@keyframes team-flow {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+.team-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: team-pulse 1.8s var(--ease-out-signal) infinite;
+}
+@keyframes team-pulse {
+  from {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+.team-edge-active {
+  stroke-dasharray: 6 6;
+  animation: team-flow 900ms linear infinite;
+}
+
+/* Contact beacon: ambient domain motion behind the big call to action. */
+@keyframes beacon-ring {
+  0% {
+    transform: scale(0.2);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+@keyframes beacon-drift {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -64;
+  }
+}
+@keyframes beacon-travel {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
+}
+@keyframes beacon-blink {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.beacon-car {
+  offset-rotate: 0deg;
+  animation: beacon-travel var(--bt, 7s) linear infinite;
+  animation-delay: var(--bd, 0s);
+}
+.beacon-node {
+  animation: beacon-blink 3.2s ease-in-out infinite;
+  animation-delay: var(--bd, 0s);
+}
+.beacon-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: beacon-ring 4.8s var(--ease-out-signal) infinite;
+  animation-delay: var(--bd, 0s);
+}
+.beacon-road {
+  stroke-dasharray: 4 12;
+  animation: beacon-drift 3s linear infinite;
+}
 /* Page transitions (View Transitions API, where supported). */
 ::view-transition-old(root),
 ::view-transition-new(root) {

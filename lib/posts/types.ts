@@ -1,4 +1,4 @@
-import type { Category } from '@/lib/schemas';
+import type { Category, ExternalLinkValue } from '@/lib/schemas';
 import type { PostStatus } from '@/lib/visibility';
 
 export type PostType = 'article' | 'update';
@@ -23,6 +23,14 @@ export interface Post {
   author_id: string | null;
   created_at: string;
   updated_at: string;
+  /** Listed on /news. Off for ticker-only items and gallery-only moments. */
+  show_in_news: boolean;
+  /** Rolls in the "now" ticker at the top of every page. */
+  show_in_ticker: boolean;
+  in_gallery: boolean;
+  video_url: string | null;
+  gallery_paths: string[];
+  external_links: ExternalLinkValue[];
 }
 
 /** Tag that marks seeded content whose source this.md flags as unconfirmed. */
@@ -34,6 +42,10 @@ export interface PublicListQuery {
   tag?: string;
   q?: string;
   type?: PostType;
+  /** Restrict to posts listed on the news page. */
+  news?: boolean;
+  ticker?: boolean;
+  gallery?: boolean;
   limit?: number;
   offset?: number;
 }

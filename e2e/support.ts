@@ -32,3 +32,19 @@ export async function eventually(
     await assertion();
   }).toPass({ timeout: timeoutMs, intervals: [500, 1000, 1500] });
 }
+
+// A valid 1x1 PNG. The server checks the real bytes, so a fake image would be refused.
+const PNG_1X1 = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+  'base64',
+);
+
+/** Publishing an article needs a thumbnail: upload a tiny one and describe it. */
+export async function addThumbnail(page: Page) {
+  await page.locator('input[type=file]').first().setInputFiles({
+    name: 'thumb.png',
+    mimeType: 'image/png',
+    buffer: PNG_1X1,
+  });
+  await page.getByLabel('Alt text (required)').fill('A test thumbnail');
+}

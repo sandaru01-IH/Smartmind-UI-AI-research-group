@@ -32,6 +32,9 @@ export async function listPosts(query: PublicListQuery = {}): Promise<PublicList
     .order('published_at', { ascending: false })
     .range(offset, offset + limit - 1);
   if (query.type) req = req.eq('type', query.type);
+  if (query.news !== undefined) req = req.eq('show_in_news', query.news);
+  if (query.ticker !== undefined) req = req.eq('show_in_ticker', query.ticker);
+  if (query.gallery !== undefined) req = req.eq('in_gallery', query.gallery);
   if (query.category) req = req.eq('category', query.category);
   if (query.tag) req = req.contains('tags', [query.tag]);
   const q = query.q?.trim().replace(SCHEMA_ESCAPE, ' ');
@@ -73,12 +76,20 @@ export async function getPublicPost(slug: string): Promise<Post | null> {
   return (await getPostBySlug(slug)) ?? (await fetchPostBySlug(slug));
 }
 
-/** Newest published items of any type: the ticker and the Latest strip share this. */
-export async function getLatestUpdates(limit: number): Promise<Post[]> {
+/** Items the admin flagged to roll in the "now" ticker at the top of every page. */
+export async function getTickerItems(limit: number): Promise<Post[]> {
   'use cache';
   cacheTag('posts', 'latest');
   cacheLife({ stale: 30, revalidate: 30, expire: 3600 });
-  return (await listPosts({ limit })).posts;
+  return (await listPosts({ ticker: true, limit })).posts;
+}
+
+/** Moments for the gallery: posts the admin marked for it, newest event first. */
+export async function getGalleryPosts(limit = 24): Promise<Post[]> {
+  'use cache';
+  cacheTag('posts', 'gallery');
+  cacheLife({ stale: 30, revalidate: 30, expire: 3600 });
+  return (await listPosts({ gallery: true, limit })).posts;
 }
 
 export async function getFeaturedPost(): Promise<Post | null> {
@@ -88,7 +99,7 @@ export async function getFeaturedPost(): Promise<Post | null> {
 
   const db = createPublicClient();
   if (!db) {
-    const pool = visibleSeedPosts(SEED_POSTS).filter((p) => p.type === 'article');
+    const pool = visibleSeedPosts(SEED_POSTS).filter((p) => p.type === 'article' && p.show_in_news);
     return (
       applyPublicQuery(pool.filter((p) => p.featured)).posts[0] ??
       applyPublicQuery(pool).posts[0] ??
@@ -100,13 +111,14 @@ export async function getFeaturedPost(): Promise<Post | null> {
     .select(POST_COLUMNS)
     .eq('status', 'published')
     .eq('type', 'article')
+    .eq('show_in_news', true)
     .eq('featured', true)
     .order('published_at', { ascending: false })
     .limit(1)
     .maybeSingle();
   if (featured.error) throw new Error(`Could not load featured post: ${featured.error.message}`);
   if (featured.data) return parsePostRow(featured.data);
-  const newest = await listPosts({ type: 'article', limit: 1 });
+  const newest = await listPosts({ type: 'article', news: true, limit: 1 });
   return newest.posts[0] ?? null;
 }
 
@@ -122,7 +134,7 @@ export async function getFilterOptions(): Promise<{ categories: Category[]; tags
   'use cache';
   cacheTag('posts');
   cacheLife({ stale: 30, revalidate: 30, expire: 3600 });
-  const { posts } = await listPosts({ type: 'article', limit: 500 });
+  const { posts } = await listPosts({ type: 'article', news: true, limit: 500 });
   const present = new Set(posts.map((p) => p.category));
   const tags = Array.from(new Set(posts.flatMap((p) => p.tags))).sort();
   return { categories: CATEGORIES.filter((c) => present.has(c)), tags };

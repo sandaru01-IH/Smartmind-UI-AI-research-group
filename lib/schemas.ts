@@ -57,6 +57,30 @@ const optionalDateTime = z
   .optional()
   .transform((v) => (v ? v : null));
 
+export const PLATFORMS = ['medium', 'linkedin', 'youtube', 'facebook', 'website'] as const;
+export type Platform = (typeof PLATFORMS)[number];
+export const PLATFORM_LABEL: Record<Platform, string> = {
+  medium: 'Medium',
+  linkedin: 'LinkedIn',
+  youtube: 'YouTube',
+  facebook: 'Facebook',
+  website: 'Website',
+};
+
+export const externalLinkSchema = z.object({
+  platform: z.enum(PLATFORMS),
+  url: httpUrl,
+});
+export type ExternalLinkValue = z.output<typeof externalLinkSchema>;
+
+const httpsUrl = httpUrl.refine((v) => v.startsWith('https://'), 'Use a secure https link');
+const optionalHttps = z
+  .union([httpsUrl, z.literal(''), z.null()])
+  .optional()
+  .transform((v) => (v ? v : null));
+
+const storagePath = z.string().trim().max(300);
+
 const tags = z
   .array(z.string().trim().toLowerCase().min(1).max(30))
   .max(8, 'Use at most 8 tags')
@@ -90,8 +114,21 @@ export const postInputSchema = z
     featured: z.boolean().default(false),
     status: z.enum(['draft', 'published']).default('draft'),
     published_at: optionalDateTime,
+    show_in_news: z.boolean().default(true),
+    show_in_ticker: z.boolean().default(false),
+    in_gallery: z.boolean().default(false),
+    video_url: optionalHttps,
+    gallery_paths: z.array(storagePath).max(12, 'Use at most 12 photos').default([]),
+    external_links: z.array(externalLinkSchema).max(6, 'Use at most 6 links').default([]),
   })
   .superRefine((v, ctx) => {
+    if (v.status === 'published' && v.type === 'article' && !v.cover_path) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['cover_path'],
+        message: 'Add a thumbnail image before publishing',
+      });
+    }
     if (v.type === 'update' && v.title.length > UPDATE_HEADLINE_MAX) {
       ctx.addIssue({
         code: 'custom',

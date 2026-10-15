@@ -12,11 +12,7 @@ export const metadata = pageMeta({
 export default function PublicationsPage() {
   return (
     <>
-      <PageHeader
-        eyebrow="Publications"
-        title="Papers on networks, floods and traffic"
-        lead={`The lab page lists ${LISTED_PAPER_COUNT} papers from 2019 to 2021, led by Amila Jayasinghe and Chethika Abenayake. The newer chatbot work follows.`}
-      />
+      <PageHeader eyebrow="Publications" title="Read our publications." />
       <div className="container-site pb-24">
         <PublicationsExplorer publications={ALL_PUBLICATIONS} />
       </div>
