@@ -91,7 +91,10 @@ test.describe('admin lifecycle', () => {
     await page.getByLabel('Status').selectOption('published');
     // Without a thumbnail an article cannot be published.
     await expect(page.getByText('Add a thumbnail image to publish')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeDisabled();
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(page.getByRole('alert').filter({ hasText: 'can’t be saved yet' })).toContainText(
+      'Thumbnail image',
+    );
     await addThumbnail(page);
     await page.getByRole('checkbox', { name: /ticker at the top/ }).check();
     await page.getByRole('button', { name: 'Save', exact: true }).click();

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { Eye, Loader2, Save, Trash2 } from 'lucide-react';
+import { z } from 'zod';
 import { deletePostAction, savePostAction } from '@/app/admin/actions';
 import { buttonClass } from '@/components/ui/button';
 import { TbcFlag } from '@/components/ui/tag';
@@ -111,6 +112,22 @@ function isFutureSchedule(d: Draft): boolean {
   return d.status === 'published' && at !== null && new Date(at).getTime() > Date.now();
 }
 
+const FIELD_LABEL: Record<string, string> = {
+  title: 'Title',
+  slug: 'Slug',
+  excerpt: 'Excerpt',
+  body_md: 'Body',
+  cover_path: 'Thumbnail image',
+  cover_alt: 'Thumbnail description',
+  link_url: 'External link',
+  video_url: 'Video link',
+  external_links: 'Read more links',
+  gallery_paths: 'Gallery photos',
+  event_date: 'Event date',
+  published_at: 'Publish at',
+  tags: 'Tags',
+};
+
 const field =
   'h-11 w-full rounded-sharp border border-line-strong bg-surface px-3 text-base text-fg placeholder:text-muted';
 const areaField =
@@ -188,6 +205,16 @@ export function PostEditor({ post }: { post: Post | null }) {
   const save = useCallback(
     async (opts: { silent?: boolean } = {}): Promise<boolean> => {
       const { d: cur, id: curId } = latest.current;
+      // Check in the browser first, so the author is told exactly what is missing.
+      const check = postInputSchema.safeParse(toValues(cur));
+      if (!check.success) {
+        setErrors(z.flattenError(check.error).fieldErrors as Record<string, string[]>);
+        if (!opts.silent) {
+          const first = check.error.issues[0];
+          toast.push(`Can't save yet: ${first.message}.`, 'error');
+        }
+        return false;
+      }
       setSaving(true);
       const res = await savePostAction({ id: curId, values: toValues(cur) });
       setSaving(false);
@@ -265,10 +292,10 @@ export function PostEditor({ post }: { post: Post | null }) {
             <p role="status" className="label-mono text-muted">
               {saving
                 ? 'Saving…'
-                : savedAt
-                  ? `Saved ${savedAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`
-                  : dirty
-                    ? 'Unsaved changes'
+                : dirty
+                  ? 'Unsaved changes. The preview shows the last saved version.'
+                  : savedAt
+                    ? `Saved ${savedAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`
                     : 'No changes'}
             </p>
             {tbc ? <TbcFlag /> : null}
@@ -289,7 +316,7 @@ export function PostEditor({ post }: { post: Post | null }) {
               <Eye size={16} aria-hidden="true" /> Preview as visitor
             </Link>
           ) : null}
-          <button type="submit" disabled={saving || !valid} className={buttonClass('primary')}>
+          <button type="submit" disabled={saving} className={buttonClass('primary')}>
             {saving ? (
               <Loader2 size={16} aria-hidden="true" className="animate-spin" />
             ) : (
@@ -299,6 +326,19 @@ export function PostEditor({ post }: { post: Post | null }) {
           </button>
         </div>
       </div>
+
+      {Object.keys(errors).length > 0 ? (
+        <div role="alert" className="border border-danger p-4">
+          <p className="font-semibold text-danger">This post can&rsquo;t be saved yet:</p>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            {Object.entries(errors).map(([field, msgs]) => (
+              <li key={field}>
+                <span className="font-semibold">{FIELD_LABEL[field] ?? field}:</span> {msgs[0]}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       <div className="grid gap-8 lg:grid-cols-12">
         <div className="space-y-6 lg:col-span-8">
