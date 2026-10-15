@@ -1,10 +1,14 @@
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 import { ImageResponse } from 'next/og';
 import { BRAND } from '@/content/brand';
 
 export const OG_SIZE = { width: 1200, height: 630 } as const;
 
 /** 1200x630 social card in the site's visual language: ink background, lime signal, mono label. */
-export function renderOgImage({ title, label }: { title: string; label: string }) {
+export async function renderOgImage({ title, label }: { title: string; label: string }) {
+  const logo = await readFile(path.join(process.cwd(), 'public/brand/logo-white.png'));
+  const logoSrc = `data:image/png;base64,${logo.toString('base64')}`;
   const lines = title.length > 90 ? `${title.slice(0, 88).trimEnd()}…` : title;
   return new ImageResponse(
     <div
@@ -21,8 +25,8 @@ export function renderOgImage({ title, label }: { title: string; label: string }
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <div style={{ width: 20, height: 20, borderRadius: 20, background: '#C6FF3D' }} />
-        <div style={{ fontSize: 30, fontWeight: 700, letterSpacing: -0.5 }}>{BRAND.name}</div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={logoSrc} alt="" height={64} width={183} style={{ height: 64, width: 183 }} />
         <div
           style={{
             fontSize: 22,

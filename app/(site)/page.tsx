@@ -37,6 +37,7 @@ export default function HomePage() {
           name: BRAND.name,
           alternateName: `${BRAND.name}, ${BRAND.lab}`,
           url: SITE_URL,
+          logo: `${SITE_URL}/brand/icon-512.png`,
           description: BRAND.pitch,
           parentOrganization: {
             '@type': 'CollegeOrUniversity',

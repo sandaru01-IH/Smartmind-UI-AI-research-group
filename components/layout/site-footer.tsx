@@ -10,7 +10,7 @@ export function SiteFooter() {
     <footer className="border-t border-line bg-surface">
       <div className="container-site grid-12 gap-y-10 py-14 md:py-20">
         <div className="col-span-12 md:col-span-5">
-          <Wordmark />
+          <Wordmark size={68} />
           <p className="mt-5 max-w-[42ch] text-muted">{t.footer.partOf}</p>
           <p className="label-mono mt-5 text-muted">{BRAND.tagline}</p>
         </div>

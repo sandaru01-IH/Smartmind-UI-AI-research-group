@@ -248,6 +248,20 @@ html:not(.js) [data-reveal] {
   }
 }
 
+/* Logo lockups: the colour one on the light theme, the white one on the dark theme. */
+.brand-on-light {
+  display: none;
+}
+[data-theme='light'] .brand-on-light {
+  display: block;
+}
+[data-theme='light'] .brand-on-dark {
+  display: none;
+}
+.brand-on-dark {
+  display: block;
+}
+
 /* Mobile menu: fades and slides in, links follow one after another, and it eases out on close. */
 @keyframes menu-in {
   from {

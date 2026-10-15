@@ -93,7 +93,7 @@ test.describe('admin lifecycle', () => {
     await expect(page.getByText('Add a thumbnail image to publish')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeDisabled();
     await addThumbnail(page);
-    await page.getByLabel(/Roll in the .now. ticker/).check();
+    await page.getByRole('checkbox', { name: /ticker at the top/ }).check();
     await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(page.getByText('Saved and published.')).toBeVisible();
 

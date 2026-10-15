@@ -1,40 +1,51 @@
+import Image from 'next/image';
 import { BRAND } from '@/content/brand';
 
 /**
- * PLACEHOLDER mark (see CONTENT_TODO.md). An "S" road network built from connected nodes,
- * with a signal hub where the routes meet. Replace with the supplied logo when ready.
+ * The official Smartmind logo (SMARTMIND_logo_pack). The full-colour lockup carries dark lettering,
+ * so on the dark theme the all-white lockup takes its place. Both are in the page; CSS shows the one
+ * that matches the theme (see .brand-on-light and .brand-on-dark in globals.css), so there is no
+ * flash and no script.
  */
+
+/** The hexagon mark alone. Its colours read well on both themes. */
 export function LogoMark({ size = 28, className }: { size?: number; className?: string }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
+    <Image
+      src="/brand/icon-color.png"
+      alt=""
+      width={216}
+      height={256}
+      loading="eager"
       className={className}
-    >
-      <path
-        d="M18 4 L7 6 L8.5 12 L15.5 12 L17 18 L6 20"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="18" cy="4" r="1.9" fill="currentColor" />
-      <circle cx="7" cy="6" r="1.4" fill="currentColor" />
-      <circle cx="17" cy="18" r="1.4" fill="currentColor" />
-      <circle cx="6" cy="20" r="1.9" fill="currentColor" />
-      <circle cx="12" cy="12" r="2.6" fill="var(--signal)" />
-    </svg>
+      style={{ height: size, width: 'auto' }}
+    />
   );
 }
 
-export function Wordmark() {
+/** Mark and name together, as one lockup. `size` is the height in pixels. */
+export function Wordmark({ size = 44 }: { size?: number }) {
+  const common = {
+    height: 240,
+    loading: 'eager' as const,
+    style: { height: size, width: 'auto' },
+  };
   return (
-    <span className="inline-flex items-center gap-2.5">
-      <LogoMark />
-      <span className="font-display text-lg font-semibold tracking-tight">{BRAND.name}</span>
+    <span className="inline-flex items-center">
+      <Image
+        src="/brand/logo-color.png"
+        alt={BRAND.name}
+        width={625}
+        className="brand-on-light"
+        {...common}
+      />
+      <Image
+        src="/brand/logo-white.png"
+        alt={BRAND.name}
+        width={686}
+        className="brand-on-dark"
+        {...common}
+      />
     </span>
   );
 }
