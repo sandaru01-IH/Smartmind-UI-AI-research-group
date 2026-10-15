@@ -18,13 +18,21 @@ import { embedUrl } from '@/lib/video';
 
 type Props = { params: Promise<{ slug: string }> };
 
+/**
+ * Cache Components needs at least one static param at build time. A brand-new site has no posts yet
+ * (or the database is not reachable while building), so a placeholder slug stands in. It matches no
+ * post: visitors get the 404 page for it, exactly like any other unknown address.
+ */
+const PLACEHOLDER_SLUG = 'no-posts-yet';
+
 export async function generateStaticParams() {
   try {
     const slugs = await getSlugIndex();
-    return slugs.map((s) => ({ slug: s.slug }));
+    if (slugs.length > 0) return slugs.map((s) => ({ slug: s.slug }));
   } catch {
-    return [];
+    // Fall through to the placeholder; posts are still served on demand.
   }
+  return [{ slug: PLACEHOLDER_SLUG }];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
