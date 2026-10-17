@@ -13,7 +13,7 @@ import { getFeaturedPost, listPosts } from '@/lib/posts/public';
 export async function LatestSection() {
   const [featured, recent] = await Promise.all([
     getFeaturedPost(),
-    listPosts({ type: 'article', news: true, limit: 4 }),
+    listPosts({ news: true, limit: 4 }),
   ]);
   const rest = recent.posts.filter((p) => p.id !== featured?.id).slice(0, 3);
   if (!featured && rest.length === 0) return null;

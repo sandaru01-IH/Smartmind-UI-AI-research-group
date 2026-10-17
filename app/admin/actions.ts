@@ -5,8 +5,9 @@ import { redirect } from 'next/navigation';
 import { revalidatePath, updateTag } from 'next/cache';
 import { z } from 'zod';
 import { requireAdmin } from '@/lib/auth/require-admin';
+import { setWorkPeople } from '@/lib/catalog/admin';
 import { safeNext } from '@/lib/auth/safe-next';
-import { loginThrottle } from '@/lib/auth/throttle';
+import { accountThrottle, loginThrottle } from '@/lib/auth/throttle';
 import { extensionFor, sniffImageType, validateImage } from '@/lib/image';
 import {
   adminGet,
@@ -41,6 +42,9 @@ function refreshPublic(slugs: string[] = []): void {
   revalidatePath('/news');
   revalidatePath('/gallery');
   updateTag('gallery');
+  // A post can also be a publication or an award, and can be linked to people's profiles.
+  updateTag('works');
+  for (const page of ['/publications', '/awards', '/team']) revalidatePath(page);
   revalidatePath('/sitemap.xml');
   for (const slug of new Set(slugs)) revalidatePath(`/news/${slug}`);
 }
@@ -71,8 +75,9 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
   const h = await headers();
   const ip = h.get('x-forwarded-for')?.split(',')[0]?.trim() || h.get('x-real-ip') || 'unknown';
   const key = `${ip}|${parsed.data.email}`;
-  const state = loginThrottle.check(key);
-  if (state.locked) {
+  const accountKey = parsed.data.email;
+  const state = [loginThrottle.check(key), accountThrottle.check(accountKey)].find((s) => s.locked);
+  if (state) {
     return {
       error: `Too many attempts. Try again in ${Math.ceil(state.retryAfterSeconds / 60)} minutes.`,
       retryAfter: state.retryAfterSeconds,
@@ -85,6 +90,7 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
   const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error || !data.user) {
     loginThrottle.fail(key);
+    accountThrottle.fail(accountKey);
     return { error: GENERIC_LOGIN_ERROR };
   }
   const profile = await supabase
@@ -95,10 +101,12 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
   if (profile.error || profile.data?.role !== 'admin') {
     await supabase.auth.signOut();
     loginThrottle.fail(key);
+    accountThrottle.fail(accountKey);
     return { error: GENERIC_LOGIN_ERROR };
   }
 
   loginThrottle.reset(key);
+  accountThrottle.reset(accountKey);
   redirect(safeNext(String(formData.get('next') ?? '')));
 }
 
@@ -113,9 +121,15 @@ export async function logoutAction(): Promise<void> {
 export interface SaveInput {
   id: string | null;
   values: unknown;
+  /** Team member ids to link to this post. Left out means "do not touch the links". */
+  people?: unknown;
 }
 
-export async function savePostAction({ id, values }: SaveInput): Promise<ActionResult<Post>> {
+export async function savePostAction({
+  id,
+  values,
+  people,
+}: SaveInput): Promise<ActionResult<Post>> {
   const { supabase, user } = await requireAdmin();
   const parsed = postInputSchema.safeParse(values);
   if (!parsed.success) {
@@ -129,6 +143,17 @@ export async function savePostAction({ id, values }: SaveInput): Promise<ActionR
     published_at: resolvePublishedAt(parsed.data.status, parsed.data.published_at),
   };
 
+  const linked = people === undefined ? null : z.array(z.uuid()).max(60).safeParse(people);
+  if (linked && !linked.success) return fail('Check the linked people.');
+  if (input.cover_path && !isValidUploadPath(input.cover_path))
+    return fail('The thumbnail upload is not valid. Upload it again.', {
+      cover_path: ['Upload the image again'],
+    });
+  if (input.gallery_paths.some((p) => !isValidUploadPath(p)))
+    return fail('A gallery photo upload is not valid. Upload it again.', {
+      gallery_paths: ['Upload the photos again'],
+    });
+
   try {
     if (await slugIsTaken(supabase, input.slug, id ?? undefined)) {
       return fail('That slug is already used.', { slug: ['That slug is already used'] });
@@ -137,6 +162,7 @@ export async function savePostAction({ id, values }: SaveInput): Promise<ActionR
     const saved = id
       ? await updatePostRow(supabase, id, input)
       : await insertPost(supabase, input, user.id);
+    if (linked?.success) await setWorkPeople(supabase, 'post', saved.id, linked.data);
     refreshPublic([saved.slug, before?.slug ?? saved.slug]);
     return { ok: true, data: saved };
   } catch (e) {
@@ -184,7 +210,7 @@ export async function quickUpdateAction(
       cover_path: q.cover_path,
       cover_alt: q.cover_alt,
       link_url: q.link_url,
-      show_in_news: false,
+      show_in_news: true,
       show_in_ticker: true,
       status: 'published',
       published_at: new Date().toISOString(),
@@ -226,7 +252,7 @@ export async function duplicatePostAction(id: string): Promise<ActionResult<Post
   try {
     const post = await adminGet(supabase, id);
     if (!post) return fail('That post no longer exists.');
-    const title = `${post.title} (copy)`.slice(0, post.type === 'update' ? 140 : 160);
+    const title = `${post.title} (copy)`.slice(0, post.type === 'update' ? 140 : 250);
     const copy = await insertPost(
       supabase,
       postInputSchema.parse({

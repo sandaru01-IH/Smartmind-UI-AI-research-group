@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { PostCover } from '@/components/news/post-cover';
 import { ButtonLink } from '@/components/ui/button';
 import { PostBody } from '@/components/ui/markdown';
-import { Tag } from '@/components/ui/tag';
+import { Tag, TbcFlag } from '@/components/ui/tag';
 import { requireAdmin } from '@/lib/auth/require-admin';
 import { formatDate } from '@/lib/format';
 import { adminGet } from '@/lib/posts/admin';
@@ -13,6 +13,9 @@ import { PLATFORM_LABEL } from '@/lib/schemas';
 import { mediaUrl } from '@/lib/supabase/env';
 import { embedUrl } from '@/lib/video';
 import { publicState } from '@/lib/visibility';
+
+/** Per-user admin page: it renders on request and shows loading.tsx while it does. */
+export const instant = false;
 
 /** Renders a post the way a visitor would see it, even if it is a draft or scheduled. Admin only. */
 export default async function PreviewPage({ params }: { params: Promise<{ id: string }> }) {
@@ -45,6 +48,7 @@ export default async function PreviewPage({ params }: { params: Promise<{ id: st
       </p>
       <div className="flex flex-wrap items-center gap-3">
         <Tag>{post.category}</Tag>
+        {post.tbc ? <TbcFlag /> : null}
         <time dateTime={post.published_at ?? undefined} className="label-mono text-muted">
           {post.published_at ? formatDate(post.published_at) : 'Not published'}
         </time>

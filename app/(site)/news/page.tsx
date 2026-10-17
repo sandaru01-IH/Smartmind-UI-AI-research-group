@@ -1,10 +1,12 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { PostCard } from '@/components/news/post-card';
+import { TagFilter } from '@/components/news/tag-filter';
 import { ButtonLink } from '@/components/ui/button';
 import { PageHeader } from '@/components/ui/page-header';
 import { t } from '@/content/strings';
-import { getFeaturedPost, getFilterOptions, listPosts } from '@/lib/posts/public';
+import { filterOptionsOf, getNewsPool, pickFeatured } from '@/lib/posts/public';
+import { applyPublicQuery } from '@/lib/posts/query';
 import { CATEGORIES, type Category } from '@/lib/schemas';
 import { pageMeta } from '@/lib/seo';
 
@@ -40,11 +42,11 @@ async function Listing({ searchParams }: { searchParams: SearchParams }) {
   const limit = Math.min(Math.max(Number(one(sp.limit)) || PAGE, PAGE), 60);
   const filtered = Boolean(category || tag);
 
-  const [{ categories, tags }, featured, { posts }] = await Promise.all([
-    getFilterOptions(),
-    filtered ? Promise.resolve(null) : getFeaturedPost(),
-    listPosts({ type: 'article', news: true, category, tag, limit: limit + 2 }),
-  ]);
+  // One cached list answers everything on this page: the filters, the featured post and the grid.
+  const pool = await getNewsPool();
+  const { categories, tags } = filterOptionsOf(pool);
+  const featured = filtered ? null : pickFeatured(pool);
+  const { posts } = applyPublicQuery(pool, { category, tag });
   const rest = posts.filter((p) => p.id !== featured?.id);
   const shown = rest.slice(0, limit);
   const hasMore = rest.length > limit;
@@ -57,19 +59,11 @@ async function Listing({ searchParams }: { searchParams: SearchParams }) {
           <FilterLink key={c} to={href({ category: c, tag })} active={category === c} label={c} />
         ))}
       </nav>
-      {tags.length > 0 ? (
-        <nav aria-label="Filter news by tag" className="mt-3 flex flex-wrap gap-2">
-          {tags.map((tg) => (
-            <FilterLink
-              key={tg}
-              to={href({ category, tag: tag === tg ? undefined : tg })}
-              active={tag === tg}
-              label={`#${tg}`}
-              mono
-            />
-          ))}
-        </nav>
-      ) : null}
+      <TagFilter
+        tags={tags.map((tg) => ({ tag: tg, href: href({ category, tag: tg }) }))}
+        active={tag}
+        clearHref={href({ category })}
+      />
 
       {featured ? (
         <div className="mt-10">

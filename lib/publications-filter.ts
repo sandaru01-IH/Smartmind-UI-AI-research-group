@@ -1,16 +1,21 @@
-import type { Publication } from '@/content/publications';
-
 export interface PublicationFilters {
   q: string;
   year: number | 'all';
   venue: string | 'all';
 }
 
+interface Filterable {
+  year: number;
+  title: string;
+  venue: string;
+  authors?: string;
+}
+
 /** Case-insensitive search over title, venue and authors, plus exact year and venue filters. */
-export function filterPublications(
-  items: readonly Publication[],
+export function filterPublications<T extends Filterable>(
+  items: readonly T[],
   f: PublicationFilters,
-): Publication[] {
+): T[] {
   const words = f.q.trim().toLowerCase().split(/\s+/).filter(Boolean);
   return items.filter((p) => {
     if (f.year !== 'all' && p.year !== f.year) return false;

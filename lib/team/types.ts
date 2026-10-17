@@ -1,3 +1,6 @@
+import type { MemberWork } from '@/lib/catalog/types';
+import type { SocialLink } from './socials';
+
 /** Mirrors the `team_members` table. */
 export interface TeamMember {
   id: string;
@@ -14,8 +17,11 @@ export interface TeamMember {
   photo_path: string | null;
   photo_alt: string | null;
   profile_url: string | null;
+  socials: SocialLink[];
   visible: boolean;
   sort_order: number;
+  /** Everything this person has been linked to, filled in on the public read side. */
+  works: MemberWork[];
 }
 
 /** Mirrors `team_links`: one undirected connection between two people. */
@@ -32,5 +38,5 @@ export interface TeamNetworkData {
 }
 
 export const TEAM_COLUMNS =
-  'id,slug,name,role,group_label,affiliation,education,qualifications,papers,contribution,photo_path,photo_alt,profile_url,visible,sort_order';
+  'id,slug,name,role,group_label,affiliation,education,qualifications,papers,contribution,photo_path,photo_alt,profile_url,socials,visible,sort_order';
 export const LINK_COLUMNS = 'id,a,b,label';

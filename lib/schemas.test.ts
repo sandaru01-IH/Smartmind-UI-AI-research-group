@@ -120,11 +120,12 @@ describe('thumbnail, placement and links', () => {
     cover_alt: 'A talk',
   };
 
-  it('needs a thumbnail before an article can be published', () => {
-    const r = postInputSchema.safeParse({ ...article, status: 'published' });
-    expect(r.success).toBe(false);
+  it('recommends a thumbnail but lets an article be published without one', () => {
+    expect(postInputSchema.safeParse({ ...article, status: 'published' }).success).toBe(true);
     expect(postInputSchema.safeParse(published).success).toBe(true);
-    // Drafts and ticker updates do not need one.
+    // A thumbnail still needs its description.
+    expect(postInputSchema.safeParse({ ...published, cover_alt: '' }).success).toBe(false);
+    // Drafts and ticker updates never needed one.
     expect(postInputSchema.safeParse(article).success).toBe(true);
     expect(
       postInputSchema.safeParse({ ...article, type: 'update', status: 'published' }).success,

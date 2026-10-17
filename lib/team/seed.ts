@@ -19,8 +19,10 @@ export function seedNetwork(): TeamNetworkData {
     photo_path: null,
     photo_alt: null,
     profile_url: null,
+    socials: [],
     visible: true,
     sort_order: i,
+    works: [],
   }));
   const ids = new Set(members.map((m) => m.id));
   const links: TeamLink[] = SEED_LINKS.filter((l) => ids.has(l.a) && ids.has(l.b)).map((l) => ({

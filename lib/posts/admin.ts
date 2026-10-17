@@ -2,21 +2,26 @@ import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { slugify, uniqueSlug } from '@/lib/slug';
 import { publicState } from '@/lib/visibility';
-import { parsePostRow, parsePostRows, POST_COLUMNS } from './rows';
+import { parsePostRow, parsePostRows, POST_COLUMNS, POST_LIST_COLUMNS } from './rows';
 import { applyAdminQuery } from './query';
 import type { AdminListQuery, Post } from './types';
 import type { PostInput } from '@/lib/schemas';
 
 /** Admin data access. Callers pass the session client from requireAdmin(); RLS enforces the rest. */
 
-export async function adminList(db: SupabaseClient, query: AdminListQuery = {}): Promise<Post[]> {
+/** Every post, without the article bodies, newest edit first. One query serves the table and the figures. */
+export async function adminListAll(db: SupabaseClient): Promise<Post[]> {
   const { data, error } = await db
     .from('posts')
-    .select(POST_COLUMNS)
+    .select(POST_LIST_COLUMNS)
     .order('updated_at', { ascending: false })
     .limit(500);
   if (error) throw new Error(`Could not load posts: ${error.message}`);
-  return applyAdminQuery(parsePostRows(data), query);
+  return parsePostRows(data);
+}
+
+export async function adminList(db: SupabaseClient, query: AdminListQuery = {}): Promise<Post[]> {
+  return applyAdminQuery(await adminListAll(db), query);
 }
 
 export async function adminGet(db: SupabaseClient, id: string): Promise<Post | null> {
@@ -32,8 +37,7 @@ export interface AdminStats {
   lastUpdated: string | null;
 }
 
-export async function adminStats(db: SupabaseClient): Promise<AdminStats> {
-  const posts = await adminList(db);
+export function adminStats(posts: readonly Post[]): AdminStats {
   const now = new Date();
   const count = (s: 'live' | 'scheduled' | 'draft') =>
     posts.filter((p) => publicState(p, now) === s).length;

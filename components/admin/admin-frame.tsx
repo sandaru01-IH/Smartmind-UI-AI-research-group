@@ -1,14 +1,19 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { ExternalLink, LogOut, Plus, Users } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { logoutAction } from '@/app/admin/actions';
 import { LogoMark } from '@/components/brand/logo';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { buttonClass } from '@/components/ui/button';
+import { AdminNav } from './admin-nav';
 import { ToastProvider } from './toast';
 
-/** Calmer variant of the site shell: no ticker, no footer, one thin bar with the signed-in user. */
-export function AdminFrame({ email, children }: { email: string; children: ReactNode }) {
+/**
+ * Calmer variant of the site shell: no ticker, no footer, one thin bar with the signed-in user.
+ * The frame itself needs no data, so it is part of the static shell and paints at once. Only the
+ * account line (`account`) and the page (`children`) wait for the session.
+ */
+export function AdminFrame({ account, children }: { account: ReactNode; children: ReactNode }) {
   return (
     <ToastProvider>
       <a href="#main" className="skip-link">
@@ -24,25 +29,7 @@ export function AdminFrame({ email, children }: { email: string; children: React
             Smartmind <span className="label-mono text-muted">Admin</span>
           </Link>
           <nav aria-label="Admin" className="flex items-center gap-1">
-            <Link href="/admin/posts/new" className={buttonClass('primary', '', 'sm')}>
-              <Plus size={16} aria-hidden="true" />
-              <span className="hidden sm:inline">New post</span>
-              <span className="sm:hidden">New</span>
-            </Link>
-            <Link href="/admin/team" className={buttonClass('ghost', '', 'sm')}>
-              <Users size={16} aria-hidden="true" />
-              <span className="hidden sm:inline">Team</span>
-              <span className="sr-only sm:hidden">Team</span>
-            </Link>
-            <Link
-              href="/"
-              target="_blank"
-              className={buttonClass('ghost', '', 'sm')}
-              aria-label="View the public site (opens in a new tab)"
-            >
-              <ExternalLink size={16} aria-hidden="true" />
-              <span className="hidden sm:inline">View site</span>
-            </Link>
+            <AdminNav />
             <ThemeToggle />
             <form action={logoutAction}>
               <button type="submit" className={buttonClass('ghost', '', 'sm')}>
@@ -52,8 +39,8 @@ export function AdminFrame({ email, children }: { email: string; children: React
             </form>
           </nav>
         </div>
-        <p className="label-mono mx-auto max-w-[1200px] px-[var(--gutter)] pb-2 text-muted">
-          Signed in as <span className="text-fg">{email}</span>
+        <p className="label-mono mx-auto h-6 max-w-[1200px] px-[var(--gutter)] text-muted">
+          {account}
         </p>
       </header>
       <main

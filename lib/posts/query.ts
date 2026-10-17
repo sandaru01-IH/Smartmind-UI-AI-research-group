@@ -37,6 +37,22 @@ export function applyAdminQuery(
     .filter((p) => !query.type || query.type === 'all' || p.type === query.type)
     .filter((p) => !query.category || query.category === 'all' || p.category === query.category)
     .filter((p) => {
+      switch (query.on) {
+        case 'news':
+          return p.show_in_news;
+        case 'ticker':
+          return p.show_in_ticker;
+        case 'gallery':
+          return p.in_gallery;
+        case 'publications':
+          return p.in_publications;
+        case 'awards':
+          return p.in_awards;
+        default:
+          return true;
+      }
+    })
+    .filter((p) => {
       const s = query.status ?? 'all';
       if (s === 'all') return true;
       const state = publicState(p, now);

@@ -34,7 +34,13 @@ async function newsSlugExists(slug: string): Promise<boolean> {
  */
 export async function proxy(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith('/news/')) {
-    const slug = decodeURIComponent(request.nextUrl.pathname.slice('/news/'.length));
+    let slug = '';
+    try {
+      slug = decodeURIComponent(request.nextUrl.pathname.slice('/news/'.length));
+    } catch {
+      // A malformed escape such as /news/%E0%A4%A is simply an unknown article.
+      return NextResponse.rewrite(new URL('/_missing-page', request.url), { status: 404 });
+    }
     if (slug && !(await newsSlugExists(slug))) {
       return NextResponse.rewrite(new URL('/_missing-page', request.url), { status: 404 });
     }
@@ -65,11 +71,12 @@ export async function proxy(request: NextRequest) {
     },
   });
 
-  const { data } = await supabase.auth.getUser();
+  // Verifies the token (locally when the project uses asymmetric keys) and refreshes the cookies.
+  const { data } = await supabase.auth.getClaims();
   const { pathname, search } = request.nextUrl;
   const isLogin = pathname === '/admin/login';
 
-  if (!data.user && !isLogin) {
+  if (!data?.claims && !isLogin) {
     const url = request.nextUrl.clone();
     url.pathname = '/admin/login';
     url.search = '';

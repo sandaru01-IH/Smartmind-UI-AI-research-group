@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { ExternalLink } from '@/components/ui/external-link';
 import { TbcFlag } from '@/components/ui/tag';
-import type { Milestone } from '@/content/chatbots';
+import type { Milestone } from '@/lib/catalog/types';
 
 /**
  * Vertical timeline with a sticky year and progress rail. Native scrolling only: the rail
@@ -80,12 +80,12 @@ export function JourneyTimeline({ milestones }: { milestones: Milestone[] }) {
             }`}
           >
             <div className="flex flex-wrap items-center gap-3">
-              <p className="label-mono text-fg">{m.when}</p>
-              {m.confirmation === 'tbc' ? <TbcFlag /> : null}
+              <p className="label-mono text-fg">{m.when_label || m.year}</p>
+              {m.tbc ? <TbcFlag /> : null}
             </div>
             <h3 className="mt-4 max-w-[26ch] text-2xl md:text-3xl">{m.title}</h3>
             <p className="mt-4 max-w-[62ch] text-muted">{m.detail}</p>
-            {m.links?.length ? (
+            {m.links.length ? (
               <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-1">
                 {m.links.map((l) => (
                   <li key={l.href}>

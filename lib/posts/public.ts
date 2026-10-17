@@ -4,7 +4,7 @@ import { SEED_POSTS } from '@/content/seed-posts';
 import { CATEGORIES, type Category } from '@/lib/schemas';
 import { createPublicClient } from '@/lib/supabase/public-client';
 import { applyPublicQuery, visibleSeedPosts } from './query';
-import { parsePostRow, parsePostRows, POST_COLUMNS } from './rows';
+import { parsePostRow, parsePostRows, POST_COLUMNS, POST_LIST_COLUMNS } from './rows';
 import type { Post, PublicListQuery, PublicListResult } from './types';
 
 /**
@@ -13,7 +13,8 @@ import type { Post, PublicListQuery, PublicListResult } from './types';
  * Demo mode (no Supabase env) serves content/seed-posts.ts through the same functions.
  */
 
-const SCHEMA_ESCAPE = /[%_,()]/g;
+/** Only letters, digits and spaces reach the PostgREST filter, so a search can never add filters. */
+const SCHEMA_ESCAPE = /[^\p{L}\p{N} ]/gu;
 
 export async function listPosts(query: PublicListQuery = {}): Promise<PublicListResult> {
   'use cache';
@@ -85,41 +86,42 @@ export async function getTickerItems(limit: number): Promise<Post[]> {
 }
 
 /** Moments for the gallery: posts the admin marked for it, newest event first. */
-export async function getGalleryPosts(limit = 24): Promise<Post[]> {
+export async function getGalleryPosts(limit = 60): Promise<Post[]> {
   'use cache';
   cacheTag('posts', 'gallery');
   cacheLife({ stale: 30, revalidate: 30, expire: 3600 });
   return (await listPosts({ gallery: true, limit })).posts;
 }
 
-export async function getFeaturedPost(): Promise<Post | null> {
+/**
+ * Every live news article, newest first, without the article bodies. The news page, its filters and
+ * the featured post are all worked out from this one cached list, so opening the news tab costs one
+ * database read (or none, while the cache is warm) instead of one per filter.
+ */
+export async function getNewsPool(): Promise<Post[]> {
   'use cache';
   cacheTag('posts', 'latest');
-  cacheLife({ stale: 30, revalidate: 30, expire: 3600 });
+  cacheLife({ stale: 60, revalidate: 120, expire: 86400 });
 
   const db = createPublicClient();
-  if (!db) {
-    const pool = visibleSeedPosts(SEED_POSTS).filter((p) => p.type === 'article' && p.show_in_news);
-    return (
-      applyPublicQuery(pool.filter((p) => p.featured)).posts[0] ??
-      applyPublicQuery(pool).posts[0] ??
-      null
-    );
-  }
-  const featured = await db
+  if (!db) return applyPublicQuery(visibleSeedPosts(SEED_POSTS), { news: true }).posts;
+  const { data, error } = await db
     .from('posts')
-    .select(POST_COLUMNS)
+    .select(POST_LIST_COLUMNS)
     .eq('status', 'published')
-    .eq('type', 'article')
     .eq('show_in_news', true)
-    .eq('featured', true)
     .order('published_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (featured.error) throw new Error(`Could not load featured post: ${featured.error.message}`);
-  if (featured.data) return parsePostRow(featured.data);
-  const newest = await listPosts({ type: 'article', news: true, limit: 1 });
-  return newest.posts[0] ?? null;
+    .limit(200);
+  if (error) throw new Error(`Could not load news: ${error.message}`);
+  return parsePostRows(data);
+}
+
+/** The featured article: the newest one marked featured, otherwise the newest full article. */
+export const pickFeatured = (pool: readonly Post[]): Post | null =>
+  pool.find((p) => p.featured) ?? pool.find((p) => p.type === 'article') ?? null;
+
+export async function getFeaturedPost(): Promise<Post | null> {
+  return pickFeatured(await getNewsPool());
 }
 
 export async function getSlugIndex(): Promise<{ slug: string; updated_at: string }[]> {
@@ -130,12 +132,17 @@ export async function getSlugIndex(): Promise<{ slug: string; updated_at: string
   return posts.map((p) => ({ slug: p.slug, updated_at: p.updated_at }));
 }
 
+/** Categories and tags that at least one live news article uses. */
+export const filterOptionsOf = (
+  pool: readonly Post[],
+): { categories: Category[]; tags: string[] } => {
+  const present = new Set(pool.map((p) => p.category));
+  return {
+    categories: CATEGORIES.filter((c) => present.has(c)),
+    tags: Array.from(new Set(pool.flatMap((p) => p.tags))).sort(),
+  };
+};
+
 export async function getFilterOptions(): Promise<{ categories: Category[]; tags: string[] }> {
-  'use cache';
-  cacheTag('posts');
-  cacheLife({ stale: 30, revalidate: 30, expire: 3600 });
-  const { posts } = await listPosts({ type: 'article', news: true, limit: 500 });
-  const present = new Set(posts.map((p) => p.category));
-  const tags = Array.from(new Set(posts.flatMap((p) => p.tags))).sort();
-  return { categories: CATEGORIES.filter((c) => present.has(c)), tags };
+  return filterOptionsOf(await getNewsPool());
 }

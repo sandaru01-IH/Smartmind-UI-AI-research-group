@@ -10,8 +10,9 @@ import { ButtonLink } from '@/components/ui/button';
 import { Section } from '@/components/ui/section';
 import { JsonLd } from '@/components/seo/json-ld';
 import { BRAND, LINKS, SITE_URL, UNIVERSITY_CONTACT } from '@/content/brand';
-import { getNumbers } from '@/content/numbers';
 import { t } from '@/content/strings';
+import { getMilestones, getNumberStats, getResearch } from '@/lib/catalog/public';
+import { numberWordCap } from '@/lib/number-words';
 import { getTeamNetwork } from '@/lib/team/public';
 
 export const metadata: Metadata = {
@@ -24,7 +25,23 @@ export const metadata: Metadata = {
 
 async function Numbers() {
   const { members } = await getTeamNetwork();
-  return <NumbersStrip stats={getNumbers(members.length)} />;
+  return <NumbersStrip stats={await getNumberStats(members.length)} />;
+}
+
+async function Journey() {
+  return <JourneyTeaser milestones={await getMilestones()} />;
+}
+
+async function ResearchThemes() {
+  const { themes } = await getResearch();
+  return <ResearchBento themes={themes} />;
+}
+
+async function ResearchHeading() {
+  const { themes } = await getResearch();
+  return (
+    <>{`${numberWordCap(themes.length)} research ${themes.length === 1 ? 'theme' : 'themes'}`}</>
+  );
 }
 
 export default function HomePage() {
@@ -72,7 +89,11 @@ export default function HomePage() {
       <Section
         id="research"
         numeral="02"
-        title={t.home.researchTitle}
+        title={
+          <Suspense fallback={t.home.researchTitle}>
+            <ResearchHeading />
+          </Suspense>
+        }
         lead={t.home.researchLead}
         action={
           <ButtonLink href="/research" variant="secondary">
@@ -80,7 +101,11 @@ export default function HomePage() {
           </ButtonLink>
         }
       >
-        <ResearchBento />
+        <Suspense
+          fallback={<div className="h-96 border border-line bg-surface" aria-hidden="true" />}
+        >
+          <ResearchThemes />
+        </Suspense>
       </Section>
 
       <Section
@@ -94,7 +119,11 @@ export default function HomePage() {
           </ButtonLink>
         }
       >
-        <JourneyTeaser />
+        <Suspense
+          fallback={<div className="h-64 border border-line bg-surface" aria-hidden="true" />}
+        >
+          <Journey />
+        </Suspense>
       </Section>
 
       <section id="contact" className="border-t border-line py-16 md:py-24">

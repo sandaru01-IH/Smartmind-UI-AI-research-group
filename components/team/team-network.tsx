@@ -10,7 +10,16 @@ import {
   type CSSProperties,
   type ReactNode,
 } from 'react';
-import { ExternalLink as ExternalIcon, RotateCcw, Search, X } from 'lucide-react';
+import Link from 'next/link';
+import {
+  ExternalLink as ExternalIcon,
+  Maximize2,
+  Minimize2,
+  RotateCcw,
+  Search,
+  X,
+} from 'lucide-react';
+import { SOCIAL_LABEL } from '@/lib/team/socials';
 import { layoutNetwork } from '@/lib/team/layout';
 import type { TeamLink, TeamMember } from '@/lib/team/types';
 import { mediaUrl } from '@/lib/supabase/env';
@@ -75,13 +84,17 @@ export function TeamNetwork({
 }) {
   const reduced = usePrefersReducedMotion();
   const uid = useId();
+  const rootRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
-  const [width, setWidth] = useState(1000);
+  const [box, setBox] = useState({ w: 1000, h: 620 });
+  const [full, setFull] = useState(false);
+  const width = box.w;
   const [hover, setHover] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [listOpen, setListOpen] = useState(false);
+  const [fullProfile, setFullProfile] = useState(false);
   const [groupFilter, setGroupFilter] = useState<string | null>(null);
   const [dragging, setDragging] = useState<string | null>(null);
   const [moving, setMoving] = useState(false);
@@ -89,7 +102,7 @@ export function TeamNetwork({
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
-    const measure = () => setWidth(el.clientWidth || 1000);
+    const measure = () => setBox({ w: el.clientWidth || 1000, h: el.clientHeight || 620 });
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
@@ -97,16 +110,44 @@ export function TeamNetwork({
   }, []);
 
   useEffect(() => {
-    if (!selected) return;
-    const on = (e: KeyboardEvent) => e.key === 'Escape' && setSelected(null);
+    if (!selected && !full) return;
+    const on = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || fullProfile) return; // the open profile dialog closes itself
+      // First Escape closes the profile, the next leaves full screen.
+      if (selected) setSelected(null);
+      else setFull(false);
+    };
     window.addEventListener('keydown', on);
     return () => window.removeEventListener('keydown', on);
-  }, [selected]);
+  }, [selected, full, fullProfile]);
+
+  // Full screen: the canvas takes the whole window so the entire team can be explored at once.
+  // The browser's own full screen is used when it is there; a fixed overlay covers the rest.
+  useEffect(() => {
+    if (!full) return;
+    const root = rootRef.current;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    if (root?.requestFullscreen && !document.fullscreenElement) {
+      root.requestFullscreen().catch(() => undefined);
+    }
+    const onChange = () => {
+      if (!document.fullscreenElement) setFull(false);
+    };
+    document.addEventListener('fullscreenchange', onChange);
+    return () => {
+      document.body.style.overflow = prev;
+      document.removeEventListener('fullscreenchange', onChange);
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => undefined);
+    };
+  }, [full]);
 
   // A drawing about as wide as its box keeps nodes and text near their real size on every screen.
-  const W = Math.min(1100, Math.max(320, Math.round(width / 20) * 20));
+  const W = Math.min(full ? 2400 : 1100, Math.max(320, Math.round(width / 20) * 20));
   const narrow = W < 640;
-  const H = Math.round(narrow ? W * 1.8 : W * 0.6);
+  const H = full
+    ? Math.max(360, Math.round(box.h / 10) * 10)
+    : Math.round(narrow ? W * 1.8 : W * 0.6);
 
   const base = useMemo(
     () =>
@@ -345,9 +386,18 @@ export function TeamNetwork({
   };
 
   return (
-    <div className={`grid gap-6 lg:grid-cols-12 ${selected ? 'pb-[55svh] lg:pb-0' : ''}`}>
-      <div className="lg:col-span-8">
-        <div className="relative isolate border border-line-strong bg-bg">
+    <div
+      ref={rootRef}
+      className={
+        full
+          ? 'fixed inset-0 z-[70] flex flex-col gap-3 bg-bg p-3 md:p-4'
+          : `grid gap-6 lg:grid-cols-12 ${selected ? 'pb-[55svh] lg:pb-0' : ''}`
+      }
+    >
+      <div className={full ? 'flex min-h-0 flex-1 flex-col' : 'lg:col-span-8'}>
+        <div
+          className={`relative isolate border border-line-strong bg-bg ${full ? 'flex min-h-0 flex-1 flex-col' : ''}`}
+        >
           {/* The hero's layered roads, faint, so the page feels like one place. */}
           <div aria-hidden="true" className="absolute inset-0 -z-10 overflow-hidden opacity-40">
             {backdrop}
@@ -436,14 +486,37 @@ export function TeamNetwork({
               <RotateCcw size={15} aria-hidden="true" />
               Reset layout
             </button>
+            <button
+              type="button"
+              onClick={() => setFull((f) => !f)}
+              aria-pressed={full}
+              className="inline-flex h-11 items-center gap-2 rounded-sharp bg-signal px-4 text-[0.9rem] font-semibold text-signal-fg hover:brightness-95"
+            >
+              {full ? (
+                <Minimize2 size={15} aria-hidden="true" />
+              ) : (
+                <Maximize2 size={15} aria-hidden="true" />
+              )}
+              {full ? 'Exit full screen' : 'Explore full screen'}
+            </button>
           </div>
 
-          <div ref={wrapRef} className="relative">
+          <div ref={wrapRef} className={full ? 'relative min-h-0 flex-1' : 'relative'}>
             <svg
               ref={svgRef}
               viewBox={`0 0 ${W} ${H}`}
               width="100%"
-              style={{ aspectRatio: `${W} / ${H}`, display: 'block' }}
+              style={
+                full
+                  ? {
+                      position: 'absolute',
+                      inset: 0,
+                      width: '100%',
+                      height: '100%',
+                      display: 'block',
+                    }
+                  : { aspectRatio: `${W} / ${H}`, display: 'block' }
+              }
               role="group"
               aria-label="Team network. Each circle is a person; drag a circle to move it."
               onClick={(e) => {
@@ -644,7 +717,9 @@ export function TeamNetwork({
           </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+        <div
+          className={`flex flex-wrap items-center justify-between gap-x-6 gap-y-3 ${full ? 'mt-3 shrink-0' : 'mt-4'}`}
+        >
           {groups.length > 0 ? (
             <ul className="flex flex-wrap gap-2" aria-label="Filter by group">
               {groups.map((g, i) => {
@@ -689,12 +764,21 @@ export function TeamNetwork({
         aria-live="polite"
         className={
           person
-            ? 'fixed inset-x-0 bottom-0 z-40 max-h-[55svh] overflow-y-auto border-t-2 border-signal bg-bg p-5 shadow-[0_-16px_40px_rgb(0_0_0/0.35)] lg:static lg:z-auto lg:col-span-4 lg:max-h-none lg:border lg:border-t-2 lg:border-line-strong lg:border-t-signal lg:p-6 lg:shadow-none'
-            : 'hidden lg:col-span-4 lg:block'
+            ? full
+              ? 'fixed inset-x-0 bottom-0 z-[80] max-h-[55svh] overflow-y-auto border-t-2 border-signal bg-bg p-5 shadow-[0_-16px_40px_rgb(0_0_0/0.35)] md:inset-x-auto md:bottom-4 md:right-4 md:top-4 md:max-h-none md:w-[26rem] md:border md:border-line-strong md:border-t-2 md:border-t-signal md:shadow-[0_12px_40px_rgb(0_0_0/0.35)]'
+              : 'fixed inset-x-0 bottom-0 z-40 max-h-[55svh] overflow-y-auto border-t-2 border-signal bg-bg p-5 shadow-[0_-16px_40px_rgb(0_0_0/0.35)] lg:static lg:z-auto lg:col-span-4 lg:max-h-none lg:border lg:border-t-2 lg:border-line-strong lg:border-t-signal lg:p-6 lg:shadow-none'
+            : full
+              ? 'hidden'
+              : 'hidden lg:col-span-4 lg:block'
         }
       >
         {person ? (
-          <Profile person={person} colour={colourOf(person)} onClose={() => setSelected(null)} />
+          <Profile
+            person={person}
+            colour={colourOf(person)}
+            onClose={() => setSelected(null)}
+            onOpenFull={() => setFullProfile(true)}
+          />
         ) : (
           <div className="border border-dashed border-line-strong p-6 lg:sticky lg:top-28">
             <p className="label-mono text-muted">The network</p>
@@ -708,18 +792,72 @@ export function TeamNetwork({
           </div>
         )}
       </aside>
+      {person && fullProfile ? (
+        <FullProfile
+          person={person}
+          colour={colourOf(person)}
+          connections={(neighbours.get(person.id) ?? []).flatMap((n) => {
+            const m = byId.get(n.id);
+            return m ? [{ id: m.id, name: m.name, role: m.role, label: n.label }] : [];
+          })}
+          onClose={() => setFullProfile(false)}
+          onOpenPerson={(id) => setSelected(id)}
+        />
+      ) : null}
     </div>
   );
 }
+
+const WORK_LABEL: Record<string, string> = {
+  article: 'Article',
+  paper: 'Paper',
+  poster: 'Poster',
+  report: 'Report',
+  talk: 'Talk',
+  other: 'Other',
+  award: 'Award',
+};
+
+/** One piece of work: its year and kind, then the title as a link when there is one. */
+function WorkItem({ w }: { w: TeamMember['works'][number] }) {
+  return (
+    <li className="text-[0.95rem] leading-snug">
+      <span className="label-mono block text-muted">
+        {[w.year, WORK_LABEL[w.kind]].filter(Boolean).join(' · ')}
+      </span>
+      {w.href && w.internal ? (
+        <Link href={w.href} className="underline-offset-4 hover:underline">
+          {w.title}
+        </Link>
+      ) : w.href ? (
+        <a
+          href={w.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline-offset-4 hover:underline"
+        >
+          {w.title}
+          <span className="sr-only"> (opens in a new tab)</span>
+        </a>
+      ) : (
+        w.title
+      )}
+    </li>
+  );
+}
+
+const PREVIEW_WORKS = 4;
 
 function Profile({
   person,
   colour,
   onClose,
+  onOpenFull,
 }: {
   person: TeamMember;
   colour: { fill: string; ink: string };
   onClose: () => void;
+  onOpenFull: () => void;
 }) {
   const photo = mediaUrl(person.photo_path);
   const rows: [string, string][] = (
@@ -729,7 +867,7 @@ function Profile({
       ['Key contribution', person.contribution],
     ] as [string, string][]
   ).filter(([, v]) => v);
-  const empty = rows.length === 0 && person.papers === null;
+  const empty = rows.length === 0 && person.papers === null && person.works.length === 0;
   return (
     <div className="lg:sticky lg:top-28">
       <div className="flex items-start gap-4">
@@ -769,6 +907,15 @@ function Profile({
         </button>
       </div>
 
+      <button
+        type="button"
+        onClick={onOpenFull}
+        className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-sharp border border-line-strong text-[0.95rem] font-semibold text-fg hover:bg-surface-2"
+      >
+        <Maximize2 size={15} aria-hidden="true" />
+        View full profile
+      </button>
+
       {person.papers !== null ? (
         <p className="mt-6 flex items-baseline gap-3 border-t border-line pt-5">
           <span className="numeral text-5xl">{person.papers}</span>
@@ -786,10 +933,44 @@ function Profile({
           ))}
         </dl>
       ) : null}
+      {person.works.length > 0 ? (
+        <div className="mt-6 border-t border-line pt-5">
+          <h4 className="label-mono text-muted">Work · {person.works.length}</h4>
+          <ul className="mt-3 space-y-3">
+            {person.works.slice(0, PREVIEW_WORKS).map((w) => (
+              <WorkItem key={w.key} w={w} />
+            ))}
+          </ul>
+          {person.works.length > PREVIEW_WORKS ? (
+            <p className="label-mono mt-3 text-muted">
+              + {person.works.length - PREVIEW_WORKS} more in the full profile
+            </p>
+          ) : null}
+        </div>
+      ) : null}
       {empty ? (
         <p className="mt-6 border-t border-line pt-5 text-muted">
           More about {person.name.split(' ')[0]} is coming soon.
         </p>
+      ) : null}
+
+      {person.socials.length > 0 ? (
+        <ul className="mt-5 flex flex-wrap gap-2" aria-label={`${person.name} on the web`}>
+          {person.socials.map((s) => (
+            <li key={`${s.platform}-${s.url}`}>
+              <a
+                href={s.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="label-mono inline-flex min-h-9 items-center gap-1.5 rounded-sharp border border-line-strong px-3 text-fg hover:bg-surface-2"
+              >
+                {SOCIAL_LABEL[s.platform]}
+                <ExternalIcon size={12} aria-hidden="true" />
+                <span className="sr-only">(opens in a new tab)</span>
+              </a>
+            </li>
+          ))}
+        </ul>
       ) : null}
 
       {person.profile_url ? (
@@ -806,5 +987,231 @@ function Profile({
         </p>
       ) : null}
     </div>
+  );
+}
+
+/**
+ * The whole profile on one clean page, in a dialog over the network. It opens from the side panel, shows
+ * everything known about the person in reading order, and the people they work with open in place.
+ */
+function FullProfile({
+  person,
+  colour,
+  connections,
+  onClose,
+  onOpenPerson,
+}: {
+  person: TeamMember;
+  colour: { fill: string; ink: string };
+  connections: { id: string; name: string; role: string; label: string }[];
+  onClose: () => void;
+  onOpenPerson: (id: string) => void;
+}) {
+  const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
+  const photo = mediaUrl(person.photo_path);
+
+  useEffect(() => {
+    // Unmounting removes the dialog (and its backdrop) by itself; closing it here would fire the
+    // close handler during React's development double-run and shut the dialog the moment it opens.
+    const d = ref.current;
+    if (d && !d.open) d.showModal();
+  }, []);
+
+  useEffect(() => {
+    ref.current?.scrollTo({ top: 0 });
+  }, [person.id]);
+
+  // Work grouped by year, newest first.
+  const byYear = useMemo(() => {
+    const groups = new Map<string, TeamMember['works']>();
+    for (const w of person.works) {
+      const key = w.year ? String(w.year) : 'Undated';
+      groups.set(key, [...(groups.get(key) ?? []), w]);
+    }
+    return [...groups.entries()];
+  }, [person.works]);
+
+  const facts: [string, string][] = (
+    [
+      ['Education', person.education],
+      ['Qualifications', person.qualifications],
+      ['Key contribution', person.contribution],
+    ] as [string, string][]
+  ).filter(([, v]) => v);
+  const papers = person.works.filter((w) => w.kind === 'paper').length;
+  const awards = person.works.filter((w) => w.kind === 'award').length;
+
+  return (
+    <dialog
+      ref={ref}
+      aria-labelledby={titleId}
+      onClose={() => {
+        if (!ref.current?.open) onClose();
+      }}
+      onClick={(e) => {
+        if (e.target === ref.current) ref.current?.close();
+      }}
+      className="m-auto h-[min(54rem,94svh)] w-[min(52rem,96vw)] overflow-y-auto border border-line-strong bg-bg p-0 text-fg backdrop:bg-black/40 backdrop:backdrop-blur-md"
+    >
+      <header
+        className="sticky top-0 z-10 flex items-start gap-4 border-b border-line bg-bg/95 p-5 backdrop-blur-sm md:p-7"
+        style={{ borderTop: `3px solid ${colour.fill}` }}
+      >
+        <div
+          className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line-strong font-mono text-2xl"
+          style={{ boxShadow: `0 0 0 3px var(--bg), 0 0 0 5px ${colour.fill}` }}
+        >
+          {photo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={photo} alt={person.photo_alt ?? ''} className="h-full w-full object-cover" />
+          ) : (
+            <span aria-hidden="true">{initials(person.name)}</span>
+          )}
+        </div>
+        <div className="min-w-0 flex-1 pl-1">
+          <h2 id={titleId} className="text-2xl md:text-4xl">
+            {person.name}
+          </h2>
+          {person.role ? <p className="mt-1 text-lg">{person.role}</p> : null}
+          <p className="label-mono mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+            {person.group_label ? (
+              <span className="inline-flex items-center gap-2" style={{ color: colour.ink }}>
+                <span
+                  aria-hidden="true"
+                  className="h-2 w-2 rounded-full"
+                  style={{ background: colour.fill }}
+                />
+                {person.group_label}
+              </span>
+            ) : null}
+            {person.affiliation ? <span className="text-muted">{person.affiliation}</span> : null}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => ref.current?.close()}
+          aria-label="Close full profile"
+          className="-mr-2 -mt-1 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-sharp text-muted hover:text-fg"
+        >
+          <X size={22} aria-hidden="true" />
+        </button>
+      </header>
+
+      <div className="space-y-10 p-5 md:p-7">
+        <dl className="grid grid-cols-3 gap-px border border-line bg-line text-center">
+          {(
+            [
+              ['Work', person.works.length],
+              ['Papers', person.papers ?? papers],
+              ['Connections', connections.length],
+            ] as const
+          ).map(([label, n]) => (
+            <div key={label} className="bg-bg p-4">
+              <dd className="numeral text-3xl md:text-4xl">{n}</dd>
+              <dt className="label-mono mt-1 text-muted">{label}</dt>
+            </div>
+          ))}
+        </dl>
+        {awards > 0 ? (
+          <p className="label-mono -mt-6 text-muted">
+            Includes {awards} {awards === 1 ? 'award' : 'awards'}.
+          </p>
+        ) : null}
+
+        {facts.length > 0 ? (
+          <section aria-label="About">
+            <dl className="space-y-6">
+              {facts.map(([k, v]) => (
+                <div key={k}>
+                  <dt className="label-mono text-muted">{k}</dt>
+                  <dd className="mt-2 max-w-[62ch] whitespace-pre-line text-lg">{v}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        ) : null}
+
+        {person.socials.length > 0 || person.profile_url ? (
+          <section aria-label="Find them online">
+            <h3 className="label-mono text-muted">Online</h3>
+            <ul className="mt-3 flex flex-wrap gap-2">
+              {person.socials.map((so) => (
+                <li key={`${so.platform}-${so.url}`}>
+                  <a
+                    href={so.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="label-mono inline-flex min-h-10 items-center gap-1.5 rounded-sharp border border-line-strong px-3 text-fg hover:bg-surface-2"
+                  >
+                    {SOCIAL_LABEL[so.platform]}
+                    <ExternalIcon size={12} aria-hidden="true" />
+                    <span className="sr-only">(opens in a new tab)</span>
+                  </a>
+                </li>
+              ))}
+              {person.profile_url ? (
+                <li>
+                  <a
+                    href={person.profile_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="label-mono inline-flex min-h-10 items-center gap-1.5 rounded-sharp border border-line-strong px-3 text-fg hover:bg-surface-2"
+                  >
+                    Profile
+                    <ExternalIcon size={12} aria-hidden="true" />
+                    <span className="sr-only">(opens in a new tab)</span>
+                  </a>
+                </li>
+              ) : null}
+            </ul>
+          </section>
+        ) : null}
+
+        <section aria-label="Work">
+          <h3 className="label-mono text-muted">Work · {person.works.length}</h3>
+          {byYear.length === 0 ? (
+            <p className="mt-3 text-muted">Nothing is linked to this person yet.</p>
+          ) : (
+            <div className="mt-4 space-y-7">
+              {byYear.map(([year, list]) => (
+                <div key={year} className="grid gap-3 md:grid-cols-[5rem_1fr]">
+                  <p className="numeral text-2xl text-muted">{year}</p>
+                  <ul className="space-y-4 border-l border-line pl-5">
+                    {list.map((w) => (
+                      <WorkItem key={w.key} w={w} />
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {connections.length > 0 ? (
+          <section aria-label="Connections">
+            <h3 className="label-mono text-muted">Works with · {connections.length}</h3>
+            <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+              {connections.map((c) => (
+                <li key={c.id}>
+                  <button
+                    type="button"
+                    onClick={() => onOpenPerson(c.id)}
+                    className="block min-h-11 w-full border border-line px-3 py-2 text-left hover:bg-surface-2"
+                  >
+                    <span className="block">{c.name}</span>
+                    {c.label || c.role ? (
+                      <span className="label-mono block truncate text-muted">
+                        {c.label || c.role}
+                      </span>
+                    ) : null}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+      </div>
+    </dialog>
   );
 }

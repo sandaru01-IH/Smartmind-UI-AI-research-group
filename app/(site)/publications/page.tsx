@@ -1,20 +1,30 @@
+import { Suspense } from 'react';
 import { PublicationsExplorer } from '@/components/publications/publications-explorer';
 import { PageHeader } from '@/components/ui/page-header';
-import { ALL_PUBLICATIONS, LISTED_PAPER_COUNT } from '@/content/publications';
+import { getPublications } from '@/lib/catalog/public';
 import { pageMeta } from '@/lib/seo';
 
 export const metadata = pageMeta({
   title: 'Publications',
-  description: `${LISTED_PAPER_COUNT} papers listed by the Urban Simulation Lab from 2019 to 2021, plus the 2026 participatory chatbot paper.`,
+  description:
+    'Papers, posters and reports from the Urban Simulation Lab and the Smartmind team, with the people behind each.',
   path: '/publications',
 });
+
+async function List() {
+  return <PublicationsExplorer publications={await getPublications()} />;
+}
 
 export default function PublicationsPage() {
   return (
     <>
       <PageHeader eyebrow="Publications" title="Read our publications." />
       <div className="container-site pb-24">
-        <PublicationsExplorer publications={ALL_PUBLICATIONS} />
+        <Suspense
+          fallback={<div className="h-96 border border-line bg-surface" aria-hidden="true" />}
+        >
+          <List />
+        </Suspense>
       </div>
     </>
   );

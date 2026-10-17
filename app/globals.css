@@ -461,3 +461,23 @@ html:not(.js) [data-reveal] {
     animation: none;
   }
 }
+
+/* Loading placeholders: a calm shimmer that stops under reduced motion. */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 30%,
+    color-mix(in oklab, var(--surface-2) 60%, var(--bg)) 50%,
+    var(--surface-2) 70%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}

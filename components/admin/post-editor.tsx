@@ -10,7 +10,6 @@ import { buttonClass } from '@/components/ui/button';
 import { TbcFlag } from '@/components/ui/tag';
 import { fromLocalInput, toLocalInput } from '@/lib/datetime';
 import type { Post } from '@/lib/posts/types';
-import { hasTbcFlag } from '@/lib/posts/types';
 import {
   CATEGORIES,
   PLATFORMS,
@@ -24,6 +23,7 @@ import { isValidSlug, slugify } from '@/lib/slug';
 import { GalleryPhotos } from './gallery-photos';
 import { ImageUploader } from './image-uploader';
 import { MarkdownEditor } from './markdown-editor';
+import { PeoplePicker, type PersonOption } from './people-picker';
 import { useToast } from './toast';
 
 interface Draft {
@@ -44,6 +44,9 @@ interface Draft {
   show_in_news: boolean;
   show_in_ticker: boolean;
   in_gallery: boolean;
+  in_publications: boolean;
+  in_awards: boolean;
+  tbc: boolean;
   video_url: string;
   gallery_paths: string[];
   external_links: { platform: Platform; url: string }[];
@@ -64,9 +67,12 @@ const blank = (type: 'article' | 'update'): Draft => ({
   featured: false,
   status: 'draft',
   published_at: '',
-  show_in_news: type === 'article',
+  show_in_news: true,
   show_in_ticker: type === 'update',
   in_gallery: false,
+  in_publications: false,
+  in_awards: false,
+  tbc: false,
   video_url: '',
   gallery_paths: [],
   external_links: [],
@@ -90,6 +96,9 @@ const fromPost = (p: Post): Draft => ({
   show_in_news: p.show_in_news,
   show_in_ticker: p.show_in_ticker,
   in_gallery: p.in_gallery,
+  in_publications: p.in_publications,
+  in_awards: p.in_awards,
+  tbc: p.tbc,
   video_url: p.video_url ?? '',
   gallery_paths: p.gallery_paths,
   external_links: p.external_links,
@@ -162,11 +171,22 @@ function Field({
   );
 }
 
-export function PostEditor({ post }: { post: Post | null }) {
+export function PostEditor({
+  post,
+  people = [],
+  linkedPeople = [],
+}: {
+  post: Post | null;
+  /** Everyone who can be linked to this post. */
+  people?: PersonOption[];
+  /** Ids of the people already linked. */
+  linkedPeople?: string[];
+}) {
   const router = useRouter();
   const toast = useToast();
   const [id, setId] = useState<string | null>(post?.id ?? null);
   const [d, setD] = useState<Draft>(post ? fromPost(post) : blank('article'));
+  const [linked, setLinked] = useState<string[]>(linkedPeople);
   const [slugTouched, setSlugTouched] = useState(Boolean(post));
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [savedAt, setSavedAt] = useState<Date | null>(null);
@@ -177,11 +197,10 @@ export function PostEditor({ post }: { post: Post | null }) {
   const [scheduled, setScheduled] = useState(() =>
     isFutureSchedule(post ? fromPost(post) : blank('article')),
   );
-  const latest = useRef({ d, id });
+  const latest = useRef({ d, id, linked });
   useEffect(() => {
-    latest.current = { d, id };
+    latest.current = { d, id, linked };
   });
-  const tbc = post ? hasTbcFlag(post) : false;
 
   const set = useCallback(
     <K extends keyof Draft>(key: K, value: Draft[K]) => {
@@ -204,7 +223,7 @@ export function PostEditor({ post }: { post: Post | null }) {
 
   const save = useCallback(
     async (opts: { silent?: boolean } = {}): Promise<boolean> => {
-      const { d: cur, id: curId } = latest.current;
+      const { d: cur, id: curId, linked: curPeople } = latest.current;
       // Check in the browser first, so the author is told exactly what is missing.
       const check = postInputSchema.safeParse(toValues(cur));
       if (!check.success) {
@@ -216,7 +235,11 @@ export function PostEditor({ post }: { post: Post | null }) {
         return false;
       }
       setSaving(true);
-      const res = await savePostAction({ id: curId, values: toValues(cur) });
+      const res = await savePostAction({
+        id: curId,
+        values: toValues(cur),
+        people: curPeople,
+      });
       setSaving(false);
       if (!res.ok) {
         setErrors(res.fieldErrors ?? {});
@@ -231,7 +254,13 @@ export function PostEditor({ post }: { post: Post | null }) {
         window.history.replaceState(null, '', `/admin/posts/${res.data.id}`);
       }
       if (!opts.silent)
-        toast.push(cur.status === 'published' ? 'Saved and published.' : 'Draft saved.');
+        toast.push(
+          cur.status !== 'published'
+            ? 'Draft saved.'
+            : cur.cover_path || cur.type === 'update'
+              ? 'Posted!'
+              : 'Posted! Tip: add a thumbnail so it stands out in News, Home and the Gallery.',
+        );
       return true;
     },
     [toast],
@@ -298,10 +327,12 @@ export function PostEditor({ post }: { post: Post | null }) {
                     ? `Saved ${savedAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`
                     : 'No changes'}
             </p>
-            {tbc ? <TbcFlag /> : null}
+            {d.tbc ? <TbcFlag /> : null}
             {needsThumbnail ? (
-              <p role="alert" className="label-mono text-danger">
-                Add a thumbnail image to publish
+              <p role="status" className="label-mono text-landslide-ink">
+                {savedAt && !dirty
+                  ? 'Posted! Add a thumbnail any time to make it stand out.'
+                  : 'No thumbnail yet. Add one to make this stand out, or publish without it.'}
               </p>
             ) : null}
           </div>
@@ -356,7 +387,7 @@ export function PostEditor({ post }: { post: Post | null }) {
                   checked={d.type === t}
                   onChange={() => {
                     set('type', t);
-                    set('show_in_news', t === 'article');
+                    set('show_in_news', true);
                     set('show_in_ticker', t === 'update');
                     if (t === 'update') set('in_gallery', false);
                   }}
@@ -579,6 +610,21 @@ export function PostEditor({ post }: { post: Post | null }) {
                 <span>Feature on the news page and home</span>
               </label>
             ) : null}
+            <label className="flex min-h-11 cursor-pointer items-start gap-3 py-2">
+              <input
+                type="checkbox"
+                checked={d.tbc}
+                onChange={(e) => set('tbc', e.target.checked)}
+                className="mt-0.5 h-5 w-5 shrink-0 accent-[var(--signal)]"
+              />
+              <span>
+                To be confirmed
+                <span className="block text-[0.9rem] text-muted">
+                  Visitors see a “To be confirmed” flag everywhere this appears. Untick it once it
+                  is confirmed and the flag goes away across the whole site.
+                </span>
+              </span>
+            </label>
           </section>
 
           {!isUpdate ? (
@@ -586,11 +632,17 @@ export function PostEditor({ post }: { post: Post | null }) {
               <h2 id="where-h" className="text-lg">
                 Where it appears
               </h2>
+              <p className="text-[0.9rem] text-muted">
+                Tick every place this belongs. Choosing the Award or Publication category ticks it
+                for you, and a post can be an award and a publication at once.
+              </p>
               {(
                 [
                   ['show_in_news', 'In the news section'],
                   ['show_in_ticker', 'Roll in the “now” ticker at the top of every page'],
                   ['in_gallery', 'In the gallery, as a moment'],
+                  ['in_publications', 'On the publications page (a paper, poster or report)'],
+                  ['in_awards', 'On the awards page (an award or recognition)'],
                 ] as const
               ).map(([key, label]) => (
                 <label key={key} className="flex min-h-11 cursor-pointer items-center gap-3">
@@ -609,6 +661,24 @@ export function PostEditor({ post }: { post: Post | null }) {
             </section>
           ) : null}
 
+          <section className="space-y-3 border border-line p-4" aria-labelledby="people-h">
+            <h2 id="people-h" className="text-lg">
+              People
+            </h2>
+            <p className="text-[0.9rem] text-muted">
+              Whoever you tick gets this on their team profile, and people who share work are
+              connected on the team page automatically.
+            </p>
+            <PeoplePicker
+              options={people}
+              value={linked}
+              onChange={(v) => {
+                setLinked(v);
+                setDirty(true);
+              }}
+            />
+          </section>
+
           <section className="space-y-4 border border-line p-4" aria-labelledby="meta-h">
             <h2 id="meta-h" className="text-lg">
               Details
@@ -617,7 +687,13 @@ export function PostEditor({ post }: { post: Post | null }) {
               <select
                 id="category"
                 value={d.category}
-                onChange={(e) => set('category', e.target.value as Draft['category'])}
+                onChange={(e) => {
+                  const category = e.target.value as Draft['category'];
+                  set('category', category);
+                  // A post can be several things at once, so picking a category only adds ticks.
+                  if (category === 'Award') set('in_awards', true);
+                  if (category === 'Publication') set('in_publications', true);
+                }}
                 className={field}
               >
                 {CATEGORIES.map((c) => (
@@ -676,7 +752,7 @@ export function PostEditor({ post }: { post: Post | null }) {
               <p className="text-[0.9rem] text-muted">
                 {isUpdate
                   ? 'Optional for ticker updates.'
-                  : 'Required to publish. It is the card people see on the home page, news and gallery.'}
+                  : 'Recommended, not required. It is the card people see on the home page, news and gallery. Without one the site draws cover art.'}
               </p>
             )}
           </section>

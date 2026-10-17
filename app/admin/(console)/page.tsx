@@ -5,10 +5,14 @@ import { QuickUpdate } from '@/components/admin/quick-update';
 import { buttonClass } from '@/components/ui/button';
 import { requireAdmin } from '@/lib/auth/require-admin';
 import { formatDateShort } from '@/lib/format';
-import { adminList, adminStats } from '@/lib/posts/admin';
-import { hasTbcFlag, type AdminListQuery } from '@/lib/posts/types';
+import { adminListAll, adminStats } from '@/lib/posts/admin';
+import { applyAdminQuery } from '@/lib/posts/query';
+import type { AdminListQuery } from '@/lib/posts/types';
 import { CATEGORIES } from '@/lib/schemas';
 import { publicState } from '@/lib/visibility';
+
+/** Per-user admin page: it renders on request and shows loading.tsx while it does. */
+export const instant = false;
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? '';
@@ -26,10 +30,17 @@ export default async function Dashboard({ searchParams }: { searchParams: Search
     (['updated', 'published', 'title'] as const).find((s) => s === one(sp.sort)) ?? 'updated';
   const category = CATEGORIES.find((c) => c === one(sp.category)) ?? 'all';
   const type = (['article', 'update'] as const).find((t) => t === one(sp.type)) ?? 'all';
+  const on =
+    (['news', 'ticker', 'gallery', 'publications', 'awards'] as const).find(
+      (o) => o === one(sp.on),
+    ) ?? 'all';
   const q = one(sp.q).slice(0, 80);
-  const query: AdminListQuery = { q, status, category, type, sort };
+  const query: AdminListQuery = { q, status, category, type, on, sort };
 
-  const [stats, posts] = await Promise.all([adminStats(supabase), adminList(supabase, query)]);
+  // One query feeds both the figures and the filtered table.
+  const all = await adminListAll(supabase);
+  const stats = adminStats(all);
+  const posts = applyAdminQuery(all, query);
   const now = new Date();
   const rows: AdminRow[] = posts.map((p) => ({
     id: p.id,
@@ -39,7 +50,9 @@ export default async function Dashboard({ searchParams }: { searchParams: Search
     category: p.category,
     state: publicState(p, now),
     featured: p.featured,
-    tbc: hasTbcFlag(p),
+    tbc: p.tbc,
+    inPublications: p.in_publications,
+    inAwards: p.in_awards,
     published_at: p.published_at,
     updated_at: p.updated_at,
   }));
@@ -124,6 +137,19 @@ export default async function Dashboard({ searchParams }: { searchParams: Search
               <option value="all">All</option>
               <option value="article">Articles</option>
               <option value="update">Updates</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="f-on" className="label-mono mb-2 block text-muted">
+              Appears on
+            </label>
+            <select id="f-on" name="on" defaultValue={on} className={field}>
+              <option value="all">Anywhere</option>
+              <option value="news">News page</option>
+              <option value="ticker">Ticker</option>
+              <option value="gallery">Gallery</option>
+              <option value="publications">Publications page</option>
+              <option value="awards">Awards page</option>
             </select>
           </div>
           <div>

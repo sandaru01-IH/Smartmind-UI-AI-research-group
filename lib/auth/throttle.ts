@@ -61,3 +61,14 @@ export const loginThrottle = createThrottle({
   windowMs: 15 * 60_000,
   lockMs: 15 * 60_000,
 });
+
+/**
+ * The address header can be forged, so a guesser could change it on every try to dodge the limit
+ * above. This second limiter counts failures per account regardless of address. Its limit is higher
+ * so a stranger cannot lock the real admin out with a handful of wrong passwords.
+ */
+export const accountThrottle = createThrottle({
+  maxFailures: 20,
+  windowMs: 60 * 60_000,
+  lockMs: 15 * 60_000,
+});

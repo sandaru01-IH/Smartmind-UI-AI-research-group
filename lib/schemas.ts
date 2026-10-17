@@ -13,7 +13,7 @@ export const CATEGORIES = [
 export type Category = (typeof CATEGORIES)[number];
 
 export const UPDATE_HEADLINE_MAX = 140;
-export const TITLE_MAX = 160;
+export const TITLE_MAX = 250;
 export const BODY_MAX = 50_000;
 
 const httpUrl = z
@@ -82,7 +82,7 @@ const optionalHttps = z
 const storagePath = z.string().trim().max(300);
 
 const tags = z
-  .array(z.string().trim().toLowerCase().min(1).max(30))
+  .array(z.string().trim().toLowerCase().min(1).max(50))
   .max(8, 'Use at most 8 tags')
   .transform((list) => Array.from(new Set(list)));
 
@@ -117,18 +117,15 @@ export const postInputSchema = z
     show_in_news: z.boolean().default(true),
     show_in_ticker: z.boolean().default(false),
     in_gallery: z.boolean().default(false),
+    in_publications: z.boolean().default(false),
+    in_awards: z.boolean().default(false),
+    tbc: z.boolean().default(false),
     video_url: optionalHttps,
     gallery_paths: z.array(storagePath).max(12, 'Use at most 12 photos').default([]),
     external_links: z.array(externalLinkSchema).max(6, 'Use at most 6 links').default([]),
   })
   .superRefine((v, ctx) => {
-    if (v.status === 'published' && v.type === 'article' && !v.cover_path) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['cover_path'],
-        message: 'Add a thumbnail image before publishing',
-      });
-    }
+    // A thumbnail is recommended but never required: the site draws cover art for posts without one.
     if (v.type === 'update' && v.title.length > UPDATE_HEADLINE_MAX) {
       ctx.addIssue({
         code: 'custom',

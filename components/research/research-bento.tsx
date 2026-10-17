@@ -3,28 +3,38 @@
 import { useId, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { Tag } from '@/components/ui/tag';
-import { THEMES, type ResearchTheme } from '@/content/research';
+import { THEME_VARS, type ResearchTheme } from '@/lib/catalog/types';
+import { plural } from '@/lib/number-words';
 import { ThemePattern } from './theme-pattern';
 
-const SPAN: Record<string, string> = {
-  land: 'lg:col-span-7',
-  flood: 'lg:col-span-5',
-  traffic: 'lg:col-span-5',
-  ai: 'lg:col-span-7',
-};
+/** Alternating wide and narrow tiles, two to a row; a lone last tile spans the full width. */
+function spanFor(index: number, count: number): string {
+  if (index === count - 1 && count % 2 === 1) return 'lg:col-span-12';
+  const row = Math.floor(index / 2);
+  return (index + row) % 2 === 0 ? 'lg:col-span-7' : 'lg:col-span-5';
+}
 
-function ThemeTile({ theme, index }: { theme: ResearchTheme; index: number }) {
+function ThemeTile({
+  theme,
+  index,
+  count,
+}: {
+  theme: ResearchTheme;
+  index: number;
+  count: number;
+}) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
-  const colour = `var(${theme.colourVar})`;
+  const vars = THEME_VARS[theme.style];
+  const colour = `var(${vars.colourVar})`;
   return (
     <article
-      className={`group relative flex min-h-[22rem] flex-col justify-between overflow-hidden border border-line bg-surface p-6 transition-colors hover:border-line-strong md:p-8 ${SPAN[theme.id]}`}
+      className={`group relative flex min-h-[22rem] flex-col justify-between overflow-hidden border border-line bg-surface p-6 transition-colors hover:border-line-strong md:p-8 ${spanFor(index, count)}`}
       style={{ borderTopColor: colour, borderTopWidth: 2 }}
       data-open={open}
     >
       <ThemePattern
-        theme={theme.id}
+        theme={theme.style}
         colour={colour}
         className="pointer-events-none absolute -right-6 -top-4 h-48 w-80 opacity-60 transition-opacity duration-300 group-hover:opacity-90 group-data-[open=true]:opacity-90"
       />
@@ -32,7 +42,7 @@ function ThemeTile({ theme, index }: { theme: ResearchTheme; index: number }) {
         <p className="numeral text-2xl text-line-strong">{String(index + 1).padStart(2, '0')}</p>
         <h3
           className="mt-3 max-w-[14ch] text-3xl md:text-4xl"
-          style={{ color: `var(${theme.inkVar})` }}
+          style={{ color: `var(${vars.inkVar})` }}
         >
           {theme.title}
         </h3>
@@ -46,7 +56,7 @@ function ThemeTile({ theme, index }: { theme: ResearchTheme; index: number }) {
           onClick={() => setOpen((o) => !o)}
           className="label-mono inline-flex min-h-11 items-center gap-2 text-fg"
         >
-          {theme.projects.length} projects
+          {plural(theme.projects.length, 'project')}
           <ChevronDown
             size={16}
             aria-hidden="true"
@@ -62,11 +72,11 @@ function ThemeTile({ theme, index }: { theme: ResearchTheme; index: number }) {
         >
           {theme.projects.map((p) => (
             <li
-              key={p.title}
+              key={p.id}
               className="flex items-start gap-3 border-t border-line pt-3 text-[0.95rem]"
             >
               <span>{p.title}</span>
-              {p.srcFunded ? <Tag className="shrink-0">SRC-funded</Tag> : null}
+              {p.src_funded ? <Tag className="shrink-0">SRC-funded</Tag> : null}
             </li>
           ))}
         </ul>
@@ -75,12 +85,19 @@ function ThemeTile({ theme, index }: { theme: ResearchTheme; index: number }) {
   );
 }
 
-/** Four themes in a bento grid. Each has its theme colour, a generative pattern and its projects. */
-export function ResearchBento() {
+/** The research themes in a bento grid. Each has its theme colour, a generative pattern and its projects. */
+export function ResearchBento({ themes }: { themes: ResearchTheme[] }) {
+  if (themes.length === 0) {
+    return (
+      <p className="border border-dashed border-line-strong p-6 text-muted">
+        Research themes will appear here soon.
+      </p>
+    );
+  }
   return (
     <div className="grid gap-5 lg:grid-cols-12">
-      {THEMES.map((theme, i) => (
-        <ThemeTile key={theme.id} theme={theme} index={i} />
+      {themes.map((theme, i) => (
+        <ThemeTile key={theme.id} theme={theme} index={i} count={themes.length} />
       ))}
     </div>
   );

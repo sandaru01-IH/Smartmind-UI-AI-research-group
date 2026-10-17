@@ -1,9 +1,8 @@
 import type { Post } from '@/lib/posts/types';
-import { TBC_TAG } from '@/lib/posts/types';
 
 /**
  * Seed news. Every item restates a milestone from this.md > "Chatbot journey".
- * Items this.md flags as unconfirmed are drafts tagged `to-be-confirmed`. Nothing here is invented.
+ * Items this.md flags as unconfirmed are drafts flagged `tbc`. Nothing here is invented.
  * Used in demo mode (no Supabase) and by `npm run seed`.
  */
 const base = {
@@ -19,6 +18,9 @@ const base = {
   show_in_news: true,
   show_in_ticker: false,
   in_gallery: false,
+  in_publications: false,
+  in_awards: false,
+  tbc: false,
   video_url: null,
   gallery_paths: [] as string[],
   external_links: [] as {
@@ -94,7 +96,8 @@ export const SEED_POSTS: Post[] = [
     body_md:
       'In May 2025 a paper on a collaborative approach to disaster management and community awareness won Best Scientific Paper at The Colombo Conference 2025 (ICSD-2025). It features the AI chatbot built for NBRO.\n\n**To be confirmed:** this.md sources the award to a team member’s LinkedIn profile only. Confirm with the team before publishing.',
     category: 'Award',
-    tags: ['award', 'icsd-2025', TBC_TAG],
+    tags: ['award', 'icsd-2025'],
+    tbc: true,
     event_date: null,
     status: 'draft',
     published_at: null,
@@ -117,7 +120,8 @@ export const SEED_POSTS: Post[] = [
       '**To be confirmed:** this.md sources this to a team LinkedIn post only. Confirm details and permissions before publishing.',
     ].join('\n\n'),
     category: 'Event',
-    tags: ['street-cloud', 'dresden', TBC_TAG],
+    tags: ['street-cloud', 'dresden'],
+    tbc: true,
     event_date: '2026-09-22',
     status: 'draft',
     published_at: null,

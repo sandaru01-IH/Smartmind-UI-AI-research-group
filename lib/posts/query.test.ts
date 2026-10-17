@@ -7,7 +7,7 @@ const visible = visibleSeedPosts(SEED_POSTS, now);
 
 describe('seed content rules', () => {
   it('never publishes anything flagged to be confirmed', () => {
-    const tbc = SEED_POSTS.filter((p) => p.tags.includes('to-be-confirmed'));
+    const tbc = SEED_POSTS.filter((p) => p.tbc);
     expect(tbc.length).toBeGreaterThan(0);
     expect(tbc.every((p) => p.status === 'draft')).toBe(true);
   });

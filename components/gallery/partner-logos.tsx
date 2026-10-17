@@ -1,7 +1,8 @@
 import Image from 'next/image';
 import { ArrowUpRight } from 'lucide-react';
 import { Reveal } from '@/components/ui/reveal';
-import type { Partner } from '@/content/partners';
+import type { Partner } from '@/lib/catalog/types';
+import { mediaUrl } from '@/lib/supabase/env';
 import { t } from '@/content/strings';
 
 // Grey and quiet until hovered or focused, so a long list of partners sits calmly at the foot of the page.
@@ -9,23 +10,24 @@ const TILE =
   'group block h-full border border-line bg-surface text-muted grayscale transition-[filter,color,border-color] duration-300 hover:border-line-strong hover:text-fg hover:grayscale-0 focus-visible:text-fg focus-visible:grayscale-0';
 
 function Tile({ partner, index }: { partner: Partner; index: number }) {
+  const logo = mediaUrl(partner.logo_path);
   const inner = (
     <>
       <span className="relative flex h-24 items-center justify-center border-b border-line px-4 md:h-28">
-        {partner.logo ? (
+        {logo ? (
           <Image
-            src={partner.logo}
+            src={logo}
             alt=""
-            width={160}
-            height={64}
-            className="max-h-14 w-auto object-contain"
+            width={208}
+            height={80}
+            className="h-[4.5rem] w-full max-w-[13rem] object-contain md:h-20"
           />
         ) : (
           <span
             aria-hidden="true"
             className="max-w-full truncate font-display text-[1.6rem] leading-none tracking-tight"
           >
-            {partner.short}
+            {partner.short || partner.name}
           </span>
         )}
         {partner.url ? (
@@ -66,6 +68,7 @@ export function PartnerLogos({ partners }: { partners: readonly Partner[] }) {
     <div className="space-y-12">
       {groups.map((g) => {
         const items = partners.filter((p) => p.kind === g.id);
+        if (items.length === 0) return null;
         return (
           <div key={g.id}>
             <h3 className="label-mono mb-4 text-muted">
@@ -73,7 +76,7 @@ export function PartnerLogos({ partners }: { partners: readonly Partner[] }) {
             </h3>
             <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
               {items.map((p, i) => (
-                <Tile key={p.name} partner={p} index={i} />
+                <Tile key={p.id} partner={p} index={i} />
               ))}
             </ul>
           </div>

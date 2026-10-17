@@ -14,6 +14,7 @@ import {
 import { buttonClass } from '@/components/ui/button';
 import { slugify } from '@/lib/slug';
 import { teamMemberSchema } from '@/lib/team/schema';
+import { SOCIAL_LABEL, SOCIAL_PLATFORMS, type SocialLink } from '@/lib/team/socials';
 import type { TeamLink, TeamMember } from '@/lib/team/types';
 import { ImageUploader } from './image-uploader';
 import { useToast } from './toast';
@@ -36,6 +37,7 @@ interface Draft {
   photo_path: string | null;
   photo_alt: string;
   profile_url: string;
+  socials: SocialLink[];
   visible: boolean;
   sort_order: string;
 }
@@ -53,6 +55,7 @@ const blank = (): Draft => ({
   photo_path: null,
   photo_alt: '',
   profile_url: '',
+  socials: [],
   visible: true,
   sort_order: '0',
 });
@@ -70,6 +73,7 @@ const fromMember = (m: TeamMember): Draft => ({
   photo_path: m.photo_path,
   photo_alt: m.photo_alt ?? '',
   profile_url: m.profile_url ?? '',
+  socials: m.socials,
   visible: m.visible,
   sort_order: String(m.sort_order),
 });
@@ -79,6 +83,7 @@ const toValues = (d: Draft) => ({
   papers: d.papers.trim() === '' ? null : Number(d.papers),
   sort_order: Number(d.sort_order || 0),
   profile_url: d.profile_url.trim() || null,
+  socials: d.socials.filter((s) => s.url.trim() !== ''),
 });
 
 function Field({
@@ -208,7 +213,12 @@ function MemberForm({
             className={field}
           />
         </Field>
-        <Field id="tm-papers" label="Number of papers" error={err('papers')}>
+        <Field
+          id="tm-papers"
+          label="Earlier papers (optional)"
+          hint="Papers from before this site. Papers you link to this person are counted automatically on top."
+          error={err('papers')}
+        >
           <input
             id="tm-papers"
             inputMode="numeric"
@@ -255,6 +265,71 @@ function MemberForm({
           className={field}
         />
       </Field>
+      <fieldset className="space-y-3">
+        <legend className="label-mono mb-1 text-muted">Social and academic profiles</legend>
+        <p className="text-[0.9rem] text-muted">
+          Shown as links on the person&rsquo;s profile on the team page.
+        </p>
+        {d.socials.map((s, i) => (
+          <div key={i} className="flex flex-wrap gap-2">
+            <select
+              aria-label={`Network for link ${i + 1}`}
+              value={s.platform}
+              onChange={(e) =>
+                set(
+                  'socials',
+                  d.socials.map((x, j) =>
+                    j === i ? { ...x, platform: e.target.value as SocialLink['platform'] } : x,
+                  ),
+                )
+              }
+              className={`${field} w-44`}
+            >
+              {SOCIAL_PLATFORMS.map((p) => (
+                <option key={p} value={p}>
+                  {SOCIAL_LABEL[p]}
+                </option>
+              ))}
+            </select>
+            <input
+              aria-label={`Address for link ${i + 1}`}
+              type="url"
+              placeholder="https://"
+              value={s.url}
+              onChange={(e) =>
+                set(
+                  'socials',
+                  d.socials.map((x, j) => (j === i ? { ...x, url: e.target.value } : x)),
+                )
+              }
+              className={`${field} min-w-0 flex-1 basis-56`}
+            />
+            <button
+              type="button"
+              aria-label={`Remove link ${i + 1}`}
+              onClick={() =>
+                set(
+                  'socials',
+                  d.socials.filter((_, j) => j !== i),
+                )
+              }
+              className={buttonClass('ghost', '', 'icon')}
+            >
+              <Trash2 size={16} aria-hidden="true" />
+            </button>
+          </div>
+        ))}
+        {err('socials') ? <p className="text-[0.9rem] text-danger">{err('socials')}</p> : null}
+        {d.socials.length < 8 ? (
+          <button
+            type="button"
+            onClick={() => set('socials', [...d.socials, { platform: 'linkedin', url: '' }])}
+            className={buttonClass('secondary', '', 'sm')}
+          >
+            <Plus size={16} aria-hidden="true" /> Add a profile link
+          </button>
+        ) : null}
+      </fieldset>
       <div>
         <p className="label-mono mb-2 text-muted">Photo (optional)</p>
         <ImageUploader

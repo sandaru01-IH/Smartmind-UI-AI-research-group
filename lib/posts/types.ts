@@ -28,14 +28,16 @@ export interface Post {
   /** Rolls in the "now" ticker at the top of every page. */
   show_in_ticker: boolean;
   in_gallery: boolean;
+  /** Also listed on the publications page. */
+  in_publications: boolean;
+  /** Also listed on the awards page. */
+  in_awards: boolean;
+  /** Still waiting for confirmation: shown with a "to be confirmed" flag wherever it appears. */
+  tbc: boolean;
   video_url: string | null;
   gallery_paths: string[];
   external_links: ExternalLinkValue[];
 }
-
-/** Tag that marks seeded content whose source this.md flags as unconfirmed. */
-export const TBC_TAG = 'to-be-confirmed';
-export const hasTbcFlag = (post: Pick<Post, 'tags'>): boolean => post.tags.includes(TBC_TAG);
 
 export interface PublicListQuery {
   category?: Category;
@@ -60,6 +62,8 @@ export interface AdminListQuery {
   status?: PostStatus | 'scheduled' | 'all';
   category?: Category | 'all';
   type?: PostType | 'all';
+  /** Only posts that appear on this part of the site. */
+  on?: 'news' | 'ticker' | 'gallery' | 'publications' | 'awards' | 'all';
   sort?: 'updated' | 'published' | 'title';
 }
 

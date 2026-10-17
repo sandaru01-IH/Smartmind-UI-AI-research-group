@@ -9,10 +9,10 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { href: '/about', label: t.nav.about },
   { href: '/research', label: t.nav.research },
-  { href: '/team', label: t.nav.team },
   { href: '/publications', label: t.nav.publications },
   { href: '/awards', label: t.nav.awards },
   { href: '/gallery', label: t.nav.gallery },
+  { href: '/team', label: t.nav.team },
   { href: '/news', label: t.nav.news },
 ];
 

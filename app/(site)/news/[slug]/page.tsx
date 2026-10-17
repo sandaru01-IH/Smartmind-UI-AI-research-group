@@ -8,7 +8,7 @@ import { PostBody } from '@/components/ui/markdown';
 import { PostCover } from '@/components/news/post-cover';
 import { ButtonLink } from '@/components/ui/button';
 import { JsonLd } from '@/components/seo/json-ld';
-import { Tag } from '@/components/ui/tag';
+import { Tag, TbcFlag } from '@/components/ui/tag';
 import { BRAND, SITE_URL } from '@/content/brand';
 import { formatDate } from '@/lib/format';
 import { getPublicPost, getSlugIndex } from '@/lib/posts/public';
@@ -89,6 +89,7 @@ async function Article({ params }: Props) {
         </Link>
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <Tag>{post.category}</Tag>
+          {post.tbc ? <TbcFlag /> : null}
           <time dateTime={post.published_at ?? undefined} className="label-mono text-muted">
             {formatDate(post.published_at)}
           </time>

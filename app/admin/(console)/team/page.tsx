@@ -4,6 +4,9 @@ import { TeamManager } from '@/components/admin/team-manager';
 import { requireAdmin } from '@/lib/auth/require-admin';
 import { adminTeam } from '@/lib/team/admin';
 
+/** Per-user admin page: it renders on request and shows loading.tsx while it does. */
+export const instant = false;
+
 export default async function AdminTeamPage() {
   await connection();
   const { supabase } = await requireAdmin();

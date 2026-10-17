@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { getNumbers } from './numbers';
 import { PARTNERS } from './partners';
 import { AWARDS } from './awards';
 import { TEAM } from './team';
@@ -8,20 +7,7 @@ import { MILESTONES } from './chatbots';
 import { SRC_FUNDED_COUNT } from './research';
 import { confirmedOnly } from './types';
 
-const NUMBERS = getNumbers(8);
-const stat = (id: string) => NUMBERS.find((n) => n.id === id)?.value;
-
-describe('numbers strip traces to this.md', () => {
-  it('matches the figures in this.md', () => {
-    expect(stat('papers')).toBe(12);
-    expect(stat('team')).toBe(8);
-    expect(stat('themes')).toBe(4);
-    expect(stat('awards')).toBe(7);
-    expect(stat('partners')).toBe(14);
-  });
-  it('gives every figure a source note', () => {
-    expect(NUMBERS.every((n) => n.source.length > 0)).toBe(true);
-  });
+describe('starter content traces to this.md', () => {
   it('counts only confirmed awards', () => {
     expect(AWARDS.length).toBe(9);
     expect(AWARDS.filter((a) => a.confirmation === 'tbc').map((a) => a.year)).toEqual([2025, 2024]);

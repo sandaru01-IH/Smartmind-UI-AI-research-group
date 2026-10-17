@@ -2,11 +2,12 @@
 
 import { useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
+import Link from 'next/link';
 import { ExternalLink } from '@/components/ui/external-link';
-import { TbcFlag } from '@/components/ui/tag';
+import { Tag, TbcFlag } from '@/components/ui/tag';
 import { t } from '@/content/strings';
 import { filterPublications, type PublicationFilters } from '@/lib/publications-filter';
-import type { Publication } from '@/content/publications';
+import { PUB_KIND_LABEL, type Publication } from '@/lib/catalog/types';
 
 const field =
   'h-11 w-full rounded-sharp border border-line-strong bg-surface px-3 text-base text-fg placeholder:text-muted';
@@ -119,7 +120,11 @@ export function PublicationsExplorer({ publications }: { publications: Publicati
               <p className="numeral col-span-12 text-3xl text-muted md:col-span-2">{p.year}</p>
               <div className="col-span-12 md:col-span-10">
                 <h3 className="text-xl leading-snug md:text-2xl">
-                  {p.href ? (
+                  {p.href?.startsWith('/') ? (
+                    <Link href={p.href} className="hover:underline">
+                      {p.title}
+                    </Link>
+                  ) : p.href ? (
                     <ExternalLink href={p.href} className="hover:underline">
                       {p.title}
                     </ExternalLink>
@@ -127,9 +132,12 @@ export function PublicationsExplorer({ publications }: { publications: Publicati
                     p.title
                   )}
                 </h3>
-                <p className="label-mono mt-3 text-muted">{p.venue}</p>
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  {p.kind !== 'paper' && !p.fromPost ? <Tag>{PUB_KIND_LABEL[p.kind]}</Tag> : null}
+                  {p.venue ? <p className="label-mono text-muted">{p.venue}</p> : null}
+                </div>
                 {p.authors ? <p className="mt-2 text-[0.95rem] text-muted">{p.authors}</p> : null}
-                {p.confirmation === 'tbc' ? <TbcFlag className="mt-3" /> : null}
+                {p.tbc ? <TbcFlag className="mt-3" /> : null}
               </div>
             </li>
           ))}

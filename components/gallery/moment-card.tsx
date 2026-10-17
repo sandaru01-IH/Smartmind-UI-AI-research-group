@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Images, Play } from 'lucide-react';
 import { PostCover } from '@/components/news/post-cover';
-import { Tag } from '@/components/ui/tag';
+import { Tag, TbcFlag } from '@/components/ui/tag';
 import { formatDate } from '@/lib/format';
 import type { Post } from '@/lib/posts/types';
 
@@ -48,6 +48,7 @@ export function MomentCard({
       <div className={`flex flex-1 flex-col gap-3 ${feature ? 'p-6 md:p-8' : 'p-5'}`}>
         <div className="flex flex-wrap items-center gap-3">
           <Tag>{post.category}</Tag>
+          {post.tbc ? <TbcFlag /> : null}
           <time dateTime={date ?? undefined} className="label-mono text-muted">
             {formatDate(date)}
           </time>

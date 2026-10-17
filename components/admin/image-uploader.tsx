@@ -25,6 +25,8 @@ export function ImageUploader({
   altError,
   name = 'cover',
   noun = 'cover image',
+  showAlt = true,
+  fit = 'cover',
 }: {
   value: CoverValue;
   onChange: (next: CoverValue) => void;
@@ -32,6 +34,9 @@ export function ImageUploader({
   altError?: string;
   name?: string;
   noun?: string;
+  /** Logos are decorative next to the partner's name, so they need no description. */
+  showAlt?: boolean;
+  fit?: 'cover' | 'contain';
 }) {
   const inputId = useId();
   const altId = useId();
@@ -68,7 +73,11 @@ export function ImageUploader({
         <img
           src={shown}
           alt={value.alt || 'Cover preview'}
-          className="aspect-[16/9] w-full max-w-md border border-line object-cover"
+          className={`border border-line ${
+            fit === 'contain'
+              ? 'h-20 w-48 bg-surface object-contain p-2'
+              : 'aspect-[16/9] w-full max-w-md object-cover'
+          }`}
         />
       ) : null}
       <div className="flex flex-wrap items-center gap-2">
@@ -108,7 +117,7 @@ export function ImageUploader({
         ) : null}
         <p className="label-mono text-muted">JPEG, PNG or WebP, up to 5 MB</p>
       </div>
-      {value.path ? (
+      {value.path && showAlt ? (
         <div>
           <label htmlFor={altId} className="label-mono mb-2 block text-muted">
             Alt text (required)

@@ -20,6 +20,8 @@ export interface AdminRow {
   state: PublicState;
   featured: boolean;
   tbc: boolean;
+  inPublications: boolean;
+  inAwards: boolean;
   published_at: string | null;
   updated_at: string;
 }
@@ -92,6 +94,8 @@ export function PostsTable({ rows }: { rows: AdminRow[] }) {
                     <Tag>{r.type === 'update' ? 'Update' : 'Article'}</Tag>
                     <Tag>{r.category}</Tag>
                     {r.featured ? <Tag>Featured</Tag> : null}
+                    {r.inPublications ? <Tag>On publications page</Tag> : null}
+                    {r.inAwards ? <Tag>On awards page</Tag> : null}
                     {r.tbc ? <TbcFlag /> : null}
                   </div>
                 </td>

@@ -43,7 +43,7 @@ const en = {
     latestLead: 'What the network has been doing.',
     allNews: 'All news',
     numbers: 'In numbers',
-    researchTitle: 'Four research themes',
+    researchTitle: 'Research themes',
     researchLead: 'Cities, disasters, movement and learning machines, studied as one system.',
     researchCta: 'All research',
     journeyTitle: 'The Journey of Smartmind',

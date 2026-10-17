@@ -1,0 +1,772 @@
+[
+  {
+    "slug": "chatbots-participatory-disaster-risk-reduction-review",
+    "title": "Can Chatbots Advance Participatory Disaster Risk Reduction for Sustainable Development and Resilient Human Settlement? A Systematic Review With Bibliometric Analysis",
+    "people": "H. Sawandi, A. Jayasinghe, P. Kalansooriya, J. Jayasanka, B. Amila, C. Hewawasam",
+    "venue": "Sustainable Development (journal)",
+    "confirm": "whether this is the same work as the May 2026 Sciforum paper"
+  },
+  {
+    "slug": "collaborative-approach-disaster-management-awareness",
+    "title": "Solution for Urban Sustainability: A Collaborative Approach for Disaster Management and Community Awareness",
+    "people": "H. Sawandi, L. Kaveesha, S. Sankalpa, A. Jayasinghe, F. Hasan",
+    "venue": "ICSD 2025, Colombo (conference)",
+    "confirm": "the CV omits the year; 2025 is taken from the neighbouring entry"
+  },
+  {
+    "slug": "specialized-urban-planning-chatbot",
+    "title": "Specialized Urban Planning Chatbot: A Participatory Approach for Evaluating Efficiency",
+    "people": "F. Hasan, A. Jayasinghe, S. Sathsarana",
+    "venue": "Bhumi, The Planning Research Journal 10(2) (journal)",
+    "confirm": "venue and date come from Crossref because the CV gives neither"
+  },
+  {
+    "slug": "gpt-4-abilities-transportation-planning-sri-lanka",
+    "title": "Identifying GPT-4's Abilities in the Context of Transportation Planning in Sri Lanka",
+    "people": "S. Wanniarachchi, A. Jayasinghe",
+    "venue": "R4TLI 2023 (conference)",
+    "confirm": ""
+  },
+  {
+    "slug": "road-data-surveying-deep-learning-gis",
+    "title": "A Novel Framework for Road Data Surveying Based on Deep-learning and GIS",
+    "people": "S. Wanniarachchi, H. N. Kalpana, A. Jayasinghe, S. Bandara",
+    "venue": "Journal of South Asian Logistics and Transport 2(1) (journal)",
+    "confirm": "the CV names a group output whose title differs slightly from this one"
+  },
+  {
+    "slug": "deep-learning-gis-road-inventory-survey",
+    "title": "Novel Deep Learning and GIS-Based Approach for Road Inventory Survey",
+    "people": "S. Wanniarachchi, H. Lindamullage, A. Jayasinghe, S. Bandara",
+    "venue": "R4TLI 2021 (conference)",
+    "confirm": ""
+  },
+  {
+    "slug": "globalized-climate-precarity-brick-trade",
+    "title": "Globalized Climate Precarity: Environmental Degradation, Disasters, and the International Brick Trade",
+    "people": "L. Parsons, R. Safra de Campos, A. Moncaster, I. Cook, T. Siddiqui, C. Abenayake, A. B. Jayasinghe, P. Mishra, L. Ly Vouch, T. Billah",
+    "venue": "Annals of the American Association of Geographers 114(3) (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "urban-density-runoff-simulation-flood-resilience",
+    "title": "An Urban Density-Based Runoff Simulation Framework to Envisage Flood Resilience of Cities",
+    "people": "N. Wijayawardana, C. Abenayake, A. Jayasinghe, N. Dias",
+    "venue": "Urban Science 7(1), 17 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "trading-disaster-containers-climate-precarity",
+    "title": "Trading Disaster: Containers and Container Thinking in the Production of Climate Precarity",
+    "people": "L. Parsons, R. Safra de Campos, A. Moncaster, I. Cook, T. Siddiqui, C. Abenayake, A. B. Jayasinghe, P. Mishra, T. Billah",
+    "venue": "Transactions of the Institute of British Geographers 47(4), 990–1008 (journal)",
+    "confirm": "the CV says this journal ranks 11th in Google Scholar's geography and cartography list (2023); check before printing the ranking"
+  },
+  {
+    "slug": "modeling-transport-system-failure-urban-flooding",
+    "title": "An Innovative Approach to Assess the Impact of Urban Flooding: Modeling Transportation System Failure Due to Urban Flooding",
+    "people": "C. Abenayake, A. Jayasinghe, H. N. Kalpana, E. E. Wijegunarathna, P. K. S. Mahanama",
+    "venue": "Applied Geography 147, 102772 (journal)",
+    "confirm": "the CV says this journal ranks 2nd in Google Scholar's geography and cartography list (2023); check before printing the ranking"
+  },
+  {
+    "slug": "urban-flood-modeling-building-regulation",
+    "title": "Urban Flood Modeling Application: Assess the Effectiveness of Building Regulation in Coping with Urban Flooding Under Precipitation Uncertainty",
+    "people": "M. M. M. Piyumi, C. Abenayake, A. Jayasinghe, E. Wijegunarathna",
+    "venue": "Sustainable Cities and Society 75 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "network-centrality-assessment-flood-resilience",
+    "title": "Network Centrality Assessment (NCA): Assessing the Transport Network Resilience to Urban Flooding",
+    "people": "L. D. C. H. N. Kalpana, A. B. Jayasinghe, C. C. Abenayake, P. N. P. Wijayawardana",
+    "venue": "Journal of South Asian Logistics and Transport 1(1), 99–114 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "health-resilient-cities-post-covid-world",
+    "title": "Health Resilient Cities in a Post Covid World",
+    "people": "N. Dias, C. Jayakody, D. Amaratunga, C. Abenayake, A. Jayasinghe",
+    "venue": "COVID-19: Impact, Mitigation, Opportunities and Building Resilience, National Science Foundation of Sri Lanka (chapter)",
+    "confirm": ""
+  },
+  {
+    "slug": "disaster-trade-hidden-footprint-uk-production",
+    "title": "Disaster Trade: The Hidden Footprint of UK Production Overseas",
+    "people": "L. Parsons, R. Safra De Campos, A. Moncaster, I. Cook, T. Siddiqui, C. Abenayake, A. B. Jayasinghe, M. Pratik, L. Scungio, T. Billah",
+    "venue": "Royal Holloway, University of London (report)",
+    "confirm": ""
+  },
+  {
+    "slug": "residential-population-resilience-urban-flooding",
+    "title": "An Alternative Approach to Assess the Residential Population Resilience to Urban Flooding",
+    "people": "L. D. C. H. N. Kalpana, A. B. Jayasinghe, C. C. Abenayake, P. N. P. Wijayawardana",
+    "venue": "FARU Journal 7(1), 48–55 (journal)",
+    "confirm": "this and the next entry are candidates for the FARU 2020 Best Paper award in Disaster Management and Climate Change"
+  },
+  {
+    "slug": "gis-simulation-surface-runoff-urban-blocks",
+    "title": "A GIS-Based Simulation Application to Model Surface Runoff Level in Urban Blocks",
+    "people": "C. C. Abenayake, A. B. Jayasinghe, P. N. P. Wijayawardana, L. D. C. H. N. Kalpana, N. Dias, D. Amaratunga, R. Haigh",
+    "venue": "FARU Journal 7(1), 56–64 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "framework-sustainable-storm-water-management",
+    "title": "Assessment Framework to Select Sustainable Storm Water Management Options for Urban Areas",
+    "people": "U. P. L. V. Pathirana, M. T. O. V. Peiris, A. B. Jayasinghe, P. K. S. Mahanama",
+    "venue": "Bhumi, The Planning Research Journal 7(2), 31–38 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "scenario-analysis-flood-resilient-built-form-colombo",
+    "title": "Scenario Analysis for Flood Resilient Built Form: Case of Colombo, Sri Lanka",
+    "people": "C. C. Abenayake, N. Dias, D. Amaratunga, R. Haigh, N. P. Wijayawardana, A. B. Jayasinghe",
+    "venue": "ICSECM, 10th International Conference on Structural Engineering and Construction Management (conference)",
+    "confirm": ""
+  },
+  {
+    "slug": "land-use-triggering-landslides-sabaragamuwa",
+    "title": "Assessing the Impact of Land Use on Triggering Landslides: A Case of Sabaragamuwa Province, Sri Lanka",
+    "people": "B. Gunarathna, A. B. Jayasinghe, C. C. Abenayake, P. K. S. Mahanama",
+    "venue": "Bhumi, The Planning Research Journal 6(2) (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "ecosystem-services-composite-indicator-flood-resilience",
+    "title": "Ecosystem Services-Based Composite Indicator for Assessing Community Resilience to Floods",
+    "people": "C. C. Abenayake, Y. Mikami, Y. Matsuda, A. Jayasinghe",
+    "venue": "Environmental Development 27, 34–46 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "multi-hierarchy-network-demand-uncertainty-bangkok",
+    "title": "Applicability of the Multi-Hierarchy Network Under Demand Uncertainty by Using Ellipsoidal Uncertainty Set in Robust Optimization: Bangkok, Thailand",
+    "people": "K. Rattanaporn, S. Kazushi, F. Atsushi, A. Jayasinghe",
+    "venue": "23rd International Conference of the Hong Kong Society for Transportation Studies (conference)",
+    "confirm": "the CV writes two names in mixed order (S Kazushi, F Atsushi); check the author names"
+  },
+  {
+    "slug": "robust-optimization-facility-location-relief-distribution",
+    "title": "Robust Optimization of Facility Location Models and Fundamental Resource Estimations Under Demand Uncertainty: A Case Study of Relief Distribution",
+    "people": "R. Kasemsri, K. Sano, H. Nishiuchi, A. Jayasinghe",
+    "venue": "International Journal of Transport Development and Integration 1(2), 148–158 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "multi-hierarchy-facility-location-routing-relief",
+    "title": "A Multi-Hierarchy Facility Location Problem with Routing Under Demand Uncertainty: An Application to Relief Distributions",
+    "people": "R. Kasemsri, K. Sano, A. Jayasinghe",
+    "venue": "Japanese journal, volume 14, pages 156–166 (journal)",
+    "confirm": "the CV gives the journal name only in Japanese; add the English name before publishing"
+  },
+  {
+    "slug": "coastal-vulnerability-climate-disasters-open-source-gis",
+    "title": "Assess the Level of Vulnerability to Climate Exaggerated Disasters in Sri Lankan Coastal Areas: An Application of Open Source Geographic Information System",
+    "people": "P. K. S. Mahanama, A. Jayasinghe, K. D. P. P. Jayasinghe, P. K. B. D. B. Bandara, C. C. Abenayake",
+    "venue": "FOSS4G-Asia 2015, Bangkok (conference)",
+    "confirm": ""
+  },
+  {
+    "slug": "coastal-vulnerability-ahp-gis-sri-lanka",
+    "title": "Assesses the Level of Vulnerability in Sri Lankan Coastal Areas to Climate Exaggerated Disasters: Application of Analytical Hierarchical Process (AHP) and GIS",
+    "people": "P. K. S. Mahanama, K. D. P. P. Jayasinghe, A. Jayasinghe, R. M. P. N. S. Bandara, C. C. Abenayake",
+    "venue": "International Journal of Advanced Research 2(8), 523–534 (journal)",
+    "confirm": "publish this entry only; the CV lists the same paper twice and the second copy must not be posted"
+  },
+  {
+    "slug": "climate-responses-local-authorities-coastal-sri-lanka",
+    "title": "Climate Responses of Local Authorities: A Case of Sri Lankan Coastal Urban Areas",
+    "people": "P. K. S. Mahanama, C. C. Abenayake, A. Jayasinghe, P. K. B. D. B. Bandara",
+    "venue": "International Journal of Scientific Knowledge 4(3), 59–66 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "participatory-open-source-gis-flood-mapping-batticaloa",
+    "title": "Participatory Open Source GIS as a Tool for Flood Mapping: A Study of Batticaloa City, Sri Lanka",
+    "people": "L. S. Bandara, A. Jayasinghe, C. C. Abenayake, P. K. S. Mahanama",
+    "venue": "FOSS4G Sri Lanka, Colombo (conference)",
+    "confirm": "the CV's link is a Word abstract file, so leave the link out if you prefer a web page"
+  },
+  {
+    "slug": "rainfall-temperature-trends-coastal-cities-sri-lanka",
+    "title": "Study on the Trends of Rainfall and Temperature Patterns to Identify the Influence of Climate Variation in Coastal Cities in Sri Lanka",
+    "people": "P. K. B. D. B. Bandara, C. C. Abenayake, A. Jayasinghe, P. K. S. Mahanama",
+    "venue": "FARU Journal 5(1) (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "local-knowledge-climate-variation-negombo-batticaloa",
+    "title": "Local Knowledge on Climate Variation: A Case of Negombo and Batticaloa, Sri Lanka",
+    "people": "C. C. Abenayake, A. Jayasinghe, P. K. S. Mahanama",
+    "venue": "Bhumi, The Planning Research Journal (Special Issue) 1(3), 16–29 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "negombo-climate-change-vulnerability-assessment",
+    "title": "Negombo, Sri Lanka: Climate Change Vulnerability Assessment",
+    "people": "P. K. S. Mahanama, C. C. Abenayake, A. B. Jayasinghe",
+    "venue": "UN-Habitat, Nairobi, edited by J. Pelham (report)",
+    "confirm": ""
+  },
+  {
+    "slug": "participatory-gis-flood-mapping-batticaloa-ecca",
+    "title": "Participatory GIS as a Tool for Flood Mapping in Climate Change Adaptation: A Study of Batticaloa City, Sri Lanka",
+    "people": "A. Jayasinghe, P. K. S. Mahanama, D. L. Senanayake, L. Bandara, I. Seifert",
+    "venue": "European Climate Change Adaptation Conference (ECCA) 2013, Hamburg (conference)",
+    "confirm": ""
+  },
+  {
+    "slug": "covid-19-travel-behavior-colombo-metropolitan-region",
+    "title": "Impacts of COVID-19 on Travel Behavior in Colombo Metropolitan Region, Sri Lanka",
+    "people": "N. Ranaweera, A. Jayasinghe, A. Jayasinghe, S. Sathsarana, C. Abenayake",
+    "venue": "Research Handbook on Transport and COVID-19, pp. 11–49, Edward Elgar Publishing (book chapter)",
+    "confirm": "the CV lists A. Jayasinghe twice; check the author list"
+  },
+  {
+    "slug": "policy-driven-strategic-transport-planning-western-province",
+    "title": "Policy-Driven Strategic Transport Planning for the Western Province, Sri Lanka",
+    "people": "G. N. Samarasekera, T. Sivakumar, S. Nanayakkara, A. Jayasinghe, T. Liyanage",
+    "venue": "Journal of South Asian Logistics and Transport 3(2), 129–152 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "road-traffic-crashes-network-configuration-kegalle",
+    "title": "Analyzing the Relationship Between the Magnitude of the Road Traffic Crashes and Road Network Configuration: A Case of Kegalle, Sri Lanka",
+    "people": "W. Dasanayaka, A. Jayasinghe, L. Kalpana, E. E. Wijegunarathna, C. Abenayake",
+    "venue": "Journal of the Eastern Asia Society for Transportation Studies 14, 1001–1018 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "covid-19-impact-mobility-colombo-r4tli-2022",
+    "title": "Exploring the Impact of Covid-19 on Mobility in Colombo Metropolitan Region, Sri Lanka",
+    "people": "N. N. Ranaweera, A. Jayasinghe",
+    "venue": "R4TLI 2022 (conference)",
+    "confirm": ""
+  },
+  {
+    "slug": "tod-ness-small-medium-towns-sri-lanka",
+    "title": "Investigation of ToD-ness of Small and Medium Towns in Sri Lanka",
+    "people": "G. Wanigasekara, P. K. S. Mahanama, A. B. Jayasinghe",
+    "venue": "R4TLI 2022 (conference)",
+    "confirm": ""
+  },
+  {
+    "slug": "pass-by-diverted-trip-impact-supermarket-colombo",
+    "title": "Estimate the Pass-By and Diverted Trip Impact Generated by a Supermarket in Colombo, Sri Lanka",
+    "people": "A. Pathiraja, P. C. P. De Silva, A. B. Jayasinghe",
+    "venue": "FARU 2022, Faculty of Architecture Research Unit (conference)",
+    "confirm": ""
+  },
+  {
+    "slug": "built-environment-mode-choice-colombo",
+    "title": "Examining the Relationship Between Built Environment and the Mode Choice of Travelers: A Case Study of Colombo, Sri Lanka",
+    "people": "H. Rathnayake, L. Kalpana, A. B. Jayasinghe",
+    "venue": "Bhumi, The Planning Research Journal 8(2) (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "covid-19-influence-travel-behavior-sri-lanka",
+    "title": "Empirical Study of Covid-19's Influence on Travel Behavior in Sri Lanka",
+    "people": "A. Jayasinghe, A. Gunawardana",
+    "venue": "R4TLI 2021 (conference)",
+    "confirm": ""
+  },
+  {
+    "slug": "navigation-app-spatial-thinking-route-choice",
+    "title": "Navigation App and Future Spatial Thinking: Impacts of Mobile Navigation App on Traveler Route Choice",
+    "people": "V. Garusinghe, A. Jayasinghe",
+    "venue": "R4TLI 2021 (conference)",
+    "confirm": ""
+  },
+  {
+    "slug": "model-traffic-road-segments-large-urban-networks",
+    "title": "A Novel Approach to Model Traffic on Road Segments of Large-Scale Urban Road Networks",
+    "people": "A. Jayasinghe, K. Sano, C. C. Abenayake, P. K. S. Mahanama",
+    "venue": "MethodsX 6, 1147–1163 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "network-centrality-public-transport-passenger-attraction",
+    "title": "Network Centrality Analysis of Public Transport Systems: Developing a Strategic Planning Tool to Assess Passenger Attraction",
+    "people": "A. Jayasinghe, R. Kasemsri, C. C. Abenayake, P. K. S. Mahanama",
+    "venue": "International Journal of Innovative Technology and Exploring Engineering 8(10S), 472–476 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "sustainability-assessment-mega-transport-expressway",
+    "title": "Evaluation of Sustainability Assessment Practices in Mega Transport Infrastructure Projects in Sri Lanka: Special Reference to Expressway Projects",
+    "people": "M. M. N. C. Bandara, M. T. O. V. Peris, A. B. Jayasinghe",
+    "venue": "13th Conference of the Eastern Asia Society for Transportation Studies (EASTS), Colombo (conference)",
+    "confirm": ""
+  },
+  {
+    "slug": "game-theory-motorcycle-driver-behavior-signalized-intersection",
+    "title": "Two-Player Game-Theory-Based Analysis of Motorcycle Driver's Behavior at a Signalized Intersection",
+    "people": "L. T. Trinh, K. Sano, A. Jayasinghe, T. V. Tran",
+    "venue": "Asian Transport Studies 5(2), 272–291 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "perception-bus-priority-lanes-colombo",
+    "title": "Perception of Bus Priority Lanes (BPL) in Colombo, Sri Lanka",
+    "people": "S. W. M. P. Senevirathne, N. Lakmali, A. B. Jayasinghe",
+    "venue": "International Journal of Advanced Research (IJAR) 6(8) (journal)",
+    "confirm": "the CV's page numbers are garbled; add them from the journal page"
+  },
+  {
+    "slug": "centrality-parameters-vehicular-mode-choice",
+    "title": "Examine the Relationship Between the Centrality Parameters and the Vehicular Mode Choice",
+    "people": "L. D. C. H. N. Kalpana, H. M. W. T. Rathnayake, A. Jayasinghe",
+    "venue": "FOSS4G Asia 2018 (conference)",
+    "confirm": ""
+  },
+  {
+    "slug": "built-environment-mode-choice-r4tli-2018",
+    "title": "An Examination of the Relationship Between Built Environment and Mode Choice",
+    "people": "H. Rathnayake, A. B. Jayasinghe",
+    "venue": "R4TLI 2018, Sri Lanka Society of Transport and Logistics (conference)",
+    "confirm": ""
+  },
+  {
+    "slug": "stakeholders-perception-bus-priority-lane-galle-road",
+    "title": "Stakeholders' Perception of Bus Priority Lane on Galle Road & Sri Jayawardhanapura Mawatha, Colombo, Sri Lanka",
+    "people": "N. Lakmali, A. B. Jayasinghe",
+    "venue": "R4TLI 2018, Sri Lanka Society of Transport and Logistics (conference)",
+    "confirm": "this is likely the paper behind the R4TLI 2018 award listed in the Awards section"
+  },
+  {
+    "slug": "estimating-trip-attraction-urban-zones-centrality",
+    "title": "Application for Developing Countries: Estimating Trip Attraction in Urban Zones Based on Centrality",
+    "people": "A. Jayasinghe, K. Sano, K. Rattanaporn",
+    "venue": "Journal of Traffic and Transportation Engineering (English Edition) 4(5), 464–476 (journal)",
+    "confirm": "the CV says 2018, but Crossref dates volume 4, issue 5 to October 2017; fix whichever is wrong"
+  },
+  {
+    "slug": "annual-average-daily-traffic-network-centrality-metropolitan",
+    "title": "Estimation of Annual Average Daily Traffic on Road Segments: Network Centrality-Based Method for Metropolitan Areas",
+    "people": "A. Jayasinghe, K. Sano",
+    "venue": "Transportation Research Record, Journal of the Transportation Research Board, paper 17-03141 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "network-centrality-assessment-predict-traffic-volume-colombo",
+    "title": "Network Centrality Assessment (NCA) as an Alternative Approach to Predict Vehicular Traffic Volume: A Case of Colombo, Sri Lanka",
+    "people": "A. Jayasinghe, K. Sano, H. Nishiuchi",
+    "venue": "Journal of the Eastern Asia Society for Transportation Studies 11, 834–853 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "centrality-road-network-travelers-route-choice-colombo",
+    "title": "The Role of Centrality Characteristics of Road Network in Travelers' Route Choice: A Case of Colombo, Sri Lanka",
+    "people": "A. Jayasinghe, K. Rattanaporn, K. Sano, H. Nishiuchi",
+    "venue": "52nd JSCE Infrastructure Planning Conference, Akita, Japan (conference)",
+    "confirm": ""
+  },
+  {
+    "slug": "explaining-traffic-flow-patterns-centrality-measures",
+    "title": "Explaining Traffic Flow Patterns Using Centrality Measures",
+    "people": "A. Jayasinghe, K. Sano, H. Nishiuchi",
+    "venue": "International Journal for Traffic and Transport Engineering 5(2), 134–149 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "centrality-measures-transit-demand-ahmedabad",
+    "title": "'Centrality Measures' as a Tool to Identify the Transit Demand at Public Transit Stops: A Case of Ahmedabad City, India",
+    "people": "A. Jayasinghe, T. Munshi",
+    "venue": "Journal of Advanced Research 2(7), 1063–1074 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "centrality-measures-vehicular-flow-colombo-municipal-council",
+    "title": "Applicability of Centrality Measures to Explain Vehicular Flow in Colombo Municipal Council Area, Sri Lanka",
+    "people": "C. Gunawardana, A. Jayasinghe",
+    "venue": "FARU Journal 5(1) (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "road-traffic-crashes-road-configuration-space-syntax",
+    "title": "Road Traffic Crashes and Road Configuration: A Space Syntax Application",
+    "people": "U. Dasanayaka, A. Jayasinghe",
+    "venue": "FARU Journal 5(1) (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "eco-sensitive-planning-game-theory-lucis-elephant-conflict",
+    "title": "Data-Driven Framework for Eco-Sensitive Planning and Design: A Game Theory-Enhanced LUCIS Approach to Human–Elephant Conflict in Sri Lanka",
+    "people": "L. Waduge, G. Diwyanjali, S. Sankalpa, C. Abenayake, A. Jayasinghe, C. De Silva",
+    "venue": "Frontiers in Sustainability 7, 1838933 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "scientific-stakeholder-knowledge-urban-growth-kurunegala-galle",
+    "title": "Integrating Scientific and Stakeholder-Based Knowledge to Simulate Future Urban Growth Scenarios: Findings from Kurunegala and Galle, Sri Lanka",
+    "people": "F. Hasan, A. Jayasinghe, C. Abenayake",
+    "venue": "Sustainability 16(24), 11161 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "vegetation-land-fragmentation-western-province-ai-simulation",
+    "title": "Modelling Vegetation Land Fragmentation in Urban Areas of Western Province, Sri Lanka Using an Artificial Intelligence-Based Simulation Technique",
+    "people": "A. Jayasinghe, N. Ranaweera, C. Abenayake, N. Bandara, C. De Silva",
+    "venue": "PLoS One 18(2), e0275457 (journal)",
+    "confirm": "the CV says PLoS One ranks 35th in Google Scholar's top 100 journals (2023); check before printing the ranking"
+  },
+  {
+    "slug": "empower-communities-urban-growth-built-form-simulation",
+    "title": "Empower Communities: Integrating Scientific and Stakeholder-Based Knowledge to Simulate Future Urban Growth Scenarios Using Advanced Technology for Built-Form Simulation",
+    "people": "F. Hasan, A. Jayasinghe",
+    "venue": "not given in the CV",
+    "confirm": "add the venue before publishing"
+  },
+  {
+    "slug": "road-capacity-accessibility-urban-density-land-use-mix-vitality",
+    "title": "An Investigation of Combined Effects of Road Capacity and Accessibility on Urban Density, Land Use Mix, and Vitality",
+    "people": "D. M. V. A. Dilrukshi, A. Jayasinghe",
+    "venue": "Journal of South Asian Logistics and Transport 3(2), 25–44 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "regional-spatial-planning-paddy-supply-chain-north-central",
+    "title": "A Regional Spatial Planning Framework to Optimize Paddy Supply Chain Management in North Central Province, Sri Lanka",
+    "people": "N. Jayarathna, A. Jayasinghe",
+    "venue": "R4TLI 2023 (conference)",
+    "confirm": "the CV spells Framework as Farmwork in this title; it is corrected here"
+  },
+  {
+    "slug": "southern-expressway-land-fragmentation-western-province",
+    "title": "Assessing the Impact of the Southern Expressway on Land Fragmentation: With Special Reference to Western Province",
+    "people": "P. D. Wijesekara, A. B. Jayasinghe",
+    "venue": "R4TLI 2023 (conference)",
+    "confirm": ""
+  },
+  {
+    "slug": "modeling-urban-growth-transport-accessibility-kurunegala",
+    "title": "Modeling Urban Growth Based on Transport and Accessibility Changes in Kurunegala",
+    "people": "F. Hasan, A. Jayasinghe",
+    "venue": "R4TLI 2023 (conference)",
+    "confirm": ""
+  },
+  {
+    "slug": "decision-making-tool-land-use-accessibility-density-runoff",
+    "title": "A Decision-Making Tool for Urban Planners: A Framework to Model the Interdependency among Land Use, Accessibility, Density, and Surface Runoff in Urban Areas",
+    "people": "S. Madusanka, C. Abenayake, A. Jayasinghe, C. Perera",
+    "venue": "Sustainability 14(1), 522 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "accessibility-capacity-roads-density-land-use-mix-r4tli-2022",
+    "title": "Analyzing the Combined Influence of Accessibility and Capacity of Roads on Urban Density, Land Use Mix and Vitality",
+    "people": "D. Dilrukshi, A. Jayasinghe",
+    "venue": "R4TLI 2022 (conference)",
+    "confirm": "this is the conference version of the 2023 journal article"
+  },
+  {
+    "slug": "measuring-urban-sprawl-small-medium-towns-gis-remote-sensing",
+    "title": "Measuring Urban Sprawl of Small and Medium Towns Using GIS and Remote Sensing Techniques: A Case Study of Sri Lanka",
+    "people": "E. P. P. Manesha, A. Jayasinghe, H. N. Kalpana",
+    "venue": "The Egyptian Journal of Remote Sensing and Space Science 24(3) (journal)",
+    "confirm": "the CV's page range is cut off, and it says the journal ranks 14th in Google Scholar's remote sensing list (2023); check both"
+  },
+  {
+    "slug": "urban-boundary-demarcation-icn-model",
+    "title": "Urban Boundary Demarcation: An ICN Model Approach",
+    "people": "A. Jayasinghe, L. D. C. H. N. Kalpana, C. C. Abenayake, P. K. S. Mahanama",
+    "venue": "Social Sciences 10(12) (journal)",
+    "confirm": "the CV's page number is garbled, and it says the journal ranks 18th in Google Scholar's social sciences list (2023)"
+  },
+  {
+    "slug": "vegetation-land-fragmentation-level-western-province-faru-2021",
+    "title": "Study on Level of Vegetation Land Fragmentation in Western Province, Sri Lanka",
+    "people": "M. N. N. Ranaweera, A. B. Jayasinghe, C. Abenayake",
+    "venue": "FARU 2021 (conference); also FARU Journal 8(1)",
+    "confirm": "the date shown is that of FARU Journal 8(1) from Crossref"
+  },
+  {
+    "slug": "urban-sprawl-driving-factors-small-medium-town-sri-lanka",
+    "title": "Analysis of Relationship Between Urban Sprawl and Its Driving Factors: A Case of Small and Medium Town in Sri Lanka",
+    "people": "E. P. P. Manesha, A. Jayasinghe",
+    "venue": "FARU 2021 (conference); also FARU Journal 8(1)",
+    "confirm": "the date shown is that of FARU Journal 8(1) from Crossref"
+  },
+  {
+    "slug": "measure-urban-agglomeration-pattern-road-network",
+    "title": "A Novel Approach to Measure the Pattern of Urban Agglomeration Based on the Road Network",
+    "people": "L. D. C. H. N. Kalpana, C. C. Abenayake, A. B. Jayasinghe, P. K. S. Mahanama, N. Sanjaya",
+    "venue": "International Journal of Sustainable Development and Planning 16(2), 251–262 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "new-bypass-roads-build-form-small-towns",
+    "title": "An Investigation of the Effects of New Bypass Roads on Build Form in Small Towns in Sri Lanka",
+    "people": "S. Sewwandi, A. Jayasinghe",
+    "venue": "Journal of South Asian Logistics and Transport 1(1), 1–32 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "modeling-framework-accessibility-land-use-densities",
+    "title": "A Modeling Framework: To Analyze the Relationship Between Accessibility, Land Use and Densities in Urban Areas",
+    "people": "A. Jayasinghe, N. B. S. Madusanka, C. Abenayake, P. K. S. Mahanama",
+    "venue": "Sustainability 13(2), 467 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "novel-method-model-spatial-distribution-population",
+    "title": "A Novel Method to Model Spatial Distribution of Population",
+    "people": "A. B. Jayasinghe, H. W. A. S. Sathsarana, R. M. Y. L. Rathnayake, N. S. Bandara",
+    "venue": "International Journal of Innovative Technology and Exploring Engineering 9(3S), 34–40 (journal)",
+    "confirm": "this is the likely paper behind the FARU 2019 poster award listed in the Awards section"
+  },
+  {
+    "slug": "simulation-population-growth-distribution-road-network-centrality",
+    "title": "Simulation of Population Growth and Distribution Based on Centrality of Road Network",
+    "people": "A. Jayasinghe, N. Z. Tenzin, C. C. Abenayake, P. K. S. Mahanama",
+    "venue": "International Journal of Innovative Technology and Exploring Engineering 8(10S), 389–393 (journal)",
+    "confirm": "this is the likely paper behind the iCon-MESSSH 2019 Best Presentation award"
+  },
+  {
+    "slug": "road-network-centrality-model-simulate-population-distribution",
+    "title": "Road Network Centrality Based Model to Simulate Population Distribution",
+    "people": "N. Tenzin, A. Jayasinghe, C. Abenayake",
+    "venue": "Journal of the Eastern Asia Society for Transportation Studies 13, 1194–1215 (journal)",
+    "confirm": "this is the likely paper behind the EASTS 2019 Best Paper award"
+  },
+  {
+    "slug": "spatial-analysis-model-population-distribution",
+    "title": "Spatial Analysis Model for Population Distribution",
+    "people": "N. Y. Tenzin, A. B. Jayasinghe",
+    "venue": "FOSS4G Asia 2018 (conference)",
+    "confirm": ""
+  },
+  {
+    "slug": "fractal-dimension-urban-form-elements-colombo",
+    "title": "Fractal Dimension of Urban Form Elements and Its Relationships: In the Case of City of Colombo",
+    "people": "A. Jayasinghe, T. Jezan",
+    "venue": "Asian Journal of Engineering and Technology 2(2), 98–108 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "urbanizing-pattern-kegalle-connectivity-analysis",
+    "title": "A Study of the Urbanizing Pattern in Kegalle District, Sri Lanka with Connectivity Analysis",
+    "people": "A. Jayasinghe, J. Munasinghe",
+    "venue": "International Journal of Scientific Knowledge 2(1), 7–19 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "spatial-form-river-settlements-gurugoda-oya-valley",
+    "title": "A Study of the Spatial Form of River Based Settlements at Gurugoda Oya Valley, Sri Lanka",
+    "people": "C. C. Abenayake, A. Jayasinghe, K. D. Fernando",
+    "venue": "Journal of Social Sciences 1(4), 459–474 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "quantum-inspired-pedestrian-mobility-walkability-thermal-comfort",
+    "title": "Quantum-Inspired Pedestrian Mobility Modeling: Applying Probabilistic Spatial Simulation to Urban Walkability and Thermal Comfort in Sri Lanka",
+    "people": "M. Deshan, A. Jayasinghe, C. Abenayake",
+    "venue": "PLoS One 21(5), e0348630 (journal)",
+    "confirm": "Crossref lists a correction notice dated 22 June 2026 (PLoS One 21(6)); cite the corrected version"
+  },
+  {
+    "slug": "big-data-driven-pedestrian-analytics",
+    "title": "Big Data-Driven Pedestrian Analytics",
+    "people": "H. Sawandi, A. Jayasinghe",
+    "venue": "ICSD 2025, Colombo, p. 270, Springer Nature (conference)",
+    "confirm": "the CV entry starts with stray words (Cities, Environmentally Friendly); the title used here is the clean one"
+  },
+  {
+    "slug": "real-time-tracking-machine-learning-pedestrian-walking-moratuwa",
+    "title": "Real-Time Tracking Data and Machine Learning Approaches for Mapping Pedestrian Walking Behavior: A Case Study at the University of Moratuwa",
+    "people": "H. Sawandi, A. Jayasinghe, G. Retscher",
+    "venue": "Sensors 24(12), 3822 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "visual-quality-streets-street-view-deep-learning-framework",
+    "title": "Data-Driven Framework to Analyze the Visual Quality of Streets: A Systematic Measurement of Street Quality Through Street View Images Utilizing Deep Learning Algorithms",
+    "people": "P. Wickramasinghe, A. B. Jayasinghe",
+    "venue": "not given in the CV",
+    "confirm": "add the venue before publishing"
+  },
+  {
+    "slug": "walkability-city-centers-street-conditions-services-morphology",
+    "title": "Analyses of Walkability in City Centers: A Framework to Assess Walkability Based on Street Conditions, Proximity of Services and Urban Morphological Conditions",
+    "people": "S. M. Nissanka, A. B. Jayasinghe",
+    "venue": "not given in the CV",
+    "confirm": "add the venue before publishing"
+  },
+  {
+    "slug": "visual-quality-roads-deep-learning-street-view-r4tli-2023",
+    "title": "Analyze the Visual Quality of Roads Utilizing Deep Learning Algorithms and Street View Images",
+    "people": "P. Wickramasinghe, A. Jayasinghe",
+    "venue": "R4TLI 2023 (conference)",
+    "confirm": ""
+  },
+  {
+    "slug": "novel-framework-walkability-city-centers-r4tli-2023",
+    "title": "A Novel Framework to Analyze the Walkability of City Centers",
+    "people": "S. Nissanka, A. Jayasinghe",
+    "venue": "R4TLI 2023 (conference)",
+    "confirm": ""
+  },
+  {
+    "slug": "covid-19-behaviour-perception-public-space-colombo",
+    "title": "Impacts of Covid-19 on Individuals' Behaviour & Perception in Public Space: A Case Study of Colombo, Sri Lanka",
+    "people": "N. Bopitiyegedara, A. B. Jayasinghe, P. K. S. Mahanama",
+    "venue": "FARU 2022, Faculty of Architecture Research Unit (conference)",
+    "confirm": ""
+  },
+  {
+    "slug": "smartphones-3d-mapping-lidar-photogrammetry",
+    "title": "Smartphones as 3D Mapping Tools: A Comparative Study of LiDAR and Photogrammetry Techniques",
+    "people": "H. Sawandi, N. S. Bandara, H. Siriwardana, A. B. Jayasinghe",
+    "venue": "9th International Conference of SLAcJ, Japan (conference)",
+    "confirm": "add the conference dates"
+  },
+  {
+    "slug": "iot-sensors-location-based-services-water-quality-review",
+    "title": "The Integration of IoT (Internet of Things) Sensors and Location-Based Services for Water Quality Monitoring: A Systematic Literature Review",
+    "people": "R. M. P. N. S. Bandara, A. B. Jayasinghe, G. Retscher",
+    "venue": "Sensors 25(6), 1918 (journal)",
+    "confirm": "the month comes from the issue number; add the exact date from the journal page"
+  },
+  {
+    "slug": "mobile-gis-mobility-mapping",
+    "title": "Application of Mobile GIS for Mobility Mapping",
+    "people": "N. Sanjaya, A. Jayasinghe, Y. Chemin",
+    "venue": "International Journal of Emerging Technology & Research (IJETR) 1(6), 1–7 (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "gis-spatial-planning-suitable-residential-site-rambukkana",
+    "title": "An Application of Geographic Information Systems (GIS) for Spatial Planning: A Case Study on Identification of Suitable Site for Residential Development in Rambukkana DS Division",
+    "people": "P. K. S. Mahanama, A. Jayasinghe",
+    "venue": "GIS for All: Theory and Applications, Journal of the Geo-informatics Society of Sri Lanka (journal)",
+    "confirm": ""
+  },
+  {
+    "slug": "challenges-sri-lankan-planning-graduates-japanese-universities",
+    "title": "Challenges Experienced by Sri Lankan Town & Country Planning Graduates Studying in Japanese Universities",
+    "people": "N. Ranaweera, A. Jayasinghe, C. Abenayake, C. De Silva",
+    "venue": "Odyssey of Partnership: 70 Years of Japan–Sri Lanka Relations, pp. 185–214 (book chapter)",
+    "confirm": "the CV numbers this entry 6.7 and writes C. De Silva as CD Silva"
+  },
+  {
+    "slug": "overview-pbl-geodesy-geoinformatics-transport-education",
+    "title": "Overview of the PBL in Geodesy, Geoinformatics and Transport Engineering Education",
+    "people": "J. Gabela Majic, G. Retscher, G. Gartner, A. Binn, V. Gikas, I. Spyropoulou, R. Gerike, R. Ratnayake, A. Jayasinghe, L. Perera, P. Kalansooriya",
+    "venue": "XXVII FIG Congress 2022 (conference)",
+    "confirm": "the CV's venue field holds a template placeholder; the congress name comes from the citation"
+  },
+  {
+    "slug": "best-paper-urban-dynamics-faru-2023",
+    "title": "Best Paper, Urban Dynamics: Connectivity, Design and Sustainability (FARU 2023)",
+    "people": "not named in the CV",
+    "venue": "",
+    "confirm": "the winner and the paper; entries 28 to 30 (2023, no venue in the CV) are candidates"
+  },
+  {
+    "slug": "best-paper-construction-technologies-perception-faru-2023",
+    "title": "Best Paper, Innovative Construction Technologies and Perception Enhancement (FARU 2023)",
+    "people": "not named in the CV",
+    "venue": "",
+    "confirm": "the winner and the paper"
+  },
+  {
+    "slug": "best-research-urban-transport-planning-r4tli-2023",
+    "title": "Best Research in Urban Transport Planning (R4TLI 2023)",
+    "people": "not named in the CV",
+    "venue": "",
+    "confirm": "the winner and the paper; the R4TLI 2023 papers are entries 63 to 68"
+  },
+  {
+    "slug": "overall-best-research-transport-logistics-r4tli-2020",
+    "title": "Overall Best Research in Transport & Logistics (5th R4TLI, 2020)",
+    "people": "not named in the CV",
+    "venue": "",
+    "confirm": "the winner and the paper"
+  },
+  {
+    "slug": "best-paper-smart-growth-sustainability-faru-2020",
+    "title": "Best Paper, Smart Growth and Sustainability (FARU 2020)",
+    "people": "not named in the CV",
+    "venue": "",
+    "confirm": "the winner and the paper"
+  },
+  {
+    "slug": "best-paper-disaster-management-climate-change-faru-2020",
+    "title": "Best Paper, Disaster Management and Climate Change (FARU 2020)",
+    "people": "not named in the CV",
+    "venue": "",
+    "confirm": "the winner and the paper; the two FARU Journal 7 papers on flooding (entries 38 and 39) fit the theme"
+  },
+  {
+    "slug": "wcise-2019-best-researcher-urban-planning",
+    "title": "WCISE'19 International Award for Best Researcher in the Field of Urban Planning",
+    "people": "Amila Jayasinghe",
+    "venue": "",
+    "confirm": "the CV writes the year as 2020/19; December 2019 comes from the earlier brief"
+  },
+  {
+    "slug": "best-paper-faru-2019-colombo",
+    "title": "Best Paper (FARU 2019 Research Conference, Colombo)",
+    "people": "not named in the CV",
+    "venue": "",
+    "confirm": "the winner and the paper"
+  },
+  {
+    "slug": "best-poster-gold-award-faru-2019",
+    "title": "Best Poster, Gold Award (FARU 2019 Research Conference, Colombo)",
+    "people": "Sahan Sathsarana (named in the earlier brief)",
+    "venue": "",
+    "confirm": "the winner and the poster; entry 22, on modelling the spatial distribution of population, is the likely paper because Sathsarana is a co-author"
+  },
+  {
+    "slug": "best-paper-13th-easts-colombo-2019",
+    "title": "Best Paper (13th EASTS Conference, Colombo, 2019)",
+    "people": "N. Tenzin (named in the earlier brief)",
+    "venue": "",
+    "confirm": "the winner and the paper; entry 41, on a road network centrality model of population distribution, is the likely paper; the earlier brief said 2018 and student, so confirm both"
+  },
+  {
+    "slug": "best-presentation-icon-messsh-2019-phuket",
+    "title": "Best Presentation (iCon-MESSSH'19, Phuket, Thailand)",
+    "people": "Amila Jayasinghe (named in the earlier brief)",
+    "venue": "",
+    "confirm": "the presenter and the paper; entry 23, on simulating population growth from road network centrality, is the likely paper; the earlier brief said Best Paper but the CV says Best Presentation"
+  },
+  {
+    "slug": "best-research-highway-safety-r4tli-2018",
+    "title": "Best Research in Highway and Safety (3rd R4TLI, Colombo, 2018)",
+    "people": "N. Lakmali (named in the earlier brief)",
+    "venue": "",
+    "confirm": "the winner and the paper; entry 86, the stakeholder study of the Galle Road bus priority lane, is the likely paper"
+  },
+  {
+    "slug": "itpsl-award-planning-research-2021",
+    "title": "ITPSL Award for Planning Research (2021)",
+    "people": "Amila Jayasinghe",
+    "venue": "Institute of Town Planners Sri Lanka (ITPSL Awards 2021)",
+    "confirm": ""
+  },
+  {
+    "slug": "award-of-excellence-outstanding-research-2018-2021",
+    "title": "Award of Excellence with Distinction for Outstanding Research Performance (2018 to 2021)",
+    "people": "Amila Jayasinghe",
+    "venue": "University of Moratuwa",
+    "confirm": ""
+  },
+  {
+    "slug": "study-awards-cept-university-2009-2011",
+    "title": "Study Awards at CEPT University, India (2009 to 2011)",
+    "people": "Amila Jayasinghe",
+    "venue": "CEPT University, India, with the Alumni Association, the Vastu Shilpa Foundation and the Institute of Town Planners India",
+    "confirm": "the CV gives the span as 2009 to 11 for all six awards"
+  },
+  {
+    "slug": "deans-awards-eight-consecutive-semesters-moratuwa",
+    "title": "Dean's Awards for Eight Consecutive Semesters (University of Moratuwa, 2004 to 2008)",
+    "people": "Amila Jayasinghe",
+    "venue": "University of Moratuwa",
+    "confirm": ""
+  }
+]

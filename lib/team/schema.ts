@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { isValidSlug } from '@/lib/slug';
+import { SOCIAL_PLATFORMS } from './socials';
 
 const text = (max: number) => z.string().trim().max(max).default('');
 
@@ -46,6 +47,26 @@ export const teamMemberSchema = z.object({
   photo_path: optionalText(300),
   photo_alt: optionalText(200),
   profile_url: optionalHttp,
+  socials: z
+    .array(
+      z.object({
+        platform: z.enum(SOCIAL_PLATFORMS),
+        url: z
+          .string()
+          .trim()
+          .max(2048)
+          .refine((v) => {
+            try {
+              const u = new URL(v);
+              return u.protocol === 'http:' || u.protocol === 'https:';
+            } catch {
+              return false;
+            }
+          }, 'Use a full http or https link'),
+      }),
+    )
+    .max(8, 'Use at most 8 profile links')
+    .default([]),
   visible: z.boolean().default(true),
   sort_order: z.number().int().min(-1000).max(1000).default(0),
 });
