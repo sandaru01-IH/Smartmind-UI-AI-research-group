@@ -15,7 +15,6 @@ const en = {
     awards: 'Awards',
     gallery: 'Gallery & Partners',
     news: 'News',
-    collaborate: 'Open invitation',
     contact: 'Contact us',
     menu: 'Menu',
     closeMenu: 'Close menu',
@@ -52,10 +51,6 @@ const en = {
     journeyCta: 'The full journey',
     philosophyTitle: 'Intelligence + Love',
     philosophyLead: 'Open, Reproducible and Simple: the three ideas behind everything we build.',
-    featuredTitle: 'Featured research',
-    featuredLead:
-      'Key papers and projects, chosen for the breadth of what they show about cities as complex, adaptive systems.',
-    featuredCta: 'All research',
   },
   common: {
     readMore: 'Read more',

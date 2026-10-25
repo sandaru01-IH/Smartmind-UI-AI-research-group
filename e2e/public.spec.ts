@@ -298,16 +298,6 @@ test.describe('features', () => {
     await expect(page).toHaveURL(/\/gallery#partners$/);
   });
 
-  test('the open invitation page opens with the invitation and the ways to participate', async ({
-    page,
-  }) => {
-    await page.goto('/collaborate');
-    await expect(
-      page.getByRole('heading', { level: 1, name: 'Collaborate With Us' }),
-    ).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Ways to participate' })).toBeVisible();
-  });
-
   test('team network: hover traces links, select shows only personal details', async ({ page }) => {
     await page.goto('/team', { waitUntil: 'networkidle' });
     const amila = page.getByRole('button', { name: /^Amila Jayasinghe/ });

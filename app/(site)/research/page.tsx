@@ -1,7 +1,6 @@
 import { Suspense } from 'react';
 import { ArchitectureDiagram } from '@/components/chatbots/architecture-diagram';
 import { JourneyTimeline } from '@/components/chatbots/journey-timeline';
-import { FeaturedResearch } from '@/components/research/featured-research';
 import { ResearchBento } from '@/components/research/research-bento';
 import { ExternalLink } from '@/components/ui/external-link';
 import { PageHeader } from '@/components/ui/page-header';
@@ -9,7 +8,7 @@ import { Section } from '@/components/ui/section';
 import { Tag, TbcFlag } from '@/components/ui/tag';
 import { LINKS } from '@/content/brand';
 import { CHATBOT_PHILOSOPHY } from '@/content/chatbots';
-import { getFeatured, getMilestones, getResearch, getSpotlights } from '@/lib/catalog/public';
+import { getMilestones, getResearch, getSpotlights } from '@/lib/catalog/public';
 import { numberWord, numberWordCap, plural } from '@/lib/number-words';
 import { pageMeta } from '@/lib/seo';
 
@@ -36,22 +35,6 @@ async function Header() {
   );
 }
 
-/** Shown only once the admin has added featured research; nothing is kept in the code. */
-async function FeaturedSection() {
-  const items = await getFeatured();
-  if (items.length === 0) return null;
-  return (
-    <Section
-      id="featured"
-      numeral="01"
-      title="Featured research"
-      lead="Key papers and projects from the network, with the people who led them."
-    >
-      <FeaturedResearch items={items} full />
-    </Section>
-  );
-}
-
 async function Themes() {
   const { themes } = await getResearch();
   return <ResearchBento themes={themes} />;
@@ -63,7 +46,7 @@ async function WiderTopics() {
   return (
     <Section
       id="wider"
-      numeral="04"
+      numeral="03"
       title="Wider topics in the department"
       lead={`The department’s ongoing research page names ${numberWord(topics.length)} further ${topics.length === 1 ? 'topic' : 'topics'}.`}
     >
@@ -97,7 +80,7 @@ async function Spotlights() {
         <Section
           key={s.id}
           id={i === 0 ? 'spotlight' : `spotlight-${i + 1}`}
-          numeral={String(i + 5).padStart(2, '0')}
+          numeral={String(i + 4).padStart(2, '0')}
           title={s.title}
         >
           <article className="grid-12 gap-y-6 border border-line bg-surface p-6 md:p-10">
@@ -138,11 +121,7 @@ export default function ResearchPage() {
         <Header />
       </Suspense>
 
-      <Suspense fallback={null}>
-        <FeaturedSection />
-      </Suspense>
-
-      <Section id="themes" numeral="02" title="Themes and projects">
+      <Section id="themes" numeral="01" title="Themes and projects">
         <Suspense fallback={block}>
           <Themes />
         </Suspense>
@@ -150,7 +129,7 @@ export default function ResearchPage() {
 
       <Section
         id="journey"
-        numeral="03"
+        numeral="02"
         title="The journey of Smartmind"
         lead="Research turned into chatbots: urban-planning Q&A in 2023, flood and landslide warnings in 2026."
       >

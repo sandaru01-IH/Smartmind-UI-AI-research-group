@@ -4,8 +4,6 @@ import { ImportStarter } from '@/components/admin/content-manager';
 import { adminListAll } from '@/lib/posts/admin';
 import { requireAdmin } from '@/lib/auth/require-admin';
 import {
-  adminCollabs,
-  adminFeatured,
   adminAwards,
   adminMilestones,
   adminPartners,
@@ -21,15 +19,13 @@ export const instant = false;
 export default async function ContentHub() {
   await connection();
   const { supabase } = await requireAdmin();
-  const [awards, pubs, partners, research, journey, posts, featured, collabs] = await Promise.all([
+  const [awards, pubs, partners, research, journey, posts] = await Promise.all([
     adminAwards(supabase),
     adminPublications(supabase),
     adminPartners(supabase),
     adminResearch(supabase),
     adminMilestones(supabase),
     adminListAll(supabase),
-    adminFeatured(supabase),
-    adminCollabs(supabase),
   ]);
   const counts: Record<string, number> = {
     awards: awards.length + postsFeeding(posts, 'in_awards').length,
@@ -37,12 +33,8 @@ export default async function ContentHub() {
     partners: partners.length,
     research: research.themes.length,
     journey: journey.length,
-    featured: featured.length,
-    collaborations: collabs.length,
   };
-  // Featured research and the open invitation are not part of the starter content: they live in the database.
-  const starterKinds = ['awards', 'publications', 'partners', 'research', 'journey'];
-  const anyEmpty = starterKinds.some((k) => counts[k] === 0);
+  const anyEmpty = Object.values(counts).some((n) => n === 0);
   return (
     <div className="space-y-8">
       <header>

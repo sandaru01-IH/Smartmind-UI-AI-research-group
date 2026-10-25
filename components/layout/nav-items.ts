@@ -14,7 +14,6 @@ export const NAV_ITEMS: NavItem[] = [
   { href: '/gallery', label: t.nav.gallery },
   { href: '/team', label: t.nav.team },
   { href: '/news', label: t.nav.news },
-  { href: '/collaborate', label: t.nav.collaborate },
 ];
 
 export const CTA_ITEM: NavItem = { href: '/contact', label: t.nav.contact };

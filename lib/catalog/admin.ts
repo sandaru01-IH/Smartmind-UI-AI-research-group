@@ -3,8 +3,6 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { publicState } from '@/lib/visibility';
 import type { Post } from '@/lib/posts/types';
 import {
-  parseCollabRows,
-  parseFeaturedRows,
   parseAwardRows,
   parseMilestoneRows,
   parseSpotlightRows,
@@ -15,8 +13,6 @@ import {
   parseWorkLinkRows,
 } from './rows';
 import type {
-  CollabInput,
-  FeaturedInput,
   AwardInput,
   MilestoneInput,
   PartnerInput,
@@ -25,8 +21,6 @@ import type {
   ThemeInput,
 } from './schema';
 import {
-  COLLAB_COLUMNS,
-  FEATURED_COLUMNS,
   AWARD_COLUMNS,
   MILESTONE_COLUMNS,
   PARTNER_COLUMNS,
@@ -37,8 +31,6 @@ import {
   TOPIC_COLUMNS,
   WORK_LINK_COLUMNS,
   type Award,
-  type CollabProject,
-  type FeaturedItem,
   type Milestone,
   type Partner,
   type Publication,
@@ -73,25 +65,6 @@ export async function adminPublications(db: SupabaseClient): Promise<Publication
     .order('sort_order');
   load('publications', error);
   return parsePublicationRows(data);
-}
-
-export async function adminFeatured(db: SupabaseClient): Promise<FeaturedItem[]> {
-  const { data, error } = await db
-    .from('featured_research')
-    .select(FEATURED_COLUMNS)
-    .order('sort_order')
-    .order('year', { ascending: false });
-  load('featured research', error);
-  return parseFeaturedRows(data);
-}
-
-export async function adminCollabs(db: SupabaseClient): Promise<CollabProject[]> {
-  const { data, error } = await db
-    .from('collab_projects')
-    .select(COLLAB_COLUMNS)
-    .order('sort_order');
-  load('collaboration projects', error);
-  return parseCollabRows(data);
 }
 
 export async function adminPartners(db: SupabaseClient): Promise<Partner[]> {
@@ -209,11 +182,6 @@ export const saveSpotlight = (db: SupabaseClient, id: string | null, v: Spotligh
 export const savePartner = (db: SupabaseClient, id: string | null, v: PartnerInput) =>
   upsertOne(db, 'partners', PARTNER_COLUMNS, id, v, parsePartnerRows);
 
-export const saveFeatured = (db: SupabaseClient, id: string | null, v: FeaturedInput) =>
-  upsertOne(db, 'featured_research', FEATURED_COLUMNS, id, v, parseFeaturedRows);
-export const saveCollab = (db: SupabaseClient, id: string | null, v: CollabInput) =>
-  upsertOne(db, 'collab_projects', COLLAB_COLUMNS, id, v, parseCollabRows);
-
 export async function deleteRow(
   db: SupabaseClient,
   table:
@@ -222,9 +190,7 @@ export async function deleteRow(
     | 'partners'
     | 'research_themes'
     | 'milestones'
-    | 'research_spotlights'
-    | 'featured_research'
-    | 'collab_projects',
+    | 'research_spotlights',
   id: string,
 ): Promise<void> {
   const { error } = await db.from(table).delete().eq('id', id);

@@ -6,14 +6,13 @@ import { JourneyTeaser } from '@/components/home/journey-teaser';
 import { LatestSection } from '@/components/home/latest-bento';
 import { NumbersStrip } from '@/components/home/numbers-strip';
 import { PhilosophyTriangle } from '@/components/home/philosophy-triangle';
-import { FeaturedResearch } from '@/components/research/featured-research';
 import { ResearchBento } from '@/components/research/research-bento';
 import { ButtonLink } from '@/components/ui/button';
 import { Section } from '@/components/ui/section';
 import { JsonLd } from '@/components/seo/json-ld';
 import { BRAND, LINKS, SITE_URL, UNIVERSITY_CONTACT } from '@/content/brand';
 import { t } from '@/content/strings';
-import { getFeatured, getMilestones, getNumberStats, getResearch } from '@/lib/catalog/public';
+import { getMilestones, getNumberStats, getResearch } from '@/lib/catalog/public';
 import { numberWordCap } from '@/lib/number-words';
 import { getTeamNetwork } from '@/lib/team/public';
 
@@ -28,27 +27,6 @@ export const metadata: Metadata = {
 async function Numbers() {
   const { members } = await getTeamNetwork();
   return <NumbersStrip stats={await getNumberStats(members.length)} />;
-}
-
-/** Shown only once the admin has added featured research; nothing is kept in the code. */
-async function FeaturedSection() {
-  const items = await getFeatured();
-  if (items.length === 0) return null;
-  return (
-    <Section
-      id="featured"
-      numeral="02"
-      title={t.home.featuredTitle}
-      lead={t.home.featuredLead}
-      action={
-        <ButtonLink href="/research#featured" variant="secondary">
-          {t.home.featuredCta}
-        </ButtonLink>
-      }
-    >
-      <FeaturedResearch items={items} />
-    </Section>
-  );
 }
 
 async function Journey() {
@@ -110,16 +88,12 @@ export default function HomePage() {
         <PhilosophyTriangle />
       </Section>
 
-      <Suspense fallback={null}>
-        <FeaturedSection />
-      </Suspense>
-
       {/* Appears only once the admin has published news; renders nothing before that. */}
       <Suspense fallback={null}>
         <LatestSection />
       </Suspense>
 
-      <Section id="numbers" numeral="03" title={t.home.numbers}>
+      <Section id="numbers" numeral="02" title={t.home.numbers}>
         <Suspense
           fallback={<div className="h-44 border border-line bg-surface" aria-hidden="true" />}
         >
@@ -129,7 +103,7 @@ export default function HomePage() {
 
       <Section
         id="research"
-        numeral="04"
+        numeral="03"
         title={
           <Suspense fallback={t.home.researchTitle}>
             <ResearchHeading />
@@ -151,7 +125,7 @@ export default function HomePage() {
 
       <Section
         id="journey"
-        numeral="05"
+        numeral="04"
         title={t.home.journeyTitle}
         lead={t.home.journeyLead}
         action={

@@ -4,8 +4,6 @@ import { revalidatePath, updateTag } from 'next/cache';
 import { z } from 'zod';
 import { requireAdmin } from '@/lib/auth/require-admin';
 import {
-  saveCollab,
-  saveFeatured,
   adminAwards,
   adminMilestones,
   adminPartners,
@@ -23,8 +21,6 @@ import {
   setWorkPeople,
 } from '@/lib/catalog/admin';
 import {
-  collabSchema,
-  featuredSchema,
   awardSchema,
   milestoneSchema,
   partnerSchema,
@@ -45,8 +41,6 @@ import {
 } from '@/lib/catalog/seed';
 import type {
   Award,
-  CollabProject,
-  FeaturedItem,
   Milestone,
   Partner,
   Publication,
@@ -60,8 +54,7 @@ import type { ActionResult } from './actions';
  * Every write here expires the cache tag of what changed, plus the tags of everything that is built
  * from it (a person's profile, the home page figures), so one edit shows up all over the site.
  */
-type Area =
-  'awards' | 'publications' | 'partners' | 'research' | 'milestones' | 'featured' | 'collabs';
+type Area = 'awards' | 'publications' | 'partners' | 'research' | 'milestones';
 
 const PAGES: Record<Area, string[]> = {
   awards: ['/awards', '/team', '/'],
@@ -69,8 +62,6 @@ const PAGES: Record<Area, string[]> = {
   partners: ['/gallery', '/'],
   research: ['/research', '/'],
   milestones: ['/research', '/'],
-  featured: ['/research', '/'],
-  collabs: ['/collaborate', '/'],
 };
 
 function refresh(area: Area): void {
@@ -189,76 +180,6 @@ export async function deletePartnerAction(id: string): Promise<ActionResult> {
     return { ok: true };
   } catch (e) {
     return fail(messageOf(e, 'Could not delete the partner.'));
-  }
-}
-
-/* ---------------------------------------------------------------- featured */
-
-export async function saveFeaturedAction(input: {
-  id: string | null;
-  values: unknown;
-}): Promise<ActionResult<FeaturedItem>> {
-  const { supabase } = await requireAdmin();
-  const id = idOrNull.safeParse(input.id);
-  const parsed = featuredSchema.safeParse(input.values);
-  if (!id.success) return fail('Unknown item.');
-  if (!parsed.success) return invalid(parsed.error);
-  if (parsed.data.figure_path && !isValidUploadPath(parsed.data.figure_path))
-    return fail('The figure upload is not valid.', { figure_path: ['Upload the figure again'] });
-  try {
-    const saved = await saveFeatured(supabase, id.data, parsed.data);
-    refresh('featured');
-    return { ok: true, data: saved };
-  } catch (e) {
-    return fail(messageOf(e, 'Could not save the featured item.'));
-  }
-}
-
-export async function deleteFeaturedAction(id: string): Promise<ActionResult> {
-  const { supabase } = await requireAdmin();
-  if (!z.uuid().safeParse(id).success) return fail('Unknown item.');
-  try {
-    await deleteRow(supabase, 'featured_research', id);
-    refresh('featured');
-    return { ok: true };
-  } catch (e) {
-    return fail(messageOf(e, 'Could not delete the featured item.'));
-  }
-}
-
-/* ----------------------------------------------------------- collaborations */
-
-export async function saveCollabAction(input: {
-  id: string | null;
-  values: unknown;
-}): Promise<ActionResult<CollabProject>> {
-  const { supabase } = await requireAdmin();
-  const id = idOrNull.safeParse(input.id);
-  const parsed = collabSchema.safeParse(input.values);
-  if (!id.success) return fail('Unknown project.');
-  if (!parsed.success) return invalid(parsed.error);
-  if (parsed.data.contact_photo_path && !isValidUploadPath(parsed.data.contact_photo_path))
-    return fail('The photo upload is not valid.', {
-      contact_photo_path: ['Upload the photo again'],
-    });
-  try {
-    const saved = await saveCollab(supabase, id.data, parsed.data);
-    refresh('collabs');
-    return { ok: true, data: saved };
-  } catch (e) {
-    return fail(messageOf(e, 'Could not save the project.'));
-  }
-}
-
-export async function deleteCollabAction(id: string): Promise<ActionResult> {
-  const { supabase } = await requireAdmin();
-  if (!z.uuid().safeParse(id).success) return fail('Unknown project.');
-  try {
-    await deleteRow(supabase, 'collab_projects', id);
-    refresh('collabs');
-    return { ok: true };
-  } catch (e) {
-    return fail(messageOf(e, 'Could not delete the project.'));
   }
 }
 

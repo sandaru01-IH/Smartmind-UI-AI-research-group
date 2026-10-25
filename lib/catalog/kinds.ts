@@ -21,16 +21,6 @@ export const CONTENT_KINDS = [
       'The chatbot timeline on the research page. Tie an entry to a news post to share its switch.',
   },
   {
-    id: 'featured',
-    label: 'Featured research',
-    blurb: 'Key papers and projects highlighted on the home page, each with a figure.',
-  },
-  {
-    id: 'collaborations',
-    label: 'Open invitation',
-    blurb: 'Projects open to collaboration, with the person to contact and their photo.',
-  },
-  {
     id: 'research',
     label: 'Research',
     blurb: 'Research themes with their projects, and the wider topics.',
