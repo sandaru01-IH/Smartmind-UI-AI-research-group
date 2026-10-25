@@ -5,6 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition, type ReactNode } from 'react';
 import { Download, Loader2, Plus, Save, Trash2 } from 'lucide-react';
 import {
+  deleteCollabAction,
+  deleteFeaturedAction,
+  saveCollabAction,
+  saveFeaturedAction,
   deleteAwardAction,
   deleteMilestoneAction,
   deletePartnerAction,
@@ -24,6 +28,8 @@ import type { ActionResult } from '@/app/admin/actions';
 import { buttonClass } from '@/components/ui/button';
 import { TbcFlag } from '@/components/ui/tag';
 import {
+  collabSchema,
+  featuredSchema,
   awardSchema,
   milestoneSchema,
   partnerSchema,
@@ -37,6 +43,8 @@ import {
   THEME_STYLES,
   THEME_STYLE_LABEL,
   type Award,
+  type CollabProject,
+  type FeaturedItem,
   type Milestone,
   type Partner,
   type Publication,
@@ -787,6 +795,402 @@ function PartnerForm({
         onDelete={
           partner
             ? () => crud.remove(partner.id, partner.name, () => deletePartnerAction(partner.id))
+            : undefined
+        }
+      />
+    </form>
+  );
+}
+
+/* ---------------------------------------------------------------- featured */
+
+export function FeaturedManager({ items }: { items: FeaturedItem[] }) {
+  const crud = useCrud<FeaturedItem>(items);
+  const current = crud.items.find((f) => f.id === crud.editing) ?? null;
+  return (
+    <Workspace
+      items={crud.items}
+      editing={crud.editing}
+      onEdit={crud.open}
+      addLabel="Add a featured item"
+      empty="No featured research yet."
+      row={(f) => (
+        <span className="flex items-center gap-3">
+          <span className="flex h-10 w-14 shrink-0 items-center justify-center overflow-hidden border border-line bg-surface text-[0.8rem] text-muted">
+            {f.figure_path ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={mediaUrl(f.figure_path) ?? ''}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              f.year
+            )}
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate">{f.title}</span>
+            <span className="label-mono text-muted">
+              {f.kind === 'project' ? 'Project' : 'Paper'} · {f.year}
+              {!f.figure_path ? ' · No figure yet' : ''}
+            </span>
+            {flags(f)}
+          </span>
+        </span>
+      )}
+      form={crud.editing ? <FeaturedForm key={crud.editing} item={current} crud={crud} /> : null}
+    />
+  );
+}
+
+function FeaturedForm({
+  item,
+  crud,
+}: {
+  item: FeaturedItem | null;
+  crud: ReturnType<typeof useCrud<FeaturedItem>>;
+}) {
+  const toast = useToast();
+  const [d, setD] = useState({
+    kind: item?.kind ?? ('paper' as FeaturedItem['kind']),
+    year: String(item?.year ?? new Date().getFullYear()),
+    title: item?.title ?? '',
+    venue: item?.venue ?? '',
+    summary: item?.summary ?? '',
+    key_partners: item?.key_partners ?? '',
+    href: item?.href ?? '',
+    figure_path: item?.figure_path ?? (null as string | null),
+    figure_caption: item?.figure_caption ?? '',
+    tbc: item?.tbc ?? false,
+    visible: item?.visible ?? true,
+    sort_order: String(item?.sort_order ?? 0),
+  });
+  const set = <K extends keyof typeof d>(k: K, v: (typeof d)[K]) => setD((p) => ({ ...p, [k]: v }));
+  const values = () => ({
+    ...d,
+    year: Number(d.year),
+    sort_order: num(d.sort_order),
+    href: d.href.trim() || null,
+  });
+  const valid = featuredSchema.safeParse(values()).success;
+  const err = (k: string) => first(crud.errors, k);
+
+  return (
+    <form
+      noValidate
+      className="space-y-5 border border-line-strong p-5"
+      onSubmit={(e) => {
+        e.preventDefault();
+        crud.save(() => saveFeaturedAction({ id: item?.id ?? null, values: values() }));
+      }}
+    >
+      <h3 className="text-xl">{item ? 'Edit featured item' : 'Add a featured item'}</h3>
+      <Field id="ft-title" label="Title" error={err('title')}>
+        <input
+          id="ft-title"
+          value={d.title}
+          onChange={(e) => set('title', e.target.value)}
+          className={fieldClass}
+          required
+        />
+      </Field>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Field id="ft-kind" label="Kind">
+          <select
+            id="ft-kind"
+            value={d.kind}
+            onChange={(e) => set('kind', e.target.value as FeaturedItem['kind'])}
+            className={fieldClass}
+          >
+            <option value="paper">Paper</option>
+            <option value="project">Project</option>
+          </select>
+        </Field>
+        <Field id="ft-year" label="Year" error={err('year')}>
+          <input
+            id="ft-year"
+            inputMode="numeric"
+            value={d.year}
+            onChange={(e) => set('year', numeric(e.target.value))}
+            className={fieldClass}
+          />
+        </Field>
+        <Field id="ft-venue" label="Journal or event">
+          <input
+            id="ft-venue"
+            value={d.venue}
+            onChange={(e) => set('venue', e.target.value)}
+            className={fieldClass}
+          />
+        </Field>
+      </div>
+      <Field
+        id="ft-summary"
+        label="Summary"
+        hint="Shown in full on the research page and shortened on the home page."
+        error={err('summary')}
+      >
+        <textarea
+          id="ft-summary"
+          rows={7}
+          value={d.summary}
+          onChange={(e) => set('summary', e.target.value)}
+          className={areaClass}
+        />
+      </Field>
+      <Field id="ft-partners" label="Key partners" error={err('key_partners')}>
+        <input
+          id="ft-partners"
+          value={d.key_partners}
+          onChange={(e) => set('key_partners', e.target.value)}
+          className={fieldClass}
+        />
+      </Field>
+      <Field id="ft-href" label="Link to the publication (optional)" error={err('href')}>
+        <input
+          id="ft-href"
+          type="url"
+          placeholder="https://"
+          value={d.href}
+          onChange={(e) => set('href', e.target.value)}
+          className={fieldClass}
+        />
+      </Field>
+      <div>
+        <p className="label-mono mb-2 text-muted">Figure</p>
+        <ImageUploader
+          name="figure"
+          noun="figure"
+          showAlt={false}
+          fit="contain"
+          value={{ path: d.figure_path, alt: d.title }}
+          onChange={(v) => set('figure_path', v.path)}
+          onError={(m) => toast.push(m, 'error')}
+        />
+        <p className="mt-2 text-[0.9rem] text-muted">
+          Use the paper’s own figure and keep the credit in the caption below.
+        </p>
+        {err('figure_path') ? (
+          <p className="text-[0.9rem] text-danger">{err('figure_path')}</p>
+        ) : null}
+      </div>
+      <Field
+        id="ft-caption"
+        label="Figure caption and credit"
+        hint="Describes the figure for people who cannot see it, and credits the source."
+        error={err('figure_caption')}
+      >
+        <input
+          id="ft-caption"
+          value={d.figure_caption}
+          onChange={(e) => set('figure_caption', e.target.value)}
+          className={fieldClass}
+        />
+      </Field>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field id="ft-sort" label="Order" hint="Lower numbers come first.">
+          <input
+            id="ft-sort"
+            inputMode="numeric"
+            value={d.sort_order}
+            onChange={(e) => set('sort_order', numeric(e.target.value))}
+            className={fieldClass}
+          />
+        </Field>
+        <div className="space-y-2">
+          <Check checked={d.tbc} onChange={(v) => set('tbc', v)}>
+            To be confirmed
+          </Check>
+          <Check checked={d.visible} onChange={(v) => set('visible', v)}>
+            Show on the site
+          </Check>
+        </div>
+      </div>
+      <FormFooter
+        busy={crud.busy}
+        valid={valid}
+        onCancel={() => crud.open(null)}
+        onDelete={
+          item
+            ? () => crud.remove(item.id, 'this featured item', () => deleteFeaturedAction(item.id))
+            : undefined
+        }
+      />
+    </form>
+  );
+}
+
+/* ----------------------------------------------------------- collaborations */
+
+export function CollabsManager({ items }: { items: CollabProject[] }) {
+  const crud = useCrud<CollabProject>(items);
+  const current = crud.items.find((c) => c.id === crud.editing) ?? null;
+  return (
+    <Workspace
+      items={crud.items}
+      editing={crud.editing}
+      onEdit={crud.open}
+      addLabel="Add a project"
+      empty="No open-invitation projects yet."
+      row={(c) => (
+        <span className="flex items-center gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-surface text-[0.8rem] text-muted">
+            {c.contact_photo_path ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={mediaUrl(c.contact_photo_path) ?? ''}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              (c.contact_name || '?').slice(0, 1)
+            )}
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate">{c.title}</span>
+            <span className="label-mono text-muted">
+              {c.contact_name || 'No contact yet'}
+              {!c.visible ? ' · Hidden' : ''}
+            </span>
+          </span>
+        </span>
+      )}
+      form={crud.editing ? <CollabForm key={crud.editing} item={current} crud={crud} /> : null}
+    />
+  );
+}
+
+function CollabForm({
+  item,
+  crud,
+}: {
+  item: CollabProject | null;
+  crud: ReturnType<typeof useCrud<CollabProject>>;
+}) {
+  const toast = useToast();
+  const [d, setD] = useState({
+    title: item?.title ?? '',
+    summary: item?.summary ?? '',
+    contact_name: item?.contact_name ?? '',
+    contact_role: item?.contact_role ?? 'Project contact',
+    contact_bio: item?.contact_bio ?? '',
+    contact_email: item?.contact_email ?? '',
+    contact_photo_path: item?.contact_photo_path ?? (null as string | null),
+    visible: item?.visible ?? true,
+    sort_order: String(item?.sort_order ?? 0),
+  });
+  const set = <K extends keyof typeof d>(k: K, v: (typeof d)[K]) => setD((p) => ({ ...p, [k]: v }));
+  const values = () => ({ ...d, sort_order: num(d.sort_order) });
+  const valid = collabSchema.safeParse(values()).success;
+  const err = (k: string) => first(crud.errors, k);
+
+  return (
+    <form
+      noValidate
+      className="space-y-5 border border-line-strong p-5"
+      onSubmit={(e) => {
+        e.preventDefault();
+        crud.save(() => saveCollabAction({ id: item?.id ?? null, values: values() }));
+      }}
+    >
+      <h3 className="text-xl">{item ? `Edit ${item.title}` : 'Add a project'}</h3>
+      <Field id="cb-title" label="Project name" error={err('title')}>
+        <input
+          id="cb-title"
+          value={d.title}
+          onChange={(e) => set('title', e.target.value)}
+          className={fieldClass}
+          required
+        />
+      </Field>
+      <Field id="cb-summary" label="What it is about" error={err('summary')}>
+        <textarea
+          id="cb-summary"
+          rows={5}
+          value={d.summary}
+          onChange={(e) => set('summary', e.target.value)}
+          className={areaClass}
+        />
+      </Field>
+      <fieldset className="space-y-4 border border-line p-4">
+        <legend className="label-mono px-2 text-muted">Project contact</legend>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field id="cb-name" label="Name" error={err('contact_name')}>
+            <input
+              id="cb-name"
+              value={d.contact_name}
+              onChange={(e) => set('contact_name', e.target.value)}
+              className={fieldClass}
+            />
+          </Field>
+          <Field id="cb-role" label="Role" error={err('contact_role')}>
+            <input
+              id="cb-role"
+              value={d.contact_role}
+              onChange={(e) => set('contact_role', e.target.value)}
+              className={fieldClass}
+            />
+          </Field>
+        </div>
+        <Field
+          id="cb-email"
+          label="Email (optional)"
+          hint="Leave empty until the person confirms their address can be shown."
+          error={err('contact_email')}
+        >
+          <input
+            id="cb-email"
+            type="email"
+            value={d.contact_email}
+            onChange={(e) => set('contact_email', e.target.value)}
+            className={fieldClass}
+          />
+        </Field>
+        <Field id="cb-bio" label="Short details (optional)" error={err('contact_bio')}>
+          <textarea
+            id="cb-bio"
+            rows={3}
+            value={d.contact_bio}
+            onChange={(e) => set('contact_bio', e.target.value)}
+            className={areaClass}
+          />
+        </Field>
+        <div>
+          <p className="label-mono mb-2 text-muted">Photo</p>
+          <ImageUploader
+            name="contact"
+            noun="photo"
+            showAlt={false}
+            value={{ path: d.contact_photo_path, alt: d.contact_name }}
+            onChange={(v) => set('contact_photo_path', v.path)}
+            onError={(m) => toast.push(m, 'error')}
+          />
+          {err('contact_photo_path') ? (
+            <p className="text-[0.9rem] text-danger">{err('contact_photo_path')}</p>
+          ) : null}
+        </div>
+      </fieldset>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field id="cb-sort" label="Order" hint="Lower numbers come first.">
+          <input
+            id="cb-sort"
+            inputMode="numeric"
+            value={d.sort_order}
+            onChange={(e) => set('sort_order', numeric(e.target.value))}
+            className={fieldClass}
+          />
+        </Field>
+        <Check checked={d.visible} onChange={(v) => set('visible', v)}>
+          Show on the open invitation page
+        </Check>
+      </div>
+      <FormFooter
+        busy={crud.busy}
+        valid={valid}
+        onCancel={() => crud.open(null)}
+        onDelete={
+          item
+            ? () => crud.remove(item.id, item.title, () => deleteCollabAction(item.id))
             : undefined
         }
       />

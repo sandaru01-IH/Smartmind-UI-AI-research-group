@@ -1,55 +1,43 @@
-import { ExternalLink } from '@/components/ui/external-link';
-import { LINKS, UNIVERSITY_CONTACT } from '@/content/brand';
+import { CONTACT_EMAIL } from '@/content/brand';
+import { TEAM_CONTACTS, formatLkPhone, telHref } from '@/content/philosophy';
 
-/** Where the lab sits: the University of Moratuwa's postal address and phones, plus the Facebook page. */
-export function ContactCard() {
+/**
+ * The people behind the network. The shared inbox is for general enquiries; anything that needs
+ * detail or a conversation goes to one of the members directly.
+ */
+export function TeamContacts() {
   return (
-    <section
-      aria-labelledby="contact-university"
-      className="grid gap-8 border border-line bg-surface p-6 md:grid-cols-2 md:p-10"
-    >
-      <div>
-        <h2 id="contact-university" className="text-2xl">
-          University of Moratuwa
-        </h2>
-        <address className="mt-5 not-italic">
-          {UNIVERSITY_CONTACT.addressLines.map((l) => (
-            <span key={l} className="block">
-              {l}
-            </span>
-          ))}
-        </address>
-        <p className="label-mono mt-4 text-muted">
-          General university contact, not a Smartmind address.
-        </p>
-      </div>
-      <ul className="space-y-1">
-        {UNIVERSITY_CONTACT.phones.map((p) => (
-          <li key={p}>
+    <section aria-labelledby="contact-members" className="pt-12 md:pt-16">
+      <h2 id="contact-members" className="sr-only">
+        Contact the members
+      </h2>
+      <p className="max-w-[62ch] text-lg text-muted">
+        For general enquiries write to{' '}
+        <a href={`mailto:${CONTACT_EMAIL}`} className="text-fg underline underline-offset-4">
+          {CONTACT_EMAIL}
+        </a>
+        . For details and discussions, reach any of the members below.
+      </p>
+      <ul className="mt-8 grid gap-px border border-line bg-line sm:grid-cols-3">
+        {TEAM_CONTACTS.map((c) => (
+          <li key={c.name} className="bg-surface p-6">
+            <p className="font-display text-xl">{c.name}</p>
             <a
-              href={`tel:${p.replace(/\s/g, '')}`}
-              className="inline-flex min-h-11 items-center underline underline-offset-4"
+              href={telHref(c.phone)}
+              className="mt-3 inline-flex min-h-11 items-center underline underline-offset-4"
             >
-              {p}
+              {formatLkPhone(c.phone)}
             </a>
+            {c.email ? (
+              <a
+                href={`mailto:${c.email}`}
+                className="block min-h-11 py-2 underline underline-offset-4"
+              >
+                {c.email}
+              </a>
+            ) : null}
           </li>
         ))}
-        <li>
-          <a
-            href={`mailto:${UNIVERSITY_CONTACT.email}`}
-            className="inline-flex min-h-11 items-center underline underline-offset-4"
-          >
-            {UNIVERSITY_CONTACT.email}
-          </a>
-        </li>
-        <li>
-          <ExternalLink
-            href={LINKS.facebook}
-            className="inline-flex min-h-11 items-center underline underline-offset-4"
-          >
-            Facebook page
-          </ExternalLink>
-        </li>
       </ul>
     </section>
   );

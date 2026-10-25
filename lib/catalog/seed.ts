@@ -3,7 +3,14 @@ import { MILESTONES } from '@/content/chatbots';
 import { PARTNERS } from '@/content/partners';
 import { ALL_PUBLICATIONS } from '@/content/publications';
 import { FOURONSE, THEMES, WIDER_TOPICS } from '@/content/research';
-import type { Award, Milestone, Partner, Publication, ResearchData, Spotlight } from './types';
+import type {
+  Award,
+  Milestone,
+  Partner,
+  Publication,
+  ResearchData,
+  Spotlight,
+} from './types';
 
 /**
  * Demo mode (no Supabase) and the one-off import into a new database: the sourced content that used

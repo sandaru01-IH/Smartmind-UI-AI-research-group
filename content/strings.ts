@@ -15,6 +15,7 @@ const en = {
     awards: 'Awards',
     gallery: 'Gallery & Partners',
     news: 'News',
+    collaborate: 'Open invitation',
     contact: 'Contact us',
     menu: 'Menu',
     closeMenu: 'Close menu',
@@ -32,7 +33,7 @@ const en = {
     empty: 'No updates yet.',
   },
   hero: {
-    eyebrow: 'GeoAI network · Urban Simulation Lab',
+    eyebrow: 'Smartmind UI & SI · Urban Informatics & Super Intelligence',
     fallbackLabel:
       'Layered road networks drawn as nodes and links. Fainter networks sit behind a nearer one. Larger nodes carry more routes.',
     primaryCta: 'Explore the research',
@@ -49,6 +50,12 @@ const en = {
     journeyTitle: 'The Journey of Smartmind',
     journeyLead: 'From the first planning chatbot in 2023 to flood and landslide warnings in 2026.',
     journeyCta: 'The full journey',
+    philosophyTitle: 'Intelligence + Love',
+    philosophyLead: 'Open, Reproducible and Simple: the three ideas behind everything we build.',
+    featuredTitle: 'Featured research',
+    featuredLead:
+      'Key papers and projects, chosen for the breadth of what they show about cities as complex, adaptive systems.',
+    featuredCta: 'All research',
   },
   common: {
     readMore: 'Read more',

@@ -296,8 +296,16 @@ test.describe('features', () => {
     await expect(page).toHaveURL(/\/research#journey$/);
     await page.goto('/partners');
     await expect(page).toHaveURL(/\/gallery#partners$/);
+  });
+
+  test('the open invitation page opens with the invitation and the ways to participate', async ({
+    page,
+  }) => {
     await page.goto('/collaborate');
-    await expect(page).toHaveURL(/\/contact$/);
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Collaborate With Us' }),
+    ).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Ways to participate' })).toBeVisible();
   });
 
   test('team network: hover traces links, select shows only personal details', async ({ page }) => {
@@ -426,12 +434,14 @@ test.describe('features', () => {
     );
   });
 
-  test('contact page: one big email button, plus the university details', async ({ page }) => {
+  test('contact page: one big email button, plus the three members', async ({ page }) => {
     await page.goto('/contact');
     await expect(page.getByRole('link', { name: /Contact us/ }).first()).toBeVisible();
-    await expect(page.locator('main a[href^="mailto:info@smartminduiai.com"]')).toHaveCount(1);
-    await expect(page.locator('main').getByText('+94 11 2640051')).toBeVisible();
-    await expect(page.getByRole('link', { name: 'info@uom.lk' })).toBeVisible();
+    await expect(page.locator('main a[href^="mailto:info@smartminduiai.com"]')).toHaveCount(2);
+    await expect(page.locator('main').getByText('Samith Madusanka')).toBeVisible();
+    await expect(page.getByRole('link', { name: '077 277 7236' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'amilabj@uom.lk' })).toBeVisible();
+    await expect(page.locator('main')).not.toContainText('+94 11 2640051');
   });
 
   test('footer carries the university details and no same-name disclaimer', async ({ page }) => {

@@ -481,3 +481,63 @@ html:not(.js) [data-reveal] {
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.4s ease-in-out infinite;
 }
+
+/* Philosophy triangle: the outline draws in and the centre breathes. */
+.tri-edge {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+[data-drawn='true'] .tri-edge {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1100ms var(--ease-out-signal);
+  transition-delay: var(--d, 0ms);
+}
+@keyframes tri-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+}
+@keyframes tri-copy-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.tri-core {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: tri-breathe 4s ease-in-out infinite;
+}
+.tri-copy {
+  animation: tri-copy-in 450ms var(--ease-out-signal);
+}
+@media (prefers-reduced-motion: reduce) {
+  .tri-edge {
+    stroke-dashoffset: 0;
+    transition: none !important;
+  }
+  .tri-core,
+  .tri-copy {
+    animation: none !important;
+  }
+}
+
+/* Triangle colours: coloured on the dark theme, plain black on the light one. */
+.tri-diagram {
+  --tri-core: var(--signal);
+  --tri-edge: var(--line-strong);
+  --tri-glow: 0.22;
+}
+[data-theme='light'] .tri-diagram {
+  --tri-core: var(--fg);
+  --tri-edge: var(--fg);
+  --tri-glow: 0.05;
+}

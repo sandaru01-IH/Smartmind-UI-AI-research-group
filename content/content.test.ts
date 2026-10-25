@@ -15,9 +15,9 @@ describe('starter content traces to this.md', () => {
 });
 
 describe('content integrity', () => {
-  it('lists seven national and seven international partners', () => {
-    expect(PARTNERS.filter((p) => p.kind === 'national')).toHaveLength(7);
-    expect(PARTNERS.filter((p) => p.kind === 'international')).toHaveLength(7);
+  it('lists nine national and eight international partners', () => {
+    expect(PARTNERS.filter((p) => p.kind === 'national')).toHaveLength(9);
+    expect(PARTNERS.filter((p) => p.kind === 'international')).toHaveLength(8);
   });
   it('has twelve lab papers spanning 2019 to 2021, each with a link', () => {
     expect(LAB_PAPERS).toHaveLength(12);

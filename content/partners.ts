@@ -30,6 +30,13 @@ export const PARTNERS: Partner[] = [
   },
   { name: 'Sri Lanka Land Development Corporation (SLLDC)', short: 'SLLDC', kind: 'national' },
   {
+    name: 'National Transport Commission (NTC)',
+    short: 'NTC',
+    url: 'https://www.ntc.gov.lk',
+    kind: 'national',
+  },
+  { name: 'CPCEC, Port City Colombo', short: 'Port City', kind: 'national' },
+  {
     name: 'Mahaweli Authority of Sri Lanka',
     short: 'MASL',
     url: 'https://www.mahaweli.gov.lk',
@@ -66,6 +73,13 @@ export const PARTNERS: Partner[] = [
     url: 'https://www.nagaokaut.ac.jp',
     kind: 'international',
     place: 'Japan',
+  },
+  {
+    name: 'TU Dresden',
+    short: 'TU Dresden',
+    url: 'https://tu-dresden.de',
+    kind: 'international',
+    place: 'Germany',
   },
   { name: 'OSGeo Foundation', short: 'OSGeo', url: 'https://www.osgeo.org', kind: 'international' },
   {

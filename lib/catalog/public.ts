@@ -5,6 +5,8 @@ import type { NumberStat } from '@/content/numbers';
 import { createPublicClient } from '@/lib/supabase/public-client';
 import { getMemberRefs } from '@/lib/team/refs';
 import {
+  parseCollabRows,
+  parseFeaturedRows,
   parseAwardRows,
   parseMilestoneRows,
   parseSpotlightRows,
@@ -23,6 +25,8 @@ import {
   seedSpotlights,
 } from './seed';
 import {
+  COLLAB_COLUMNS,
+  FEATURED_COLUMNS,
   AWARD_COLUMNS,
   MILESTONE_COLUMNS,
   PARTNER_COLUMNS,
@@ -33,6 +37,8 @@ import {
   TOPIC_COLUMNS,
   WORK_LINK_COLUMNS,
   type Award,
+  type CollabProject,
+  type FeaturedItem,
   type MemberWork,
   type Milestone,
   type Partner,
@@ -210,6 +216,36 @@ export async function getPartners(): Promise<Partner[]> {
     .order('name');
   if (error) throw new Error(`Could not load partners: ${error.message}`);
   return parsePartnerRows(data);
+}
+
+export async function getFeatured(): Promise<FeaturedItem[]> {
+  'use cache';
+  cacheTag('featured');
+  cacheLife(life);
+  const db = createPublicClient();
+  if (!db) return [];
+  const { data, error } = await db
+    .from('featured_research')
+    .select(FEATURED_COLUMNS)
+    .eq('visible', true)
+    .order('sort_order');
+  if (error) throw new Error(`Could not load featured research: ${error.message}`);
+  return parseFeaturedRows(data);
+}
+
+export async function getCollabs(): Promise<CollabProject[]> {
+  'use cache';
+  cacheTag('collabs');
+  cacheLife(life);
+  const db = createPublicClient();
+  if (!db) return [];
+  const { data, error } = await db
+    .from('collab_projects')
+    .select(COLLAB_COLUMNS)
+    .eq('visible', true)
+    .order('sort_order');
+  if (error) throw new Error(`Could not load collaboration projects: ${error.message}`);
+  return parseCollabRows(data);
 }
 
 export async function getResearch(): Promise<ResearchData> {

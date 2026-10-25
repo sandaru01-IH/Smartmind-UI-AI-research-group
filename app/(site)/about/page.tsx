@@ -3,6 +3,8 @@ import { ExternalLink } from '@/components/ui/external-link';
 import { PageHeader } from '@/components/ui/page-header';
 import { Section } from '@/components/ui/section';
 import { ABOUT } from '@/content/about';
+import { PhilosophyTriangle } from '@/components/home/philosophy-triangle';
+import { IDENTITY } from '@/content/philosophy';
 import { BRAND, LINKS } from '@/content/brand';
 import { pageMeta } from '@/lib/seo';
 
@@ -15,15 +17,26 @@ export const metadata = pageMeta({
 export default function AboutPage() {
   return (
     <>
-      <PageHeader eyebrow="About" title="A network that simulates cities" lead={ABOUT.summary} />
+      <PageHeader
+        eyebrow={`About · ${IDENTITY.full}`}
+        title="Understanding complex cities with Intelligence + Love"
+        lead={IDENTITY.intro}
+      >
+        <p className="mt-6 max-w-[62ch] text-muted">{IDENTITY.explore}</p>
+        <p className="mt-4 max-w-[62ch] text-muted">{IDENTITY.mindset}</p>
+      </PageHeader>
 
-      <Section id="idea" numeral="01" title="The core idea">
+      <Section id="philosophy" numeral="01" title="Philosophy, approach and vision">
+        <PhilosophyTriangle />
+      </Section>
+
+      <Section id="idea" numeral="02" title="The core idea">
         <blockquote className="max-w-[28ch] font-display text-3xl leading-tight tracking-tight md:text-5xl">
           {ABOUT.coreIdea}
         </blockquote>
       </Section>
 
-      <Section id="home" numeral="02" title="Its home">
+      <Section id="home" numeral="03" title="Its home">
         <div className="grid-12 gap-y-6">
           <p className="col-span-12 max-w-[56ch] text-lg md:col-span-7">{ABOUT.home}</p>
           <div className="col-span-12 md:col-span-4 md:col-start-9">
@@ -41,7 +54,7 @@ export default function AboutPage() {
         </div>
       </Section>
 
-      <Section id="work" numeral="03" title="What it is known for" lead={ABOUT.mostVisibleWork}>
+      <Section id="work" numeral="04" title="What it is known for" lead={ABOUT.mostVisibleWork}>
         <div className="flex flex-wrap gap-3">
           <ButtonLink href="/research#journey">The journey</ButtonLink>
           <ButtonLink href="/research" variant="secondary">

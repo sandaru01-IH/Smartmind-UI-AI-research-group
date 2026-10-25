@@ -72,7 +72,6 @@ const nextConfig: NextConfig = {
     return [
       { source: '/chatbots', destination: '/research#journey', permanent: true },
       { source: '/partners', destination: '/gallery#partners', permanent: true },
-      { source: '/collaborate', destination: '/contact', permanent: true },
     ];
   },
   async headers() {

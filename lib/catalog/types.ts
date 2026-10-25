@@ -181,3 +181,40 @@ export interface Spotlight {
 }
 
 export const SPOTLIGHT_COLUMNS = 'id,title,label,summary,points,note,tbc,visible,sort_order';
+
+/** A key paper or project highlighted on the home page and the research page. */
+export interface FeaturedItem {
+  id: string;
+  kind: 'paper' | 'project';
+  year: number;
+  title: string;
+  venue: string;
+  summary: string;
+  key_partners: string;
+  href: string | null;
+  figure_path: string | null;
+  figure_caption: string;
+  tbc: boolean;
+  visible: boolean;
+  sort_order: number;
+}
+
+export const FEATURED_COLUMNS =
+  'id,kind,year,title,venue,summary,key_partners,href,figure_path,figure_caption,tbc,visible,sort_order';
+
+/** An ongoing project open to collaboration, with the person to contact. */
+export interface CollabProject {
+  id: string;
+  title: string;
+  summary: string;
+  contact_name: string;
+  contact_role: string;
+  contact_bio: string;
+  contact_email: string;
+  contact_photo_path: string | null;
+  visible: boolean;
+  sort_order: number;
+}
+
+export const COLLAB_COLUMNS =
+  'id,title,summary,contact_name,contact_role,contact_bio,contact_email,contact_photo_path,visible,sort_order';

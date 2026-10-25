@@ -1,6 +1,7 @@
 import { ButtonLink } from '@/components/ui/button';
 import { t } from '@/content/strings';
 import { BRAND } from '@/content/brand';
+import { IDENTITY } from '@/content/philosophy';
 import { LazyHeroCanvas } from './lazy-hero-canvas';
 import { RollingHeadline } from './rolling-headline';
 import { HeroFallback } from './hero-fallback';
@@ -37,9 +38,10 @@ export function Hero() {
             words={['The', 'city', 'as', 'an', 'adaptive', '&', 'dynamic', 'system.']}
           />
         </h1>
-        <p className="mt-6 max-w-[56ch] text-lg text-fg md:text-xl">
-          {BRAND.name} is a GeoAI network of Town &amp; Country Planning alumni and students at the{' '}
-          {BRAND.university}, reimagining how future cities are simulated.
+        <p className="mt-6 max-w-[56ch] text-lg text-fg md:text-xl">{IDENTITY.line}</p>
+        <p className="mt-4 max-w-[60ch] text-muted">
+          {BRAND.name} is a collaborative research network of the Department of Town &amp; Country
+          Planning, {BRAND.university}, with industry partners and local communities.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <ButtonLink href="/research">{t.hero.primaryCta}</ButtonLink>
