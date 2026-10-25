@@ -27,6 +27,7 @@ export const UNIVERSITY_CONTACT = {
 // Source: "Social" row and "Sources".
 export const LINKS = {
   facebook: 'https://www.facebook.com/share/12KWJGHiFm3/?mibextid=wwXIfr',
+  youtube: 'https://www.youtube.com/@SmartMindUIAI',
   labPage: 'https://uom.lk/tcp/urban-simulation-lab',
   departmentResearch: 'https://uom.lk/tcp/research/ongoing-research',
 } as const;

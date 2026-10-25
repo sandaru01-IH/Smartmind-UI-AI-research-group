@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { Wordmark } from '@/components/brand/logo';
 import { ExternalLink } from '@/components/ui/external-link';
-import { BRAND, CONTACT_EMAIL, LINKS, UNIVERSITY_CONTACT } from '@/content/brand';
+import { BRAND, CONTACT_EMAIL, LINKS } from '@/content/brand';
+import { TEAM_CONTACTS, formatLkPhone, telHref } from '@/content/philosophy';
 import { t } from '@/content/strings';
 import { NAV_ITEMS, CTA_ITEM } from './nav-items';
 
@@ -42,32 +43,39 @@ export function SiteFooter() {
             </a>
           </p>
           <p className="label-mono mt-6 text-muted">{t.footer.contact}</p>
-          <address className="mt-4 not-italic">
-            {UNIVERSITY_CONTACT.addressLines.map((line) => (
-              <span key={line} className="block">
-                {line}
-              </span>
-            ))}
-            <span className="mt-3 block">
-              {UNIVERSITY_CONTACT.phones.map((phone, i) => (
-                <span key={phone}>
-                  {i > 0 ? ' / ' : ''}
+          <ul className="mt-4 space-y-4">
+            {TEAM_CONTACTS.map((c) => (
+              <li key={c.name}>
+                <p>{c.name}</p>
+                <a
+                  href={telHref(c.phone)}
+                  className="inline-flex min-h-11 items-center hover:underline md:min-h-9"
+                >
+                  {formatLkPhone(c.phone)}
+                </a>
+                {c.email ? (
                   <a
-                    href={`tel:${phone.replace(/\s/g, '')}`}
-                    className="inline-block py-2 hover:underline"
+                    href={`mailto:${c.email}`}
+                    className="block break-all py-1.5 text-muted underline underline-offset-4 hover:text-fg"
                   >
-                    {phone}
+                    {c.email}
                   </a>
-                </span>
-              ))}
-            </span>
-          </address>
-          <p className="mt-4">
+                ) : null}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 flex flex-wrap gap-x-6">
             <ExternalLink
               href={LINKS.facebook}
               className="inline-flex min-h-11 items-center underline underline-offset-4"
             >
               {t.footer.follow}
+            </ExternalLink>
+            <ExternalLink
+              href={LINKS.youtube}
+              className="inline-flex min-h-11 items-center underline underline-offset-4"
+            >
+              {t.footer.youtube}
             </ExternalLink>
           </p>
         </div>

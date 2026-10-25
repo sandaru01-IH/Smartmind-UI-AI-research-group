@@ -68,7 +68,7 @@ export default function HomePage() {
               addressCountry: 'LK',
             },
           },
-          sameAs: [LINKS.facebook, LINKS.labPage],
+          sameAs: [LINKS.facebook, LINKS.youtube, LINKS.labPage],
           memberOf: { '@type': 'Organization', name: BRAND.lab },
         }}
       />

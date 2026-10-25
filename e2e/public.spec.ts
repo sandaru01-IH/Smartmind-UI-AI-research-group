@@ -444,17 +444,24 @@ test.describe('features', () => {
     await expect(page.locator('main')).not.toContainText('+94 11 2640051');
   });
 
-  test('footer carries the university details and no same-name disclaimer', async ({ page }) => {
+  test('footer carries the three members, the video channel and no same-name disclaimer', async ({
+    page,
+  }) => {
     await page.goto('/');
     const footer = page.getByRole('contentinfo');
-    await expect(footer).toContainText('Bandaranayake Mawatha');
-    await expect(footer).toContainText('Moratuwa 10400');
-    await expect(footer).toContainText('+94 11 2650301');
+    await expect(footer).toContainText('Amila Jayasinghe');
+    await expect(footer.getByRole('link', { name: 'amilabj@uom.lk' })).toBeVisible();
+    await expect(footer.getByRole('link', { name: '071 495 3771' })).toBeVisible();
+    await expect(footer).not.toContainText('Bandaranayake Mawatha');
     await expect(footer).not.toContainText('smartmind.net');
     await expect(footer).not.toContainText('Not related to other organisations');
     await expect(footer.getByRole('link', { name: /Facebook/ })).toHaveAttribute(
       'href',
       /facebook\.com\/share/,
+    );
+    await expect(footer.getByRole('link', { name: /YouTube/ })).toHaveAttribute(
+      'href',
+      'https://www.youtube.com/@SmartMindUIAI',
     );
   });
 

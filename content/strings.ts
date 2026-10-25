@@ -72,9 +72,10 @@ const en = {
   footer: {
     partOf:
       'Smartmind is part of the Urban Simulation Lab, Department of Town & Country Planning, University of Moratuwa.',
-    contact: 'University contact',
+    contact: 'Contact the team',
     smartmindContact: 'Email us',
     follow: 'Facebook',
+    youtube: 'YouTube',
     rights: 'Smartmind, Urban Simulation Lab, University of Moratuwa.',
   },
   palette: {
