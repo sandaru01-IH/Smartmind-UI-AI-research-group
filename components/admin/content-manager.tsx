@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition, type ReactNode } from 'react';
 import { Download, Loader2, Plus, Save, Trash2 } from 'lucide-react';
 import {
+  deleteCollabAction,
+  saveCollabAction,
   deleteAwardAction,
   deleteMilestoneAction,
   deletePartnerAction,
@@ -24,6 +26,7 @@ import type { ActionResult } from '@/app/admin/actions';
 import { buttonClass } from '@/components/ui/button';
 import { TbcFlag } from '@/components/ui/tag';
 import {
+  collabSchema,
   awardSchema,
   milestoneSchema,
   partnerSchema,
@@ -37,6 +40,7 @@ import {
   THEME_STYLES,
   THEME_STYLE_LABEL,
   type Award,
+  type CollabProject,
   type Milestone,
   type Partner,
   type Publication,
@@ -787,6 +791,184 @@ function PartnerForm({
         onDelete={
           partner
             ? () => crud.remove(partner.id, partner.name, () => deletePartnerAction(partner.id))
+            : undefined
+        }
+      />
+    </form>
+  );
+}
+
+/* ----------------------------------------------------------- collaborations */
+
+export function CollabsManager({ items }: { items: CollabProject[] }) {
+  const crud = useCrud<CollabProject>(items);
+  const current = crud.items.find((c) => c.id === crud.editing) ?? null;
+  return (
+    <Workspace
+      items={crud.items}
+      editing={crud.editing}
+      onEdit={crud.open}
+      addLabel="Add a project"
+      empty="No open-invitation projects yet."
+      row={(c) => (
+        <span className="flex items-center gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-surface text-[0.8rem] text-muted">
+            {c.contact_photo_path ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={mediaUrl(c.contact_photo_path) ?? ''}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              (c.contact_name || '?').slice(0, 1)
+            )}
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate">{c.title}</span>
+            <span className="label-mono text-muted">
+              {c.contact_name || 'No contact yet'}
+              {!c.visible ? ' · Hidden' : ''}
+            </span>
+          </span>
+        </span>
+      )}
+      form={crud.editing ? <CollabForm key={crud.editing} item={current} crud={crud} /> : null}
+    />
+  );
+}
+
+function CollabForm({
+  item,
+  crud,
+}: {
+  item: CollabProject | null;
+  crud: ReturnType<typeof useCrud<CollabProject>>;
+}) {
+  const toast = useToast();
+  const [d, setD] = useState({
+    title: item?.title ?? '',
+    summary: item?.summary ?? '',
+    contact_name: item?.contact_name ?? '',
+    contact_role: item?.contact_role ?? 'Project contact',
+    contact_bio: item?.contact_bio ?? '',
+    contact_email: item?.contact_email ?? '',
+    contact_photo_path: item?.contact_photo_path ?? (null as string | null),
+    visible: item?.visible ?? true,
+    sort_order: String(item?.sort_order ?? 0),
+  });
+  const set = <K extends keyof typeof d>(k: K, v: (typeof d)[K]) => setD((p) => ({ ...p, [k]: v }));
+  const values = () => ({ ...d, sort_order: num(d.sort_order) });
+  const valid = collabSchema.safeParse(values()).success;
+  const err = (k: string) => first(crud.errors, k);
+
+  return (
+    <form
+      noValidate
+      className="space-y-5 border border-line-strong p-5"
+      onSubmit={(e) => {
+        e.preventDefault();
+        crud.save(() => saveCollabAction({ id: item?.id ?? null, values: values() }));
+      }}
+    >
+      <h3 className="text-xl">{item ? `Edit ${item.title}` : 'Add a project'}</h3>
+      <Field id="cb-title" label="Project name" error={err('title')}>
+        <input
+          id="cb-title"
+          value={d.title}
+          onChange={(e) => set('title', e.target.value)}
+          className={fieldClass}
+          required
+        />
+      </Field>
+      <Field id="cb-summary" label="What it is about" error={err('summary')}>
+        <textarea
+          id="cb-summary"
+          rows={5}
+          value={d.summary}
+          onChange={(e) => set('summary', e.target.value)}
+          className={areaClass}
+        />
+      </Field>
+      <fieldset className="space-y-4 border border-line p-4">
+        <legend className="label-mono px-2 text-muted">Project contact</legend>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field id="cb-name" label="Name" error={err('contact_name')}>
+            <input
+              id="cb-name"
+              value={d.contact_name}
+              onChange={(e) => set('contact_name', e.target.value)}
+              className={fieldClass}
+            />
+          </Field>
+          <Field id="cb-role" label="Role" error={err('contact_role')}>
+            <input
+              id="cb-role"
+              value={d.contact_role}
+              onChange={(e) => set('contact_role', e.target.value)}
+              className={fieldClass}
+            />
+          </Field>
+        </div>
+        <Field
+          id="cb-email"
+          label="Email (optional)"
+          hint="Leave empty until the person confirms their address can be shown."
+          error={err('contact_email')}
+        >
+          <input
+            id="cb-email"
+            type="email"
+            value={d.contact_email}
+            onChange={(e) => set('contact_email', e.target.value)}
+            className={fieldClass}
+          />
+        </Field>
+        <Field id="cb-bio" label="Short details (optional)" error={err('contact_bio')}>
+          <textarea
+            id="cb-bio"
+            rows={3}
+            value={d.contact_bio}
+            onChange={(e) => set('contact_bio', e.target.value)}
+            className={areaClass}
+          />
+        </Field>
+        <div>
+          <p className="label-mono mb-2 text-muted">Photo</p>
+          <ImageUploader
+            name="contact"
+            noun="photo"
+            showAlt={false}
+            value={{ path: d.contact_photo_path, alt: d.contact_name }}
+            onChange={(v) => set('contact_photo_path', v.path)}
+            onError={(m) => toast.push(m, 'error')}
+          />
+          {err('contact_photo_path') ? (
+            <p className="text-[0.9rem] text-danger">{err('contact_photo_path')}</p>
+          ) : null}
+        </div>
+      </fieldset>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field id="cb-sort" label="Order" hint="Lower numbers come first.">
+          <input
+            id="cb-sort"
+            inputMode="numeric"
+            value={d.sort_order}
+            onChange={(e) => set('sort_order', numeric(e.target.value))}
+            className={fieldClass}
+          />
+        </Field>
+        <Check checked={d.visible} onChange={(v) => set('visible', v)}>
+          Show on the open invitation page
+        </Check>
+      </div>
+      <FormFooter
+        busy={crud.busy}
+        valid={valid}
+        onCancel={() => crud.open(null)}
+        onDelete={
+          item
+            ? () => crud.remove(item.id, item.title, () => deleteCollabAction(item.id))
             : undefined
         }
       />

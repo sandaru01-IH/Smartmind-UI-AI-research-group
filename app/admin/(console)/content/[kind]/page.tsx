@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { connection } from 'next/server';
 import {
+  CollabsManager,
   AwardsManager,
   JourneyManager,
   PartnersManager,
@@ -10,6 +11,7 @@ import {
 } from '@/components/admin/content-manager';
 import { requireAdmin } from '@/lib/auth/require-admin';
 import {
+  adminCollabs,
   adminAwards,
   adminMilestones,
   adminPartners,
@@ -69,6 +71,8 @@ export default async function ContentPage({ params }: { params: Promise<{ kind: 
           fromPosts={fromPosts}
         />
       );
+  } else if (kind === 'collaborations') {
+    body = <CollabsManager items={await adminCollabs(supabase)} />;
   } else if (kind === 'partners') {
     body = <PartnersManager partners={await adminPartners(supabase)} />;
   } else if (kind === 'journey') {

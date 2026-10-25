@@ -15,6 +15,7 @@ const en = {
     awards: 'Awards',
     gallery: 'Gallery & Partners',
     news: 'News',
+    collaborate: 'Open invitation',
     contact: 'Contact us',
     menu: 'Menu',
     closeMenu: 'Close menu',

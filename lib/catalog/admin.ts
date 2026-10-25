@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { publicState } from '@/lib/visibility';
 import type { Post } from '@/lib/posts/types';
 import {
+  parseCollabRows,
   parseAwardRows,
   parseMilestoneRows,
   parseSpotlightRows,
@@ -13,6 +14,7 @@ import {
   parseWorkLinkRows,
 } from './rows';
 import type {
+  CollabInput,
   AwardInput,
   MilestoneInput,
   PartnerInput,
@@ -21,6 +23,7 @@ import type {
   ThemeInput,
 } from './schema';
 import {
+  COLLAB_COLUMNS,
   AWARD_COLUMNS,
   MILESTONE_COLUMNS,
   PARTNER_COLUMNS,
@@ -31,6 +34,7 @@ import {
   TOPIC_COLUMNS,
   WORK_LINK_COLUMNS,
   type Award,
+  type CollabProject,
   type Milestone,
   type Partner,
   type Publication,
@@ -42,6 +46,12 @@ import {
 } from './types';
 
 /** Admin data access for the editable site content. Callers pass the session client from requireAdmin(). */
+
+/** The table has not been created yet (the SQL has not been run): treat it as empty. */
+export const isMissingTable = (e: { code?: string; message?: string }): boolean =>
+  e.code === '42P01' ||
+  e.code === 'PGRST205' ||
+  /does not exist|schema cache/i.test(e.message ?? '');
 
 const load = (what: string, error: { message: string } | null): void => {
   if (error) throw new Error(`Could not load ${what}: ${error.message}`);
@@ -65,6 +75,16 @@ export async function adminPublications(db: SupabaseClient): Promise<Publication
     .order('sort_order');
   load('publications', error);
   return parsePublicationRows(data);
+}
+
+export async function adminCollabs(db: SupabaseClient): Promise<CollabProject[]> {
+  const { data, error } = await db
+    .from('collab_projects')
+    .select(COLLAB_COLUMNS)
+    .order('sort_order');
+  if (error && isMissingTable(error)) return [];
+  load('collaboration projects', error);
+  return parseCollabRows(data);
 }
 
 export async function adminPartners(db: SupabaseClient): Promise<Partner[]> {
@@ -182,6 +202,9 @@ export const saveSpotlight = (db: SupabaseClient, id: string | null, v: Spotligh
 export const savePartner = (db: SupabaseClient, id: string | null, v: PartnerInput) =>
   upsertOne(db, 'partners', PARTNER_COLUMNS, id, v, parsePartnerRows);
 
+export const saveCollab = (db: SupabaseClient, id: string | null, v: CollabInput) =>
+  upsertOne(db, 'collab_projects', COLLAB_COLUMNS, id, v, parseCollabRows);
+
 export async function deleteRow(
   db: SupabaseClient,
   table:
@@ -190,7 +213,8 @@ export async function deleteRow(
     | 'partners'
     | 'research_themes'
     | 'milestones'
-    | 'research_spotlights',
+    | 'research_spotlights'
+    | 'collab_projects',
   id: string,
 ): Promise<void> {
   const { error } = await db.from(table).delete().eq('id', id);

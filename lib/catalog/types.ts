@@ -181,3 +181,20 @@ export interface Spotlight {
 }
 
 export const SPOTLIGHT_COLUMNS = 'id,title,label,summary,points,note,tbc,visible,sort_order';
+
+/** An ongoing project open to collaboration, with the person to contact. */
+export interface CollabProject {
+  id: string;
+  title: string;
+  summary: string;
+  contact_name: string;
+  contact_role: string;
+  contact_bio: string;
+  contact_email: string;
+  contact_photo_path: string | null;
+  visible: boolean;
+  sort_order: number;
+}
+
+export const COLLAB_COLUMNS =
+  'id,title,summary,contact_name,contact_role,contact_bio,contact_email,contact_photo_path,visible,sort_order';

@@ -69,3 +69,27 @@ export const TEAM_CONTACTS = [
 export const formatLkPhone = (p: string) => p.replace(/^(\d{3})(\d{3})(\d{4})$/, '$1 $2 $3');
 /** "0772777236" -> "+94772777236" */
 export const telHref = (p: string) => `tel:+94${p.replace(/^0/, '')}`;
+
+export const COLLAB_INTRO = {
+  eyebrow: 'An open invitation · Local & international partners',
+  title: 'Collaborate With Us',
+  lead: 'Co-creating intelligent, sustainable and livable cities through open urban technologies and citizen participation.',
+  body: 'SmartMind UI & SI welcomes local and international researchers, undergraduate and postgraduate candidates, universities, public institutions, industry professionals, civil society organisations and local communities to collaborate with our ongoing projects in Urban Digital Twins, Citizen Science, Street Cloud and Urban AI Chatbots.',
+  ways: {
+    title: 'Ways to participate',
+    body: [
+      'We welcome joint research, international partnerships, research internships, urban pilot projects, open methods development, collaborative sensing, co-design workshops, field observations and participatory testing.',
+      'Contributions may include research ideas, technical expertise, pilot locations, institutionally shareable data, community perspectives or opportunities to apply findings in real planning processes.',
+    ],
+  },
+  principles: {
+    title: 'Our shared principles',
+    closing:
+      'We aim to make urban research transparent, accessible, reproducible and useful to people and nature.',
+  },
+  cta: {
+    title: 'Interested in collaborating?',
+    body: 'Tell us which project interests you, include a brief collaboration idea, and mention the relevant project contact. Individual email addresses can be added after confirmation.',
+    label: 'Connect via SmartMind website',
+  },
+} as const;

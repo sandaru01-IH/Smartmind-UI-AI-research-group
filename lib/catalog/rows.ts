@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { THEME_STYLES, PUB_KINDS } from './types';
 import type {
   Award,
+  CollabProject,
   Spotlight,
   Milestone,
   Partner,
@@ -155,3 +156,19 @@ const spotlightRow = z.object({
 
 export const parseSpotlightRows = (rows: unknown): Spotlight[] =>
   z.array(spotlightRow).parse(rows ?? []);
+
+const collabRow = z.object({
+  id: z.string(),
+  title: z.string(),
+  summary: str,
+  contact_name: str,
+  contact_role: str,
+  contact_bio: str,
+  contact_email: str,
+  contact_photo_path: z.string().nullable(),
+  visible: z.boolean(),
+  sort_order: z.number(),
+});
+
+export const parseCollabRows = (rows: unknown): CollabProject[] =>
+  z.array(collabRow).parse(rows ?? []);

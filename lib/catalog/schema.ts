@@ -139,3 +139,26 @@ export const spotlightSchema = z.object({
   sort_order: sortOrder,
 });
 export type SpotlightInput = z.output<typeof spotlightSchema>;
+
+export const collabSchema = z.object({
+  title: z.string().trim().min(2, 'Add a title').max(200),
+  summary: text(1500),
+  contact_name: text(120),
+  contact_role: text(200),
+  contact_bio: text(600),
+  contact_email: z
+    .string()
+    .trim()
+    .max(200)
+    .default('')
+    .refine((v) => v === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), 'Use a full email address'),
+  contact_photo_path: z
+    .string()
+    .trim()
+    .max(300)
+    .nullish()
+    .transform((v) => v || null),
+  visible: z.boolean().default(true),
+  sort_order: sortOrder,
+});
+export type CollabInput = z.output<typeof collabSchema>;
