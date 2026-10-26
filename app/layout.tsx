@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Bricolage_Grotesque, Instrument_Sans, JetBrains_Mono } from 'next/font/google';
 import { ViewTransition, type ReactNode } from 'react';
+import { Analytics } from '@vercel/analytics/next';
 import { ThemeScript } from '@/components/theme/theme-script';
 import { BRAND, SITE_URL } from '@/content/brand';
 import './globals.css';
@@ -66,6 +67,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         >
           {children}
         </ViewTransition>
+        <Analytics />
       </body>
     </html>
   );
