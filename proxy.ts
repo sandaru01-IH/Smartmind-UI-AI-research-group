@@ -120,5 +120,6 @@ export const config = {
     '/account/:path*',
     '/auth/:path*',
     '/api/me',
+    '/api/blog/viewer',
   ],
 };

@@ -262,4 +262,56 @@ test.describe('member accounts', () => {
     const res = await page.goto('/blog/no-such-post-abc123');
     expect(res?.status()).toBe(404);
   });
+
+  test('members like and comment on a post, the writer can delete a comment, visitors are asked to log in', async ({
+    page,
+    browser,
+  }) => {
+    const authorEmail = await createMember('author');
+    await logInMember(page, authorEmail);
+    const title = `E2E Engage ${stamp}`;
+    const { slug } = await publishPost(page, title);
+
+    const readerPage = await (await browser.newContext()).newPage();
+    await logInMember(readerPage, await createMember('fan'));
+    await readerPage.goto(`/blog/${slug}`, { waitUntil: 'networkidle' });
+
+    // Like, reload, still liked; a quick double click leaves a sensible count, never 2.
+    const like = readerPage.getByRole('button', { name: /^Like this post \(0\)$/ });
+    await like.click();
+    await expect(
+      readerPage.getByRole('button', { name: /^Remove your like \(1\)$/ }),
+    ).toBeVisible();
+    await readerPage.reload({ waitUntil: 'networkidle' });
+    const liked = readerPage.getByRole('button', { name: /^Remove your like \(1\)$/ });
+    await expect(liked).toHaveAttribute('aria-pressed', 'true');
+    await liked.dblclick();
+    await expect(readerPage.getByRole('button', { name: /\((0|1)\)$/ }).first()).toBeVisible();
+
+    // Comment, including text that looks like html.
+    const text = `Great read <b>bold</b> ${stamp}`;
+    await readerPage.getByLabel('Add a comment').fill(text);
+    await readerPage.getByRole('button', { name: 'Post comment' }).click();
+    const item = readerPage.getByRole('listitem').filter({ hasText: `Great read` });
+    await expect(item).toContainText(text);
+    await expect(item.locator('b')).toHaveCount(0);
+
+    // The post's writer sees it and can delete it.
+    await expect(async () => {
+      await page.goto(`/blog/${slug}`, { waitUntil: 'networkidle' });
+      await expect(page.getByRole('listitem').filter({ hasText: 'Great read' })).toBeVisible();
+    }).toPass({ timeout: 20_000 });
+    await page.getByRole('button', { name: 'Delete comment' }).click();
+    await expect(page.getByText('Comment deleted.')).toBeVisible();
+    await expect(page.getByText('No comments yet. Be the first.')).toBeVisible();
+
+    // A visitor who is not signed in is asked to log in.
+    const visitor = await (await browser.newContext()).newPage();
+    await visitor.goto(`/blog/${slug}`, { waitUntil: 'networkidle' });
+    await expect(visitor.getByRole('link', { name: 'Log in to comment' })).toBeVisible();
+    await expect(visitor.getByRole('link', { name: /^Log in to like/ })).toHaveAttribute(
+      'href',
+      `/login?next=%2Fblog%2F${slug}`,
+    );
+  });
 });

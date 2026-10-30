@@ -1,6 +1,7 @@
 import 'server-only';
 import { cacheLife, cacheTag } from 'next/cache';
 import { createPublicClient } from '@/lib/supabase/public-client';
+import { COMMENT_COLUMNS, parseComments, type BlogComment } from './engage';
 import {
   BLOG_LIST_COLUMNS,
   BLOG_POST_COLUMNS,
@@ -114,4 +115,22 @@ export async function getBlogSlugIndex(): Promise<{ slug: string; updatedAt: str
   if (error && missingTable(error.message)) return [];
   if (error) throw new Error(`Could not load blog posts: ${error.message}`);
   return (data ?? []).map((r) => ({ slug: String(r.slug), updatedAt: String(r.updated_at) }));
+}
+
+/** The visible comments on a post, oldest first. Expired with the post's tag when anyone comments or moderates. */
+export async function listComments(slug: string, postId: string): Promise<BlogComment[]> {
+  'use cache';
+  cacheTag('blog', `blog:${slug}`);
+  cacheLife({ stale: 30, revalidate: 60, expire: 3600 });
+  const db = createPublicClient();
+  if (!db) return [];
+  const { data, error } = await db
+    .from('blog_comments')
+    .select(COMMENT_COLUMNS)
+    .eq('post_id', postId)
+    .order('created_at', { ascending: true })
+    .limit(500);
+  if (error && missingTable(error.message)) return [];
+  if (error) throw new Error(`Could not load comments: ${error.message}`);
+  return parseComments(data);
 }
