@@ -20,6 +20,10 @@ npm run dev                       # http://localhost:3000
 
 That is enough to see the public site. With no Supabase variables set it runs in **demo mode**: news comes from `content/seed-posts.ts` and `/admin` shows a setup screen.
 
+### Community blog, Medium and videos
+
+Registration, writing, comments, moderation, the Medium page and the YouTube feed are described in [`docs/community-setup.md`](docs/community-setup.md), including how to set up Brevo for the confirmation emails before going live.
+
 ### Turn on the admin (local Supabase)
 
 ```bash
