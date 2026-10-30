@@ -38,7 +38,7 @@ export function Hero() {
             words={['The', 'city', 'as', 'an', 'adaptive', '&', 'dynamic', 'system.']}
           />
         </h1>
-        <p className="mt-6 max-w-[56ch] text-lg text-fg md:text-xl">{IDENTITY.line}</p>
+        <p className="mt-6 max-w-[64ch] text-lg text-fg md:text-xl">{IDENTITY.line}</p>
         <p className="mt-4 max-w-[60ch] text-muted">
           {BRAND.name} is a collaborative research network of the Department of Town &amp; Country
           Planning, {BRAND.university}, with industry partners and local communities.

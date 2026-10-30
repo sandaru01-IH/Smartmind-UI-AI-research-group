@@ -2,7 +2,7 @@
 export const IDENTITY = {
   short: 'UI & SI',
   full: 'Urban Informatics & Super Intelligence',
-  line: 'Understanding Complex Cities with Intelligence + Love.',
+  line: 'Understanding Complex Cities and Designing Adaptive, Dynamic Systems & applications for Sustainable Cities and Livable Communities — with Super Intelligence + Great Love.',
   intro:
     'SmartMind is a collaborative research network bringing together undergraduate and postgraduate candidates, alumni, and researchers from the Department of Town & Country Planning, University of Moratuwa, Sri Lanka, alongside industry partners and local communities.',
   explore:
