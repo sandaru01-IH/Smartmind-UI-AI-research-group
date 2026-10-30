@@ -262,3 +262,48 @@ test.describe('Medium articles', () => {
     });
   });
 });
+
+test.describe('home page sections', () => {
+  const stamp = Date.now().toString(36);
+  const title = `${TITLE_PREFIX}Medium home ${stamp}`;
+
+  test.afterAll(async () => {
+    const db = serviceClient();
+    await db.from('medium_articles').delete().like('title', `${TITLE_PREFIX}Medium %`);
+    await db.from('home_sections').update({ enabled: true }).eq('id', 'medium');
+  });
+
+  test('the Medium section shows on the home page, and leaves when its switch is off', async ({
+    page,
+  }) => {
+    await signIn(page);
+    // Added through the admin so the site's caches are told about it.
+    await page.goto('/admin/content/medium', { waitUntil: 'networkidle' });
+    await page.getByRole('button', { name: 'Add an article' }).click();
+    await page.getByLabel('Title', { exact: true }).fill(title);
+    await page
+      .getByLabel('Link to the article on Medium')
+      .fill(`https://medium.com/@e2e/home-${stamp}`);
+    await page.getByRole('button', { name: 'Save' }).click();
+    await expect(page.getByRole('button', { name: new RegExp(title) })).toBeVisible();
+    await eventually(page, '/', async () => {
+      await expect(page.locator('#latest-medium')).toContainText(title);
+    });
+
+    await page.goto('/admin/home', { waitUntil: 'networkidle' });
+    const toggle = page.getByLabel('Latest on Medium');
+    await expect(toggle).toBeChecked();
+    await toggle.uncheck();
+    await expect(page.getByText('Latest on Medium is now off.')).toBeVisible();
+    await eventually(page, '/', async () => {
+      await expect(page.locator('#latest-medium')).toHaveCount(0);
+    });
+
+    await page.goto('/admin/home', { waitUntil: 'networkidle' });
+    await page.getByLabel('Latest on Medium').check();
+    await expect(page.getByText('Latest on Medium is now on.')).toBeVisible();
+    await eventually(page, '/', async () => {
+      await expect(page.locator('#latest-medium')).toContainText(title);
+    });
+  });
+});

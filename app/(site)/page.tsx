@@ -4,6 +4,8 @@ import { Hero } from '@/components/hero/hero';
 import { ContactBeacon } from '@/components/home/contact-beacon';
 import { JourneyTeaser } from '@/components/home/journey-teaser';
 import { LatestSection } from '@/components/home/latest-bento';
+import { LatestMedium } from '@/components/home/latest-medium';
+import { LatestVideo } from '@/components/home/latest-video';
 import { NumbersStrip } from '@/components/home/numbers-strip';
 import { PhilosophyTriangle } from '@/components/home/philosophy-triangle';
 import { ResearchBento } from '@/components/research/research-bento';
@@ -91,6 +93,14 @@ export default function HomePage() {
       {/* Appears only once the admin has published news; renders nothing before that. */}
       <Suspense fallback={null}>
         <LatestSection />
+      </Suspense>
+
+      {/* Optional sections the admin can switch off. Each renders nothing when it has nothing to show. */}
+      <Suspense fallback={null}>
+        <LatestVideo />
+      </Suspense>
+      <Suspense fallback={null}>
+        <LatestMedium />
       </Suspense>
 
       <Section id="numbers" numeral="02" title={t.home.numbers}>
