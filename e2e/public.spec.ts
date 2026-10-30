@@ -76,6 +76,8 @@ test.describe('accessibility (axe, WCAG 2.2 AA)', () => {
     '/blog',
     '/medium',
     '/videos',
+    '/terms',
+    '/privacy',
     '/admin/login',
   ];
   for (const theme of THEMES) {

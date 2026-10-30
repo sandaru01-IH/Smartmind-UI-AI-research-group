@@ -82,6 +82,20 @@ export function SiteFooter() {
 
         <div className="col-span-12 border-t border-line pt-8 text-sm text-muted">
           <p className="label-mono">{t.footer.rights}</p>
+          <p className="mt-3 flex flex-wrap gap-x-6">
+            <Link
+              href="/terms"
+              className="inline-flex min-h-11 items-center underline underline-offset-4 hover:text-fg"
+            >
+              {t.footer.terms}
+            </Link>
+            <Link
+              href="/privacy"
+              className="inline-flex min-h-11 items-center underline underline-offset-4 hover:text-fg"
+            >
+              {t.footer.privacy}
+            </Link>
+          </p>
         </div>
       </div>
     </footer>

@@ -15,6 +15,8 @@ const STATIC_PATHS = [
   '/blog',
   '/medium',
   '/videos',
+  '/terms',
+  '/privacy',
   '/collaborate',
   '/contact',
 ];

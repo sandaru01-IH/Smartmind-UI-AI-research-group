@@ -81,6 +81,13 @@ const en = {
     unavailable: 'Accounts are not available right now.',
     disabled: 'Accounts and blogging switch on once the site is connected to its database.',
     backToSite: 'Back to the site',
+    deleteTitle: 'Delete your account',
+    deleteLink: 'Delete my account',
+    deleteWarning:
+      'This removes your login, email address, name, photo, bio and likes for good. Your posts and comments stay on the site under the name Former member. Delete them first if you want them gone.',
+    deleteTypePrompt: 'Type DELETE to confirm',
+    deleteSubmit: 'Delete my account for good',
+    deleteFailed: 'Could not delete the account. Try again.',
   },
   blog: {
     needLogin: 'Log in to write.',
@@ -236,6 +243,8 @@ const en = {
     follow: 'Facebook',
     youtube: 'YouTube',
     rights: 'Smartmind, Urban Simulation Lab, University of Moratuwa.',
+    terms: 'Terms of use',
+    privacy: 'Privacy notice',
   },
   palette: {
     open: 'Search the site',

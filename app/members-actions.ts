@@ -17,6 +17,8 @@ import {
   resetPasswordSchema,
   safeMemberNext,
 } from '@/lib/members/schema';
+import { getMember } from '@/lib/members/session';
+import { MEDIA_BUCKET } from '@/lib/supabase/env';
 import { createSessionClient } from '@/lib/supabase/server-client';
 
 export interface MemberFormState {
@@ -154,4 +156,24 @@ export async function resetPasswordAction(
   const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
   if (error) return { error: t.members.resetFailed };
   return { done: true };
+}
+
+/**
+ * Deletes the signed-in member's account for good. Their profile photo file goes too; their posts and
+ * comments stay, shown as "Former member". Admin accounts cannot be deleted here.
+ */
+export async function deleteMyAccountAction(
+  _prev: MemberFormState,
+  formData: FormData,
+): Promise<MemberFormState> {
+  if (formData.get('confirm') !== 'DELETE') return { error: t.members.deleteTypePrompt };
+  const member = await getMember();
+  if (!member) return { error: t.blog.needLogin };
+  if (member.profile.photoPath) {
+    await member.supabase.storage.from(MEDIA_BUCKET).remove([member.profile.photoPath]);
+  }
+  const { error } = await member.supabase.rpc('delete_my_account');
+  if (error) return { error: t.members.deleteFailed };
+  await member.supabase.auth.signOut({ scope: 'local' });
+  redirect('/');
 }

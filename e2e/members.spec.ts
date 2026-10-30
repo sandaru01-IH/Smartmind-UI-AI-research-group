@@ -244,4 +244,52 @@ test.describe('member accounts', () => {
       `/login?next=%2Fblog%2F${slug}`,
     );
   });
+
+  test('the register form links to the terms and privacy pages, which are marked as drafts', async ({
+    page,
+  }) => {
+    await page.goto('/register', { waitUntil: 'networkidle' });
+    await expect(page.getByRole('link', { name: 'Terms', exact: true })).toHaveAttribute(
+      'href',
+      '/terms',
+    );
+    await expect(page.getByRole('link', { name: 'Privacy notice' }).first()).toHaveAttribute(
+      'href',
+      '/privacy',
+    );
+    for (const [path, heading] of [
+      ['/terms', 'Terms of use'],
+      ['/privacy', 'Privacy notice'],
+    ]) {
+      await page.goto(path);
+      await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible();
+      await expect(page.getByRole('note')).toContainText('Draft:');
+    }
+  });
+
+  test('a member deletes their account, cannot log in again, and their post stays as Former member', async ({
+    page,
+    browser,
+  }) => {
+    const email = await createMember('leaver');
+    await logInMember(page, email);
+    const { slug } = await publishPost(page, `E2E Leaver ${stamp}`);
+
+    await page.goto('/account', { waitUntil: 'networkidle' });
+    await page.getByRole('link', { name: 'Delete my account' }).click();
+    const button = page.getByRole('button', { name: 'Delete my account for good' });
+    await expect(button).toBeDisabled();
+    await page.getByLabel('Type DELETE to confirm').fill('DELETE');
+    await button.click();
+    await expect(page).toHaveURL(/\/$/);
+
+    await logInMember(page, email, '/', false);
+    await expect(page.locator('main').getByRole('alert')).toHaveText(
+      'That email and password do not match.',
+    );
+
+    const visitor = await (await browser.newContext()).newPage();
+    await visitor.goto(`/blog/${slug}`, { waitUntil: 'networkidle' });
+    await expect(visitor.getByText('Former member').first()).toBeVisible();
+  });
 });
