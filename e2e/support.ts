@@ -34,7 +34,7 @@ export async function eventually(
 }
 
 // A valid 1x1 PNG. The server checks the real bytes, so a fake image would be refused.
-const PNG_1X1 = Buffer.from(
+export const PNG_1X1 = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
   'base64',
 );

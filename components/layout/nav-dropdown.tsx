@@ -92,7 +92,7 @@ export function NavDropdown({ group }: { group: NavGroup }) {
           }
           setOpen((v) => !v);
         }}
-        className="relative inline-flex min-h-11 items-center gap-1 px-3 text-[0.95rem] text-muted transition-colors hover:text-fg group-has-[[aria-current=page]]:text-fg"
+        className="relative inline-flex min-h-11 items-center gap-1 whitespace-nowrap px-2.5 text-[0.95rem] text-muted transition-colors hover:text-fg group-has-[[aria-current=page]]:text-fg"
       >
         {group.label}
         <ChevronDown
@@ -102,7 +102,7 @@ export function NavDropdown({ group }: { group: NavGroup }) {
         />
         <span
           aria-hidden="true"
-          className="absolute inset-x-3 bottom-1.5 hidden h-px bg-signal group-has-[[aria-current=page]]:block"
+          className="absolute inset-x-2.5 bottom-1.5 hidden h-px bg-signal group-has-[[aria-current=page]]:block"
         />
       </button>
       <ul

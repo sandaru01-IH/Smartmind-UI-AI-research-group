@@ -80,25 +80,19 @@ export function AccountMenu() {
     return (
       <>
         {watcher}
-        <div className="hidden h-11 w-40 md:block" aria-hidden="true" />
+        <div className="hidden h-11 w-16 md:block" aria-hidden="true" />
       </>
     );
 
   if (!me.signedIn) {
     return (
-      <div className="hidden items-center gap-1 md:flex">
+      <div className="hidden items-center md:flex">
         {watcher}
         <Link
           href="/login"
-          className="inline-flex min-h-11 items-center px-3 text-[0.95rem] text-muted hover:text-fg"
+          className="inline-flex min-h-11 items-center whitespace-nowrap px-2.5 text-[0.95rem] text-muted hover:text-fg"
         >
           {t.members.login}
-        </Link>
-        <Link
-          href="/register"
-          className="inline-flex min-h-11 items-center px-3 text-[0.95rem] text-muted hover:text-fg"
-        >
-          {t.members.register}
         </Link>
       </div>
     );
@@ -125,7 +119,6 @@ export function AccountMenu() {
         className="inline-flex min-h-11 items-center gap-2 px-2 text-[0.95rem] text-muted hover:text-fg"
       >
         <Avatar me={me} />
-        <span className="max-w-[10ch] truncate">{me.name}</span>
         <ChevronDown size={14} aria-hidden="true" />
       </button>
       <ul

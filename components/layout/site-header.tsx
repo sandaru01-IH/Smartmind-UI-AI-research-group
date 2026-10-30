@@ -76,11 +76,11 @@ export function SiteHeader() {
                   <li key={item.href}>
                     <NavLink
                       href={item.href}
-                      className="relative inline-flex min-h-11 items-center px-3 text-[0.95rem] text-muted transition-colors hover:text-fg aria-[current=page]:text-fg"
+                      className="relative inline-flex min-h-11 items-center whitespace-nowrap px-2.5 text-[0.95rem] text-muted transition-colors hover:text-fg aria-[current=page]:text-fg"
                       activeMark={
                         <span
                           aria-hidden="true"
-                          className="absolute inset-x-3 bottom-1.5 h-px bg-signal"
+                          className="absolute inset-x-2.5 bottom-1.5 h-px bg-signal"
                         />
                       }
                     >
@@ -100,7 +100,7 @@ export function SiteHeader() {
               className="inline-flex h-11 min-w-11 items-center justify-center gap-2 rounded-sharp border border-line-strong px-3 text-muted transition-colors hover:bg-surface-2 hover:text-fg"
             >
               <Search size={18} aria-hidden="true" />
-              <kbd className="label-mono hidden text-[0.7rem] md:inline">Ctrl K</kbd>
+              <kbd className="label-mono hidden text-[0.7rem] 2xl:inline">Ctrl K</kbd>
             </button>
             <ThemeToggle />
             {hasSupabase() ? <AccountMenu /> : null}
@@ -108,7 +108,7 @@ export function SiteHeader() {
               <Link
                 href={CTA_ITEM.href}
                 transitionTypes={['nav-forward']}
-                className={buttonClass('primary')}
+                className={buttonClass('primary', 'whitespace-nowrap')}
               >
                 {CTA_ITEM.label}
               </Link>

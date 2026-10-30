@@ -4,7 +4,7 @@ import { useEffect, useId, useState } from 'react';
 import { ImagePlus, Loader2, Trash2 } from 'lucide-react';
 import { IMAGE_TYPES } from '@/lib/schemas';
 import { mediaUrl } from '@/lib/supabase/env';
-import { uploadImage } from './upload-client';
+import { uploadImage, type UploadResult } from './upload-client';
 
 export interface CoverValue {
   path: string | null;
@@ -27,6 +27,7 @@ export function ImageUploader({
   noun = 'cover image',
   showAlt = true,
   fit = 'cover',
+  upload = uploadImage,
 }: {
   value: CoverValue;
   onChange: (next: CoverValue) => void;
@@ -37,6 +38,8 @@ export function ImageUploader({
   /** Logos are decorative next to the partner's name, so they need no description. */
   showAlt?: boolean;
   fit?: 'cover' | 'contain';
+  /** How a chosen file is stored. Defaults to the admin upload; members pass their own. */
+  upload?: (file: File) => Promise<UploadResult>;
 }) {
   const inputId = useId();
   const altId = useId();
@@ -56,7 +59,7 @@ export function ImageUploader({
   async function choose(file: File | undefined) {
     if (!file) return;
     setBusy(true);
-    const res = await uploadImage(file);
+    const res = await upload(file);
     setBusy(false);
     if (!res.ok) return onError(res.message);
     setPreview(URL.createObjectURL(file));

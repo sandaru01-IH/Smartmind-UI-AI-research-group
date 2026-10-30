@@ -9,3 +9,16 @@ export function newUploadPath(type: AllowedImageType, now: Date = new Date()): s
 }
 
 export const isValidUploadPath = (path: string): boolean => PATH_RE.test(path);
+
+const UUID = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
+
+/** A community member's images live in their own folder: `members/<their id>/<random>.<ext>`. */
+export function newMemberUploadPath(userId: string, type: AllowedImageType): string {
+  return `members/${userId}/${crypto.randomUUID()}.${extensionFor(type)}`;
+}
+
+/** True only for a path inside this member's own folder. */
+export function isValidMemberUploadPath(path: string, userId: string): boolean {
+  if (!new RegExp(`^${UUID}$`).test(userId)) return false;
+  return new RegExp(`^members/${userId}/${UUID}\\.(jpg|png|webp)$`).test(path);
+}
