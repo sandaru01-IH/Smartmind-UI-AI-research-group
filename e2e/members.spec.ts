@@ -14,6 +14,8 @@ import { PNG_1X1, addThumbnail, serviceClient } from './support';
 
 test.afterAll(async () => {
   const db = serviceClient();
+  // Posts outlive their writers (shown as "Former member"), so remove them explicitly.
+  await db.from('blog_posts').delete().like('title', 'E2E %');
   const { data } = await db.auth.admin.listUsers({ perPage: 200 });
   for (const u of data?.users ?? []) {
     if (u.email?.startsWith('e2e-') && u.email.includes(stamp))

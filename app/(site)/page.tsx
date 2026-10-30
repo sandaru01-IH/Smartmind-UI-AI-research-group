@@ -4,6 +4,7 @@ import { Hero } from '@/components/hero/hero';
 import { ContactBeacon } from '@/components/home/contact-beacon';
 import { JourneyTeaser } from '@/components/home/journey-teaser';
 import { LatestSection } from '@/components/home/latest-bento';
+import { LatestBlog } from '@/components/home/latest-blog';
 import { LatestMedium } from '@/components/home/latest-medium';
 import { LatestVideo } from '@/components/home/latest-video';
 import { NumbersStrip } from '@/components/home/numbers-strip';
@@ -101,6 +102,9 @@ export default function HomePage() {
       </Suspense>
       <Suspense fallback={null}>
         <LatestMedium />
+      </Suspense>
+      <Suspense fallback={null}>
+        <LatestBlog />
       </Suspense>
 
       <Section id="numbers" numeral="02" title={t.home.numbers}>

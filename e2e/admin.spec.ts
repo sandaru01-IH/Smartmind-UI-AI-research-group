@@ -391,3 +391,57 @@ test.describe('community moderation', () => {
     });
   });
 });
+
+test.describe('community posts on the home page', () => {
+  const title = `E2E Moderated Home ${memberStamp}`;
+
+  test.beforeAll(async () => {
+    await serviceClient().from('blog_posts').delete().like('title', 'E2E %');
+  });
+
+  test.afterAll(async () => {
+    const db = serviceClient();
+    await db.from('blog_posts').delete().like('title', 'E2E Moderated %');
+    await db.from('home_sections').update({ enabled: true }).eq('id', 'blog');
+    const { data } = await db.auth.admin.listUsers({ perPage: 200 });
+    for (const u of data?.users ?? []) {
+      if (u.email?.startsWith('e2e-mod-') && u.email.includes(memberStamp)) {
+        await db.auth.admin.deleteUser(u.id);
+      }
+    }
+  });
+
+  test('the section shows the newest post and goes away when switched off or when the post is hidden', async ({
+    page,
+    browser,
+  }) => {
+    test.setTimeout(180_000);
+    const writer = await (await browser.newContext()).newPage();
+    await logInMember(writer, await createMember('mod-home'));
+    await publishPost(writer, title);
+
+    const visitor = await (await browser.newContext()).newPage();
+    await eventually(visitor, '/', async () => {
+      await expect(visitor.locator('#latest-blog')).toContainText(title);
+    });
+
+    await signIn(page);
+    await page.goto('/admin/home', { waitUntil: 'networkidle' });
+    await page.getByLabel('Latest from the community').uncheck();
+    await expect(page.getByText('Latest from the community is now off.')).toBeVisible();
+    await eventually(visitor, '/', async () => {
+      await expect(visitor.locator('#latest-blog')).toHaveCount(0);
+    });
+    await page.getByLabel('Latest from the community').check();
+    await expect(page.getByText('Latest from the community is now on.')).toBeVisible();
+    await eventually(visitor, '/', async () => {
+      await expect(visitor.locator('#latest-blog')).toContainText(title);
+    });
+
+    await page.goto('/admin/community', { waitUntil: 'networkidle' });
+    await page.getByRole('switch', { name: `Show post: ${title}` }).uncheck();
+    await eventually(visitor, '/', async () => {
+      await expect(visitor.locator('#latest-blog')).toHaveCount(0);
+    });
+  });
+});
