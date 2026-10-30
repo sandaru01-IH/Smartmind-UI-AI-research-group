@@ -37,3 +37,6 @@ export const CONTACT_EMAIL = 'info@smartminduiai.com';
 export const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'http://localhost:3000'
 ).replace(/\/$/, '');
+
+/** The research group's YouTube channel, used to read its public video feed. */
+export const YOUTUBE_CHANNEL_ID = 'UCN7fW6O_yGOuJrma_B4ywlA';

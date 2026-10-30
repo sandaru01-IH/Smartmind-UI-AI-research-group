@@ -96,6 +96,25 @@ test.describe('accessibility (axe, WCAG 2.2 AA)', () => {
 });
 
 test.describe('features', () => {
+  test('Videos page shows playable cards that only load YouTube after a click', async ({
+    page,
+  }) => {
+    const frames: string[] = [];
+    page.on('request', (r) => r.url().includes('youtube') && frames.push(r.url()));
+    await page.goto('/videos', { waitUntil: 'networkidle' });
+    await expect(page.getByRole('heading', { level: 1, name: 'Videos' })).toBeVisible();
+    const play = page.getByRole('button', { name: /^Play video:/ });
+    // The live feed may be unreachable where the tests run; the page then shows its empty note.
+    if ((await play.count()) === 0) {
+      await expect(page.getByText('Videos will appear here soon.')).toBeVisible();
+      return;
+    }
+    expect(frames.filter((u) => u.includes('/embed/'))).toEqual([]);
+    await play.first().click();
+    const frame = page.locator('iframe[src^="https://www.youtube-nocookie.com/embed/"]');
+    await expect(frame).toHaveCount(1);
+  });
+
   test('Stories dropdown lists Blog, Medium articles, Videos and News', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/', { waitUntil: 'networkidle' });

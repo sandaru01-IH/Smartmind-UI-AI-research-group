@@ -27,6 +27,7 @@ const en = {
     footer: 'Footer',
     search: 'Search',
   },
+  videos: { play: 'Play video' },
   stories: {
     eyebrow: 'Stories',
     blogTitle: 'Blog',
@@ -39,6 +40,7 @@ const en = {
     videosTitle: 'Videos',
     videosLead: 'Talks and explainers from the Smartmind YouTube channel.',
     videosEmpty: 'Videos will appear here soon.',
+    videosChannel: 'Watch everything on the Smartmind YouTube channel',
   },
   theme: { toDark: 'Switch to dark theme', toLight: 'Switch to light theme', label: 'Theme' },
   ticker: {

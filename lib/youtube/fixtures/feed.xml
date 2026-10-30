@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
+ <link rel="self" href="http://www.youtube.com/feeds/videos.xml?channel_id=UCN7fW6O_yGOuJrma_B4ywlA"/>
+ <id>yt:channel:N7fW6O_yGOuJrma_B4ywlA</id>
+ <yt:channelId>N7fW6O_yGOuJrma_B4ywlA</yt:channelId>
+ <title>Smart Mind UI &amp; AI</title>
+ <link rel="alternate" href="https://www.youtube.com/channel/UCN7fW6O_yGOuJrma_B4ywlA"/>
+ <author>
+  <name>Smart Mind UI &amp; AI</name>
+  <uri>https://www.youtube.com/channel/UCN7fW6O_yGOuJrma_B4ywlA</uri>
+ </author>
+ <published>2023-08-23T15:58:28+00:00</published>
+ <entry>
+  <id>yt:video:76_DJ0bj2Hg</id>
+  <yt:videoId>76_DJ0bj2Hg</yt:videoId>
+  <yt:channelId>UCN7fW6O_yGOuJrma_B4ywlA</yt:channelId>
+  <title>Street Cloud: AI-Powered Participatory Street Co-Design | 4th IOER Conference 2026</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=76_DJ0bj2Hg"/>
+  <author>
+   <name>Smart Mind UI &amp; AI</name>
+   <uri>https://www.youtube.com/channel/UCN7fW6O_yGOuJrma_B4ywlA</uri>
+  </author>
+  <published>2026-10-28T11:11:17+00:00</published>
+  <updated>2026-10-28T11:22:25+00:00</updated>
+  <media:group>
+   <media:title>Street Cloud: AI-Powered Participatory Street Co-Design | 4th IOER Conference 2026</media:title>
+   <media:content url="https://www.youtube.com/v/76_DJ0bj2Hg?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/76_DJ0bj2Hg/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Street Cloud: AI-Powered Participatory Street Co-Design
+
+Presented at the 4th IOER Conference “Space &amp; Transformation” (22–24 September 2026, Dresden, Germany).
+
+Street Cloud integrates Urban Informatics, GIScience, and AI to support participatory street redesign. Citizens share their ideas and priorities, while AI generates redesign scenarios that communities and planners can collaboratively evaluate and refine.
+
+Research Team: Sandaruwan Sankalpa Silva, Amila Jayasinghe, Chethika Abenayake, Niroshan Sanjaya, and Samith Madusanka.
+
+Affiliations: Department of Town &amp; Country Planning, University of Moratuwa | Smarmind Research Group | Urban Simulation Lab.
+
+We gratefully acknowledge the support of the Alexander von Humboldt Foundation, DAAD, and Technische Universität Dresden.
+
+#StreetCloud #UrbanInformatics #ParticipatoryPlanning #AI #UniversityOfMoratuwa</media:description>
+   <media:community>
+    <media:starRating count="0" average="0.00" min="1" max="5"/>
+    <media:statistics views="3"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:MdJrNZqaYGY</id>
+  <yt:videoId>MdJrNZqaYGY</yt:videoId>
+  <yt:channelId>UCN7fW6O_yGOuJrma_B4ywlA</yt:channelId>
+  <title>Teaching and Learning Urban Science, Urban Informatics and Planning : The 5-Step Framework</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=MdJrNZqaYGY"/>
+  <author>
+   <name>Smart Mind UI &amp; AI</name>
+   <uri>https://www.youtube.com/channel/UCN7fW6O_yGOuJrma_B4ywlA</uri>
+  </author>
+  <published>2026-05-04T02:12:40+00:00</published>
+  <updated>2026-10-01T04:43:46+00:00</updated>
+  <media:group>
+   <media:title>Teaching and Learning Urban Science, Urban Informatics and Planning : The 5-Step Framework</media:title>
+   <media:content url="https://www.youtube.com/v/MdJrNZqaYGY?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/MdJrNZqaYGY/hqdefault.jpg" width="480" height="360"/>
+   <media:description>How do we prepare the next generation of urban professionals for the complexity of modern cities? This video examines the shift from traditional &quot;design-first&quot; project teaching to a scientific, evidence-based inquiry model. We dive into the &quot;convergent science&quot; approach that integrates urban science, computer science, and GIScience.  Key Topics Covered:Moving beyond traditional design briefs to tackle ill-structured, real-world problems.  How to use urban informatics and data science to drive planning decisions.  A deep dive into the 5-step pedagogical framework used by the Urban Simulation Lab.  Insights into transforming academic practice for the digital age of urban planning</media:description>
+   <media:community>
+    <media:starRating count="0" average="0.00" min="1" max="5"/>
+    <media:statistics views="12"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:KFQd-4uZYwE</id>
+  <yt:videoId>KFQd-4uZYwE</yt:videoId>
+  <yt:channelId>UCN7fW6O_yGOuJrma_B4ywlA</yt:channelId>
+  <title>PjBL vs PBL: Which is Better for Urban Informatics and Planning?</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=KFQd-4uZYwE"/>
+  <author>
+   <name>Smart Mind UI &amp; AI</name>
+   <uri>https://www.youtube.com/channel/UCN7fW6O_yGOuJrma_B4ywlA</uri>
+  </author>
+  <published>2026-05-04T02:10:44+00:00</published>
+  <updated>2026-10-04T03:49:34+00:00</updated>
+  <media:group>
+   <media:title>PjBL vs PBL: Which is Better for Urban Informatics and Planning?</media:title>
+   <media:content url="https://www.youtube.com/v/KFQd-4uZYwE?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/KFQd-4uZYwE/hqdefault.jpg" width="480" height="360"/>
+   <media:description>In this video, we break down the critical differences between Project-Based Learning (PjBL) and Problem-Based Learning (PBL) within the context of urban education. Based on a white paper from the University of Moratuwa, we explore why a problem-driven approach is essential for mastering complex urban systems.  In this video, you will learn:The fundamental differences between PjBL and PBL.  Why Problem-Based Learning is the future of Urban Informatics.  The 5-step studio framework: Describe, Inquire, Model, Extract, and State.  Real-world examples of how these methodologies are applied in urban planning studios.</media:description>
+   <media:community>
+    <media:starRating count="0" average="0.00" min="1" max="5"/>
+    <media:statistics views="11"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:WFL0CoKkly8</id>
+  <yt:videoId>WFL0CoKkly8</yt:videoId>
+  <yt:channelId>UCN7fW6O_yGOuJrma_B4ywlA</yt:channelId>
+  <title>Why City Problems Can't Be Solved — And How to Structure Them</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=WFL0CoKkly8"/>
+  <author>
+   <name>Smart Mind UI &amp; AI</name>
+   <uri>https://www.youtube.com/channel/UCN7fW6O_yGOuJrma_B4ywlA</uri>
+  </author>
+  <published>2026-05-04T02:06:09+00:00</published>
+  <updated>2026-10-04T05:14:43+00:00</updated>
+  <media:group>
+   <media:title>Why City Problems Can't Be Solved — And How to Structure Them</media:title>
+   <media:content url="https://www.youtube.com/v/WFL0CoKkly8?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/WFL0CoKkly8/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Cities don't have neat problems — they have wicked ones.
+
+Traffic, heatwaves, inequality, housing — these aren't puzzles with clean answers. 
+They're complex, deeply interconnected, and constantly shifting. Traditional urban 
+planning wasn't built for this. Urban Science is.
+
+In this video, we break down how to turn overwhelming urban chaos into something 
+you can actually work with — using the DIMES Framework:
+
+🔷 Describe → Define the problem context
+🔷 Inquire → Map stakeholders &amp; effects  
+🔷 Model → Break it down functionally
+🔷 Extract → Find the leverage points
+🔷 State → Articulate the structured problem
+
+📌 We also apply DIMES to a real case: Urban Heatwaves — one of the most dangerous 
+and underestimated threats facing cities today.
+
+And finally: How will AI reshape the way future urban scientists think, work, and solve?
+
+🎓 Perfect for urban planners, data scientists, policy students, and anyone curious 
+about the future of cities.
+
+🔔 Subscribe for more on Urban Science, complex systems, and AI in cities.
+
+---
+#UrbanScience #WickedProblems #DIMES #SmartCities #UrbanPlanning 
+#CityDesign #AIandCities #ComplexSystems #UrbanHeatwave #FutureCities</media:description>
+   <media:community>
+    <media:starRating count="0" average="0.00" min="1" max="5"/>
+    <media:statistics views="26"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:KnBFNieGKZc</id>
+  <yt:videoId>KnBFNieGKZc</yt:videoId>
+  <yt:channelId>UCN7fW6O_yGOuJrma_B4ywlA</yt:channelId>
+  <title>Training future city builders</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=KnBFNieGKZc"/>
+  <author>
+   <name>Smart Mind UI &amp; AI</name>
+   <uri>https://www.youtube.com/channel/UCN7fW6O_yGOuJrma_B4ywlA</uri>
+  </author>
+  <published>2026-04-24T05:30:46+00:00</published>
+  <updated>2026-10-03T17:30:03+00:00</updated>
+  <media:group>
+   <media:title>Training future city builders</media:title>
+   <media:content url="https://www.youtube.com/v/KnBFNieGKZc?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/KnBFNieGKZc/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="0" average="0.00" min="1" max="5"/>
+    <media:statistics views="1"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:jyyN4XvXwNQ</id>
+  <yt:videoId>jyyN4XvXwNQ</yt:videoId>
+  <yt:channelId>UCN7fW6O_yGOuJrma_B4ywlA</yt:channelId>
+  <title>Teaching the Convergent City: A Competency Framework for Urban Informatics Educators</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=jyyN4XvXwNQ"/>
+  <author>
+   <name>Smart Mind UI &amp; AI</name>
+   <uri>https://www.youtube.com/channel/UCN7fW6O_yGOuJrma_B4ywlA</uri>
+  </author>
+  <published>2026-04-24T04:33:00+00:00</published>
+  <updated>2026-10-05T15:56:39+00:00</updated>
+  <media:group>
+   <media:title>Teaching the Convergent City: A Competency Framework for Urban Informatics Educators</media:title>
+   <media:content url="https://www.youtube.com/v/jyyN4XvXwNQ?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i3.ytimg.com/vi/jyyN4XvXwNQ/hqdefault.jpg" width="480" height="360"/>
+   <media:description>This Video explains that the main challenge in modern urban informatics education is not just updating the curriculum, but fundamentally transforming the academic staff who teach it
+. Faculty members typically specialize in single disciplines and rely on subjective professional experience to teach the design of traditional, static master plans
+.To fix this, the authors propose a &quot;Convergent Faculty Competency Framework&quot; and a professional development pathway to help educators transition into convergent experts
+. This framework trains faculty to embrace scientific urban reasoning (like urban scaling laws and space syntax), teach the design of dynamic, AI-assisted &quot;living&quot; urban systems (like digital twins), and replace conventional design studios with dual-mode Problem-Based Learning (PBL) studios that integrate both quantitative spatial science and community-driven, participative planning</media:description>
+   <media:community>
+    <media:starRating count="0" average="0.00" min="1" max="5"/>
+    <media:statistics views="3"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:Wh_l1O2sUqA</id>
+  <yt:videoId>Wh_l1O2sUqA</yt:videoId>
+  <yt:channelId>UCN7fW6O_yGOuJrma_B4ywlA</yt:channelId>
+  <title>GeoNet - application for geospatial network centrality assessment</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=Wh_l1O2sUqA"/>
+  <author>
+   <name>Smart Mind UI &amp; AI</name>
+   <uri>https://www.youtube.com/channel/UCN7fW6O_yGOuJrma_B4ywlA</uri>
+  </author>
+  <published>2026-04-21T06:13:48+00:00</published>
+  <updated>2026-10-04T16:37:26+00:00</updated>
+  <media:group>
+   <media:title>GeoNet - application for geospatial network centrality assessment</media:title>
+   <media:content url="https://www.youtube.com/v/Wh_l1O2sUqA?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/Wh_l1O2sUqA/hqdefault.jpg" width="480" height="360"/>
+   <media:description>GeoNet is a powerful, user-friendly tool designed for performing centrality analysis on geospatial networks. It enables researchers, and planners to evaluate the importance and influence of nodes and connections within spatial networks such as road systems and transportation infrastructure.
+
+In this video, we explore how GeoNet integrates concepts from Geographic Information Systems and Network Science to deliver meaningful insights through spatial network data analysis. The tool supports multiple centrality measures, including degree connectivity, betweenness centrality, and closeness centrality, helping users identify critical nodes and paths efficiently.</media:description>
+   <media:community>
+    <media:starRating count="7" average="5.00" min="1" max="5"/>
+    <media:statistics views="116"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:gti2RkCX3n0</id>
+  <yt:videoId>gti2RkCX3n0</yt:videoId>
+  <yt:channelId>UCN7fW6O_yGOuJrma_B4ywlA</yt:channelId>
+  <title>Urban Informatics Explained 📊 | Building Smart &amp; Adaptive Cities</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=gti2RkCX3n0"/>
+  <author>
+   <name>Smart Mind UI &amp; AI</name>
+   <uri>https://www.youtube.com/channel/UCN7fW6O_yGOuJrma_B4ywlA</uri>
+  </author>
+  <published>2026-04-10T08:01:47+00:00</published>
+  <updated>2026-10-05T13:28:27+00:00</updated>
+  <media:group>
+   <media:title>Urban Informatics Explained 📊 | Building Smart &amp; Adaptive Cities</media:title>
+   <media:content url="https://www.youtube.com/v/gti2RkCX3n0?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/gti2RkCX3n0/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Urban informatics combines data, technology, and urban planning to create resilient and adaptive cities. In this video, we explore how data-driven decision-making helps build smarter, more sustainable, and responsive urban systems. Perfect for anyone interested in the future of cities and technology.
+
+Hashtags:
+#UoM #UIP #Urbansimulationlab #Smartmind #UrbanInformatics #BigData #SmartCities #GIS #DataAnalytics #UrbanTech #DigitalCities</media:description>
+   <media:community>
+    <media:starRating count="0" average="0.00" min="1" max="5"/>
+    <media:statistics views="18"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:-7-Is8oLUBM</id>
+  <yt:videoId>-7-Is8oLUBM</yt:videoId>
+  <yt:channelId>UCN7fW6O_yGOuJrma_B4ywlA</yt:channelId>
+  <title>The Secret Rules of Cities 🤯 | Hidden Patterns That Shape Urban Life</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=-7-Is8oLUBM"/>
+  <author>
+   <name>Smart Mind UI &amp; AI</name>
+   <uri>https://www.youtube.com/channel/UCN7fW6O_yGOuJrma_B4ywlA</uri>
+  </author>
+  <published>2026-04-10T07:57:46+00:00</published>
+  <updated>2026-10-01T17:14:44+00:00</updated>
+  <media:group>
+   <media:title>The Secret Rules of Cities 🤯 | Hidden Patterns That Shape Urban Life</media:title>
+   <media:content url="https://www.youtube.com/v/-7-Is8oLUBM?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/-7-Is8oLUBM/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Cities may seem chaotic, but they follow hidden rules and patterns. In this video, we uncover the science behind how cities grow, function, and scale. Learn about the surprising laws that govern urban life, from population growth to infrastructure and innovation.
+
+Hashtags:
+#UoM #UIP #Urbansimulationlab #Smartmind #CityScience #UrbanGrowth #SmartCities #UrbanAnalytics #FutureCities #ComplexSystems #UrbanResearch</media:description>
+   <media:community>
+    <media:starRating count="0" average="0.00" min="1" max="5"/>
+    <media:statistics views="2"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:jJZYH4D5DNg</id>
+  <yt:videoId>jJZYH4D5DNg</yt:videoId>
+  <yt:channelId>UCN7fW6O_yGOuJrma_B4ywlA</yt:channelId>
+  <title>Cities: From Blueprints to Biology 🧬 | How Cities Behave Like Living Systems</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=jJZYH4D5DNg"/>
+  <author>
+   <name>Smart Mind UI &amp; AI</name>
+   <uri>https://www.youtube.com/channel/UCN7fW6O_yGOuJrma_B4ywlA</uri>
+  </author>
+  <published>2026-04-10T07:57:04+00:00</published>
+  <updated>2026-10-04T08:44:02+00:00</updated>
+  <media:group>
+   <media:title>Cities: From Blueprints to Biology 🧬 | How Cities Behave Like Living Systems</media:title>
+   <media:content url="https://www.youtube.com/v/jJZYH4D5DNg?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i3.ytimg.com/vi/jJZYH4D5DNg/hqdefault.jpg" width="480" height="360"/>
+   <media:description>What if cities function like living organisms? This video dives into the concept of cities evolving from static blueprints to dynamic biological systems. Discover how urban environments grow, adapt, and respond to human behavior using principles inspired by biology and complex systems.
+
+Hashtags:
+#UoM #UIP #Urbansimulationlab #Smartmind #UrbanTheory #CityScience #ComplexSystems #SmartCities #UrbanDesign #FutureCities #SystemsThinking</media:description>
+   <media:community>
+    <media:starRating count="0" average="0.00" min="1" max="5"/>
+    <media:statistics views="6"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:CLF66pSHCXI</id>
+  <yt:videoId>CLF66pSHCXI</yt:videoId>
+  <yt:channelId>UCN7fW6O_yGOuJrma_B4ywlA</yt:channelId>
+  <title>A New Way to Model City Traffic 🚦 | Smarter Urban Mobility Explained</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=CLF66pSHCXI"/>
+  <author>
+   <name>Smart Mind UI &amp; AI</name>
+   <uri>https://www.youtube.com/channel/UCN7fW6O_yGOuJrma_B4ywlA</uri>
+  </author>
+  <published>2026-04-10T07:55:10+00:00</published>
+  <updated>2026-10-04T08:35:19+00:00</updated>
+  <media:group>
+   <media:title>A New Way to Model City Traffic 🚦 | Smarter Urban Mobility Explained</media:title>
+   <media:content url="https://www.youtube.com/v/CLF66pSHCXI?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/CLF66pSHCXI/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Urban traffic is one of the biggest challenges in modern cities. In this video, we explore a new approach to modeling city traffic using advanced simulation techniques and data-driven methods. Learn how planners and researchers are improving traffic flow, reducing congestion, and designing smarter transportation systems for the future.
+
+Hashtags:
+#UoM #UIP #Urbansimulationlab #Smartmind #TrafficModeling #SmartCities #UrbanPlanning #GIS #TransportPlanning #DataScience #UrbanMobility</media:description>
+   <media:community>
+    <media:starRating count="0" average="0.00" min="1" max="5"/>
+    <media:statistics views="11"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:CHmTfOrL4T4</id>
+  <yt:videoId>CHmTfOrL4T4</yt:videoId>
+  <yt:channelId>UCN7fW6O_yGOuJrma_B4ywlA</yt:channelId>
+  <title>The Hidden Logic of Our Cities | Complexity, Self-Organisation &amp; Urban Emergence</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=CHmTfOrL4T4"/>
+  <author>
+   <name>Smart Mind UI &amp; AI</name>
+   <uri>https://www.youtube.com/channel/UCN7fW6O_yGOuJrma_B4ywlA</uri>
+  </author>
+  <published>2026-04-08T10:16:13+00:00</published>
+  <updated>2026-10-15T08:37:47+00:00</updated>
+  <media:group>
+   <media:title>The Hidden Logic of Our Cities | Complexity, Self-Organisation &amp; Urban Emergence</media:title>
+   <media:content url="https://www.youtube.com/v/CHmTfOrL4T4?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/CHmTfOrL4T4/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Cities are not designed top-down — they emerge from millions of individual decisions, interactions, and patterns over time. This video reveals the hidden logic behind urban systems: how self-organisation, emergence, and complexity theory explain traffic flows, neighbourhood change, and the spontaneous order of city life. Essential viewing for planners, urban researchers, and anyone fascinated by how cities really work.
+📚 Referenced research: Jacobs (1961), Batty (2013), West (2017).
+🔔 Subscribe for more Urban Science &amp; City Research.
+#HiddenLogicOfCities #SelfOrganisation #UrbanComplexity #EmergentSystems #CityScience #UrbanPlanning #ComplexSystems #Smartmind #TCP #Urbansimulationlab #UIP #UOM</media:description>
+   <media:community>
+    <media:starRating count="0" average="0.00" min="1" max="5"/>
+    <media:statistics views="4"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:aRgZ5STgLyo</id>
+  <yt:videoId>aRgZ5STgLyo</yt:videoId>
+  <yt:channelId>UCN7fW6O_yGOuJrma_B4ywlA</yt:channelId>
+  <title>Urban Informatics for Complexity-Responsive Spatial Planning | Research &amp; Practice</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=aRgZ5STgLyo"/>
+  <author>
+   <name>Smart Mind UI &amp; AI</name>
+   <uri>https://www.youtube.com/channel/UCN7fW6O_yGOuJrma_B4ywlA</uri>
+  </author>
+  <published>2026-04-08T09:48:56+00:00</published>
+  <updated>2026-09-30T03:19:15+00:00</updated>
+  <media:group>
+   <media:title>Urban Informatics for Complexity-Responsive Spatial Planning | Research &amp; Practice</media:title>
+   <media:content url="https://www.youtube.com/v/aRgZ5STgLyo?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/aRgZ5STgLyo/hqdefault.jpg" width="480" height="360"/>
+   <media:description>How can urban informatics tools help planners respond to the growing complexity of cities? This video presents a research-grounded framework for complexity-responsive spatial planning — one that uses urban sensing, big data analytics, simulation, and AI to design more adaptive, resilient, and equitable urban environments. Bridging theory and practice for students, researchers, and planning professionals.
+📚 Referenced research: Liu et al. (2025) Urban Informatics, Frontiers in Sustainable Cities (2025), ISPRS Annals (2024).
+🔔 Subscribe for more on Urban Informatics, Spatial Planning &amp; Smart Cities.
+#SpatialPlanning #UrbanInformatics #ComplexityResponsive #ResiliencePlanning #SmartCities #UrbanSimulation #GeoAI #Smartmind #TCP #Urbansimulationlab #UIP #UOM</media:description>
+   <media:community>
+    <media:starRating count="0" average="0.00" min="1" max="5"/>
+    <media:statistics views="2"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:Xg3lp9ufI-I</id>
+  <yt:videoId>Xg3lp9ufI-I</yt:videoId>
+  <yt:channelId>UCN7fW6O_yGOuJrma_B4ywlA</yt:channelId>
+  <title>The City's New OS | Urban Informatics &amp; the Evolution of Adaptive Planning</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=Xg3lp9ufI-I"/>
+  <author>
+   <name>Smart Mind UI &amp; AI</name>
+   <uri>https://www.youtube.com/channel/UCN7fW6O_yGOuJrma_B4ywlA</uri>
+  </author>
+  <published>2026-04-08T09:46:49+00:00</published>
+  <updated>2026-10-05T02:52:45+00:00</updated>
+  <media:group>
+   <media:title>The City's New OS | Urban Informatics &amp; the Evolution of Adaptive Planning</media:title>
+   <media:content url="https://www.youtube.com/v/Xg3lp9ufI-I?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/Xg3lp9ufI-I/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Think of Urban Informatics as the operating system of the modern city — processing data, sensing change, and enabling planners to respond in real time. This video examines how urban informatics is evolving into an adaptive planning platform: integrating IoT sensors, real-time data streams, digital twins, and AI to create cities that can learn and respond to their inhabitants.
+📚 Referenced research: Frontiers in Urban Informatics (2025), Computational Urban Science (2025).
+🔔 Subscribe for more on Smart Cities, Urban Tech &amp; Adaptive Planning.
+#UrbanInformatics #AdaptivePlanning #SmartCityOS #DigitalTwin #IoT #RealTimePlanning #UrbanTech #Smartmind #TCP #Urbansimulationlab #UIP #UOM</media:description>
+   <media:community>
+    <media:starRating count="0" average="0.00" min="1" max="5"/>
+    <media:statistics views="2"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:HJmkXEP07i4</id>
+  <yt:videoId>HJmkXEP07i4</yt:videoId>
+  <yt:channelId>UCN7fW6O_yGOuJrma_B4ywlA</yt:channelId>
+  <title>The Evolution of AI in City Planning | From Data Analytics to Intelligent Urban Systems</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=HJmkXEP07i4"/>
+  <author>
+   <name>Smart Mind UI &amp; AI</name>
+   <uri>https://www.youtube.com/channel/UCN7fW6O_yGOuJrma_B4ywlA</uri>
+  </author>
+  <published>2026-04-08T09:43:59+00:00</published>
+  <updated>2026-10-01T08:25:04+00:00</updated>
+  <media:group>
+   <media:title>The Evolution of AI in City Planning | From Data Analytics to Intelligent Urban Systems</media:title>
+   <media:content url="https://www.youtube.com/v/HJmkXEP07i4?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/HJmkXEP07i4/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Description:
+Artificial Intelligence is no longer a future concept in urban planning — it is already reshaping how cities are designed, managed, and governed. This video traces the evolution of AI in city planning: from early GIS and spatial analysis tools to today's machine learning models, generative AI, and digital twins. We explore both the opportunities and the ethical challenges of AI-powered urban planning.
+📚 Referenced research: Peng et al. (2024), Liu et al. (2025), Springer Nature Urban Informatics.
+🔔 Subscribe for more on AI, Smart Cities &amp; Urban Planning.
+#AIinUrbanPlanning #SmartCities #UrbanAI #DigitalTwin #MachineLearning #CityPlanning #GeoAI #Smartmind #TCP #Urbansimulationlab #UIP #UOM</media:description>
+   <media:community>
+    <media:starRating count="0" average="0.00" min="1" max="5"/>
+    <media:statistics views="5"/>
+   </media:community>
+  </media:group>
+ </entry>
+</feed>

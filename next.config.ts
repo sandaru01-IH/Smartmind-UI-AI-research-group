@@ -54,19 +54,20 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   images: {
     formats: ['image/avif', 'image/webp'],
-    ...(supabase
-      ? {
-          remotePatterns: [
+    remotePatterns: [
+      { protocol: 'https', hostname: 'i.ytimg.com', pathname: '/vi/**' },
+      ...(supabase
+        ? [
             {
               protocol: supabase.protocol.replace(':', '') as 'http' | 'https',
               hostname: supabase.hostname,
               port: supabase.port,
               pathname: '/storage/v1/object/public/media/**',
             },
-          ],
-          dangerouslyAllowLocalIP: supabaseIsLocal,
-        }
-      : {}),
+          ]
+        : []),
+    ],
+    ...(supabase ? { dangerouslyAllowLocalIP: supabaseIsLocal } : {}),
   },
   async redirects() {
     return [
