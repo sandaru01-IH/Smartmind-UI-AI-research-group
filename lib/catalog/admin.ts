@@ -4,6 +4,7 @@ import { publicState } from '@/lib/visibility';
 import type { Post } from '@/lib/posts/types';
 import {
   parseCollabRows,
+  parseMediumRows,
   parseAwardRows,
   parseMilestoneRows,
   parseSpotlightRows,
@@ -15,6 +16,7 @@ import {
 } from './rows';
 import type {
   CollabInput,
+  MediumInput,
   AwardInput,
   MilestoneInput,
   PartnerInput,
@@ -24,6 +26,7 @@ import type {
 } from './schema';
 import {
   COLLAB_COLUMNS,
+  MEDIUM_COLUMNS,
   AWARD_COLUMNS,
   MILESTONE_COLUMNS,
   PARTNER_COLUMNS,
@@ -35,6 +38,7 @@ import {
   WORK_LINK_COLUMNS,
   type Award,
   type CollabProject,
+  type MediumArticle,
   type Milestone,
   type Partner,
   type Publication,
@@ -85,6 +89,17 @@ export async function adminCollabs(db: SupabaseClient): Promise<CollabProject[]>
   if (error && isMissingTable(error)) return [];
   load('collaboration projects', error);
   return parseCollabRows(data);
+}
+
+export async function adminMedium(db: SupabaseClient): Promise<MediumArticle[]> {
+  const { data, error } = await db
+    .from('medium_articles')
+    .select(MEDIUM_COLUMNS)
+    .order('published_on', { ascending: false, nullsFirst: false })
+    .order('sort_order');
+  if (error && isMissingTable(error)) return [];
+  load('Medium articles', error);
+  return parseMediumRows(data);
 }
 
 export async function adminPartners(db: SupabaseClient): Promise<Partner[]> {
@@ -205,6 +220,9 @@ export const savePartner = (db: SupabaseClient, id: string | null, v: PartnerInp
 export const saveCollab = (db: SupabaseClient, id: string | null, v: CollabInput) =>
   upsertOne(db, 'collab_projects', COLLAB_COLUMNS, id, v, parseCollabRows);
 
+export const saveMedium = (db: SupabaseClient, id: string | null, v: MediumInput) =>
+  upsertOne(db, 'medium_articles', MEDIUM_COLUMNS, id, v, parseMediumRows);
+
 export async function deleteRow(
   db: SupabaseClient,
   table:
@@ -214,7 +232,8 @@ export async function deleteRow(
     | 'research_themes'
     | 'milestones'
     | 'research_spotlights'
-    | 'collab_projects',
+    | 'collab_projects'
+    | 'medium_articles',
   id: string,
 ): Promise<void> {
   const { error } = await db.from(table).delete().eq('id', id);

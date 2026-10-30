@@ -6,7 +6,9 @@ import { useState, useTransition, type ReactNode } from 'react';
 import { Download, Loader2, Plus, Save, Trash2 } from 'lucide-react';
 import {
   deleteCollabAction,
+  deleteMediumAction,
   saveCollabAction,
+  saveMediumAction,
   deleteAwardAction,
   deleteMilestoneAction,
   deletePartnerAction,
@@ -27,6 +29,7 @@ import { buttonClass } from '@/components/ui/button';
 import { TbcFlag } from '@/components/ui/tag';
 import {
   collabSchema,
+  mediumSchema,
   awardSchema,
   milestoneSchema,
   partnerSchema,
@@ -41,6 +44,7 @@ import {
   THEME_STYLE_LABEL,
   type Award,
   type CollabProject,
+  type MediumArticle,
   type Milestone,
   type Partner,
   type Publication,
@@ -969,6 +973,163 @@ function CollabForm({
         onDelete={
           item
             ? () => crud.remove(item.id, item.title, () => deleteCollabAction(item.id))
+            : undefined
+        }
+      />
+    </form>
+  );
+}
+
+/* ----------------------------------------------------------- Medium articles */
+
+export function MediumManager({ items }: { items: MediumArticle[] }) {
+  const crud = useCrud<MediumArticle>(items);
+  const current = crud.items.find((a) => a.id === crud.editing) ?? null;
+  return (
+    <Workspace
+      items={crud.items}
+      editing={crud.editing}
+      onEdit={crud.open}
+      addLabel="Add an article"
+      empty="No Medium articles yet."
+      row={(a) => (
+        <span className="min-w-0">
+          <span className="block truncate">{a.title}</span>
+          <span className="label-mono text-muted">
+            {[a.author_name, a.published_on].filter(Boolean).join(' · ') || 'No author or date'}
+            {!a.visible ? ' · Hidden' : ''}
+          </span>
+        </span>
+      )}
+      form={crud.editing ? <MediumForm key={crud.editing} item={current} crud={crud} /> : null}
+    />
+  );
+}
+
+function MediumForm({
+  item,
+  crud,
+}: {
+  item: MediumArticle | null;
+  crud: ReturnType<typeof useCrud<MediumArticle>>;
+}) {
+  const toast = useToast();
+  const [d, setD] = useState({
+    title: item?.title ?? '',
+    url: item?.url ?? '',
+    summary: item?.summary ?? '',
+    author_name: item?.author_name ?? '',
+    published_on: item?.published_on ?? '',
+    cover_path: item?.cover_path ?? (null as string | null),
+    cover_alt: item?.cover_alt ?? '',
+    visible: item?.visible ?? true,
+    sort_order: String(item?.sort_order ?? 0),
+  });
+  const set = <K extends keyof typeof d>(k: K, v: (typeof d)[K]) => setD((p) => ({ ...p, [k]: v }));
+  const values = () => ({ ...d, sort_order: num(d.sort_order) });
+  const valid = mediumSchema.safeParse(values()).success;
+  const err = (k: string) => first(crud.errors, k);
+
+  return (
+    <form
+      noValidate
+      className="space-y-5 border border-line-strong p-5"
+      onSubmit={(e) => {
+        e.preventDefault();
+        crud.save(() => saveMediumAction({ id: item?.id ?? null, values: values() }));
+      }}
+    >
+      <h3 className="text-xl">{item ? `Edit ${item.title}` : 'Add an article'}</h3>
+      <Field id="md-title" label="Title" error={err('title')}>
+        <input
+          id="md-title"
+          value={d.title}
+          onChange={(e) => set('title', e.target.value)}
+          className={fieldClass}
+          required
+        />
+      </Field>
+      <Field
+        id="md-url"
+        label="Link to the article on Medium"
+        hint="The full https:// address."
+        error={err('url')}
+      >
+        <input
+          id="md-url"
+          type="url"
+          value={d.url}
+          onChange={(e) => set('url', e.target.value)}
+          className={fieldClass}
+          required
+        />
+      </Field>
+      <Field id="md-summary" label="Short summary" error={err('summary')}>
+        <textarea
+          id="md-summary"
+          rows={3}
+          value={d.summary}
+          onChange={(e) => set('summary', e.target.value)}
+          className={areaClass}
+        />
+      </Field>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field id="md-author" label="Author" error={err('author_name')}>
+          <input
+            id="md-author"
+            value={d.author_name}
+            onChange={(e) => set('author_name', e.target.value)}
+            className={fieldClass}
+          />
+        </Field>
+        <Field id="md-date" label="Published on" error={err('published_on')}>
+          <input
+            id="md-date"
+            type="date"
+            value={d.published_on}
+            onChange={(e) => set('published_on', e.target.value)}
+            className={fieldClass}
+          />
+        </Field>
+      </div>
+      <div>
+        <p className="label-mono mb-2 text-muted">Cover image</p>
+        <ImageUploader
+          name="medium"
+          value={{ path: d.cover_path, alt: d.cover_alt }}
+          onChange={(v) => setD((p) => ({ ...p, cover_path: v.path, cover_alt: v.alt }))}
+          onError={(m) => toast.push(m, 'error')}
+          altError={err('cover_alt')}
+        />
+        {err('cover_path') ? (
+          <p className="text-[0.9rem] text-danger">{err('cover_path')}</p>
+        ) : null}
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field
+          id="md-sort"
+          label="Order"
+          hint="Lower numbers come first among articles with the same date."
+        >
+          <input
+            id="md-sort"
+            inputMode="numeric"
+            value={d.sort_order}
+            onChange={(e) => set('sort_order', numeric(e.target.value))}
+            className={fieldClass}
+          />
+        </Field>
+        <Check checked={d.visible} onChange={(v) => set('visible', v)}>
+          Show on the Medium articles page
+        </Check>
+      </div>
+      <FormFooter
+        busy={crud.busy}
+        valid={valid}
+        onCancel={() => crud.open(null)}
+        onDelete={
+          item
+            ? () => crud.remove(item.id, item.title, () => deleteMediumAction(item.id))
             : undefined
         }
       />

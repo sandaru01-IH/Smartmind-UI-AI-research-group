@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { requireAdmin } from '@/lib/auth/require-admin';
 import {
   saveCollab,
+  saveMedium,
   adminAwards,
   adminMilestones,
   adminPartners,
@@ -23,6 +24,7 @@ import {
 } from '@/lib/catalog/admin';
 import {
   collabSchema,
+  mediumSchema,
   awardSchema,
   milestoneSchema,
   partnerSchema,
@@ -44,6 +46,7 @@ import {
 import type {
   Award,
   CollabProject,
+  MediumArticle,
   Milestone,
   Partner,
   Publication,
@@ -57,7 +60,8 @@ import type { ActionResult } from './actions';
  * Every write here expires the cache tag of what changed, plus the tags of everything that is built
  * from it (a person's profile, the home page figures), so one edit shows up all over the site.
  */
-type Area = 'awards' | 'publications' | 'partners' | 'research' | 'milestones' | 'collabs';
+type Area =
+  'awards' | 'publications' | 'partners' | 'research' | 'milestones' | 'collabs' | 'medium';
 
 const PAGES: Record<Area, string[]> = {
   awards: ['/awards', '/team', '/'],
@@ -66,6 +70,7 @@ const PAGES: Record<Area, string[]> = {
   research: ['/research', '/'],
   milestones: ['/research', '/'],
   collabs: ['/collaborate', '/'],
+  medium: ['/medium', '/'],
 };
 
 function refresh(area: Area): void {
@@ -490,5 +495,39 @@ export async function importStarterContentAction(): Promise<ActionResult<{ added
     return { ok: true, data: { added } };
   } catch (e) {
     return fail(messageOf(e, 'Could not import the starter content.'));
+  }
+}
+
+/* ----------------------------------------------------------- Medium articles */
+
+export async function saveMediumAction(input: {
+  id: string | null;
+  values: unknown;
+}): Promise<ActionResult<MediumArticle>> {
+  const { supabase } = await requireAdmin();
+  const id = idOrNull.safeParse(input.id);
+  const parsed = mediumSchema.safeParse(input.values);
+  if (!id.success) return fail('Unknown article.');
+  if (!parsed.success) return invalid(parsed.error);
+  if (parsed.data.cover_path && !isValidUploadPath(parsed.data.cover_path))
+    return fail('The cover upload is not valid.', { cover_path: ['Upload the cover again'] });
+  try {
+    const saved = await saveMedium(supabase, id.data, parsed.data);
+    refresh('medium');
+    return { ok: true, data: saved };
+  } catch (e) {
+    return fail(messageOf(e, 'Could not save the article.'));
+  }
+}
+
+export async function deleteMediumAction(id: string): Promise<ActionResult> {
+  const { supabase } = await requireAdmin();
+  if (!z.uuid().safeParse(id).success) return fail('Unknown article.');
+  try {
+    await deleteRow(supabase, 'medium_articles', id);
+    refresh('medium');
+    return { ok: true };
+  } catch (e) {
+    return fail(messageOf(e, 'Could not delete the article.'));
   }
 }

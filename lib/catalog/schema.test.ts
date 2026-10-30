@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { numberWord, numberWordCap, plural } from '@/lib/number-words';
-import { awardSchema, partnerSchema, publicationSchema, themeSchema } from './schema';
+import { awardSchema, mediumSchema, partnerSchema, publicationSchema, themeSchema } from './schema';
 
 describe('catalog schemas', () => {
   it('accepts a minimal award and defaults the flags', () => {
@@ -27,6 +27,36 @@ describe('catalog schemas', () => {
     expect(themeSchema.safeParse({ title: 'Urban', style: 'plaid' }).success).toBe(false);
     const r = themeSchema.parse({ title: 'Urban', projects: [{ title: 'Model' }] });
     expect(r.projects[0].src_funded).toBe(false);
+  });
+});
+
+describe('medium article schema', () => {
+  const base = { title: 'Why cities are systems', url: 'https://medium.com/@smartmind/why-cities' };
+
+  it('accepts a minimal article and defaults the flags', () => {
+    expect(mediumSchema.parse(base)).toMatchObject({ visible: true, summary: '', author_name: '' });
+  });
+
+  it('only allows https links to Medium', () => {
+    expect(mediumSchema.safeParse({ ...base, url: 'javascript:alert(1)' }).success).toBe(false);
+    expect(mediumSchema.safeParse({ ...base, url: 'http://medium.com/x' }).success).toBe(false);
+    expect(mediumSchema.safeParse({ ...base, url: '' }).success).toBe(false);
+  });
+
+  it('needs a real title and alt text for a cover', () => {
+    expect(mediumSchema.safeParse({ ...base, title: 'ab' }).success).toBe(false);
+    expect(mediumSchema.safeParse({ ...base, cover_path: 'covers/2026/x.png' }).success).toBe(
+      false,
+    );
+    expect(
+      mediumSchema.safeParse({ ...base, cover_path: 'covers/2026/x.png', cover_alt: 'A city' })
+        .success,
+    ).toBe(true);
+  });
+
+  it('turns an empty publish date into null and rejects a bad one', () => {
+    expect(mediumSchema.parse({ ...base, published_on: '' }).published_on).toBeNull();
+    expect(mediumSchema.safeParse({ ...base, published_on: 'yesterday' }).success).toBe(false);
   });
 });
 

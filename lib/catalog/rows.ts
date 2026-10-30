@@ -3,6 +3,7 @@ import { THEME_STYLES, PUB_KINDS } from './types';
 import type {
   Award,
   CollabProject,
+  MediumArticle,
   Spotlight,
   Milestone,
   Partner,
@@ -172,3 +173,19 @@ const collabRow = z.object({
 
 export const parseCollabRows = (rows: unknown): CollabProject[] =>
   z.array(collabRow).parse(rows ?? []);
+
+const mediumRow = z.object({
+  id: z.string(),
+  title: z.string(),
+  url: z.string(),
+  summary: str,
+  cover_path: z.string().nullable(),
+  cover_alt: z.string().nullable(),
+  author_name: str,
+  published_on: z.string().nullable(),
+  visible: z.boolean(),
+  sort_order: z.number(),
+});
+
+export const parseMediumRows = (rows: unknown): MediumArticle[] =>
+  z.array(mediumRow).parse(rows ?? []);

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { connection } from 'next/server';
 import {
   CollabsManager,
+  MediumManager,
   AwardsManager,
   JourneyManager,
   PartnersManager,
@@ -12,6 +13,7 @@ import {
 import { requireAdmin } from '@/lib/auth/require-admin';
 import {
   adminCollabs,
+  adminMedium,
   adminAwards,
   adminMilestones,
   adminPartners,
@@ -73,6 +75,8 @@ export default async function ContentPage({ params }: { params: Promise<{ kind: 
       );
   } else if (kind === 'collaborations') {
     body = <CollabsManager items={await adminCollabs(supabase)} />;
+  } else if (kind === 'medium') {
+    body = <MediumManager items={await adminMedium(supabase)} />;
   } else if (kind === 'partners') {
     body = <PartnersManager partners={await adminPartners(supabase)} />;
   } else if (kind === 'journey') {

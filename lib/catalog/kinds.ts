@@ -26,6 +26,11 @@ export const CONTENT_KINDS = [
     blurb: 'Projects open to collaboration, with the person to contact and their photo.',
   },
   {
+    id: 'medium',
+    label: 'Medium articles',
+    blurb: 'Articles published on Medium, shown as cards that link out to them.',
+  },
+  {
     id: 'research',
     label: 'Research',
     blurb: 'Research themes with their projects, and the wider topics.',

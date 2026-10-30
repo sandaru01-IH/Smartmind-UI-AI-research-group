@@ -198,3 +198,20 @@ export interface CollabProject {
 
 export const COLLAB_COLUMNS =
   'id,title,summary,contact_name,contact_role,contact_bio,contact_email,contact_photo_path,visible,sort_order';
+
+/** A Medium article the team published, shown as a card that links out to Medium. */
+export interface MediumArticle {
+  id: string;
+  title: string;
+  url: string;
+  summary: string;
+  cover_path: string | null;
+  cover_alt: string | null;
+  author_name: string;
+  published_on: string | null;
+  visible: boolean;
+  sort_order: number;
+}
+
+export const MEDIUM_COLUMNS =
+  'id,title,url,summary,cover_path,cover_alt,author_name,published_on,visible,sort_order';

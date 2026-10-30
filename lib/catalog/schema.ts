@@ -162,3 +162,48 @@ export const collabSchema = z.object({
   sort_order: sortOrder,
 });
 export type CollabInput = z.output<typeof collabSchema>;
+
+const httpsUrl = z
+  .string()
+  .trim()
+  .max(2048)
+  .refine((v) => {
+    try {
+      return new URL(v).protocol === 'https:';
+    } catch {
+      return false;
+    }
+  }, 'Use the full https link to the article');
+
+export const mediumSchema = z
+  .object({
+    title: z.string().trim().min(3, 'Add a title').max(200),
+    url: httpsUrl,
+    summary: text(400),
+    cover_path: z
+      .string()
+      .trim()
+      .max(300)
+      .nullish()
+      .transform((v) => v || null),
+    cover_alt: z
+      .string()
+      .trim()
+      .max(200)
+      .nullish()
+      .transform((v) => v || null),
+    author_name: text(120),
+    published_on: z
+      .string()
+      .trim()
+      .nullish()
+      .refine((v) => !v || /^\d{4}-\d{2}-\d{2}$/.test(v), 'Use the format YYYY-MM-DD')
+      .transform((v) => v || null),
+    visible: z.boolean().default(true),
+    sort_order: sortOrder,
+  })
+  .refine((v) => !v.cover_path || Boolean(v.cover_alt), {
+    message: 'Describe the cover for screen readers',
+    path: ['cover_alt'],
+  });
+export type MediumInput = z.output<typeof mediumSchema>;

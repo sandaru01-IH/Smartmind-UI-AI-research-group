@@ -35,6 +35,7 @@ const en = {
     mediumTitle: 'Medium articles',
     mediumLead: 'Articles the team has published on Medium.',
     mediumEmpty: 'No Medium articles yet.',
+    mediumBadge: 'Medium',
     videosTitle: 'Videos',
     videosLead: 'Talks and explainers from the Smartmind YouTube channel.',
     videosEmpty: 'Videos will appear here soon.',

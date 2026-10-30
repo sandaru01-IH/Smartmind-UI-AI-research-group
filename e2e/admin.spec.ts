@@ -1,5 +1,12 @@
 import { expect, test } from '@playwright/test';
-import { ADMIN_EMAIL, TITLE_PREFIX, addThumbnail, eventually, signIn } from './support';
+import {
+  ADMIN_EMAIL,
+  TITLE_PREFIX,
+  addThumbnail,
+  eventually,
+  serviceClient,
+  signIn,
+} from './support';
 
 test.describe('admin access', () => {
   test('anonymous visitors are sent to the login page', async ({ page }) => {
@@ -216,5 +223,42 @@ test.describe('admin lifecycle', () => {
       buffer: Buffer.from('<html>not a png</html>'),
     });
     await expect(page.getByText(/does not match|Use a JPEG/)).toBeVisible();
+  });
+});
+
+test.describe('Medium articles', () => {
+  const stamp = Date.now().toString(36);
+  const title = `${TITLE_PREFIX}Medium ${stamp}`;
+
+  test.afterAll(async () => {
+    await serviceClient().from('medium_articles').delete().like('title', `${TITLE_PREFIX}Medium %`);
+  });
+
+  test('an article added in the admin shows on /medium and disappears when hidden', async ({
+    page,
+  }) => {
+    await signIn(page);
+    await page.goto('/admin/content/medium', { waitUntil: 'networkidle' });
+    await page.getByRole('button', { name: 'Add an article' }).click();
+    await page.getByLabel('Title', { exact: true }).fill(title);
+    await page.getByLabel('Link to the article on Medium').fill(`https://medium.com/@e2e/${stamp}`);
+    await page.getByLabel('Short summary').fill('An end to end summary.');
+    await page.getByRole('button', { name: 'Save' }).click();
+    await expect(page.getByRole('button', { name: new RegExp(title) })).toBeVisible();
+
+    await eventually(page, '/medium', async () => {
+      const link = page.getByRole('link', { name: new RegExp(title) });
+      await expect(link).toBeVisible();
+      await expect(link).toHaveAttribute('href', `https://medium.com/@e2e/${stamp}`);
+      await expect(link).toHaveAttribute('target', '_blank');
+    });
+
+    await page.goto('/admin/content/medium', { waitUntil: 'networkidle' });
+    await page.getByRole('button', { name: new RegExp(title) }).click();
+    await page.getByLabel('Show on the Medium articles page').uncheck();
+    await page.getByRole('button', { name: 'Save' }).click();
+    await eventually(page, '/medium', async () => {
+      await expect(page.getByRole('link', { name: new RegExp(title) })).toHaveCount(0);
+    });
   });
 });

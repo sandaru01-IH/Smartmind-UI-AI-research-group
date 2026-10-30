@@ -6,6 +6,7 @@ import { createPublicClient } from '@/lib/supabase/public-client';
 import { getMemberRefs } from '@/lib/team/refs';
 import {
   parseCollabRows,
+  parseMediumRows,
   parseAwardRows,
   parseMilestoneRows,
   parseSpotlightRows,
@@ -25,6 +26,7 @@ import {
 } from './seed';
 import {
   COLLAB_COLUMNS,
+  MEDIUM_COLUMNS,
   AWARD_COLUMNS,
   MILESTONE_COLUMNS,
   PARTNER_COLUMNS,
@@ -36,6 +38,7 @@ import {
   WORK_LINK_COLUMNS,
   type Award,
   type CollabProject,
+  type MediumArticle,
   type MemberWork,
   type Milestone,
   type Partner,
@@ -229,6 +232,26 @@ export async function getCollabs(): Promise<CollabProject[]> {
   if (error && /does not exist|schema cache/i.test(error.message)) return [];
   if (error) throw new Error(`Could not load collaboration projects: ${error.message}`);
   return parseCollabRows(data);
+}
+
+/** Visible Medium articles, newest first. Empty when the table is missing or Supabase is off. */
+export async function getMediumArticles(limit?: number): Promise<MediumArticle[]> {
+  'use cache';
+  cacheTag('medium');
+  cacheLife(life);
+  const db = createPublicClient();
+  if (!db) return [];
+  let req = db
+    .from('medium_articles')
+    .select(MEDIUM_COLUMNS)
+    .eq('visible', true)
+    .order('published_on', { ascending: false, nullsFirst: false })
+    .order('sort_order');
+  if (limit) req = req.limit(limit);
+  const { data, error } = await req;
+  if (error && /does not exist|schema cache/i.test(error.message)) return [];
+  if (error) throw new Error(`Could not load Medium articles: ${error.message}`);
+  return parseMediumRows(data);
 }
 
 export async function getResearch(): Promise<ResearchData> {

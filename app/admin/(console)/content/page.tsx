@@ -5,6 +5,7 @@ import { adminListAll } from '@/lib/posts/admin';
 import { requireAdmin } from '@/lib/auth/require-admin';
 import {
   adminCollabs,
+  adminMedium,
   adminAwards,
   adminMilestones,
   adminPartners,
@@ -20,7 +21,7 @@ export const instant = false;
 export default async function ContentHub() {
   await connection();
   const { supabase } = await requireAdmin();
-  const [awards, pubs, partners, research, journey, posts, collabs] = await Promise.all([
+  const [awards, pubs, partners, research, journey, posts, collabs, medium] = await Promise.all([
     adminAwards(supabase),
     adminPublications(supabase),
     adminPartners(supabase),
@@ -28,6 +29,7 @@ export default async function ContentHub() {
     adminMilestones(supabase),
     adminListAll(supabase),
     adminCollabs(supabase),
+    adminMedium(supabase),
   ]);
   const counts: Record<string, number> = {
     awards: awards.length + postsFeeding(posts, 'in_awards').length,
@@ -36,6 +38,7 @@ export default async function ContentHub() {
     research: research.themes.length,
     journey: journey.length,
     collaborations: collabs.length,
+    medium: medium.length,
   };
   // The open invitation is added by hand in the admin; it is not part of the starter content.
   const starterKinds = ['awards', 'publications', 'partners', 'research', 'journey'];
