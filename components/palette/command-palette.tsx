@@ -7,7 +7,7 @@ import { t } from '@/content/strings';
 
 export interface PaletteItem {
   id: string;
-  group: 'pages' | 'news' | 'publications' | 'team';
+  group: 'pages' | 'news' | 'blog' | 'medium' | 'publications' | 'team';
   label: string;
   hint?: string;
   href: string;
@@ -17,6 +17,8 @@ export interface PaletteItem {
 const GROUP_LABEL = {
   pages: t.palette.pages,
   news: t.palette.news,
+  blog: t.palette.blog,
+  medium: t.palette.medium,
   publications: t.palette.publications,
   team: t.palette.team,
 } as const;

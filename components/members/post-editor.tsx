@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { Loader2, Save } from 'lucide-react';
 import { deleteBlogPostAction, saveBlogPostAction } from '@/app/blog-actions';
 import { Field, areaClass, fieldClass } from '@/components/admin/form-bits';
@@ -16,6 +16,7 @@ import { blogPostInputSchema } from '@/lib/blog/schema';
 import type { MyBlogPost } from '@/lib/blog/types';
 import { uploadMemberImage } from './member-upload';
 
+const FLASH_KEY = 'sm-editor-flash';
 type Errors = Record<string, string[]>;
 const first = (e: Errors, k: string) => e[k]?.[0];
 
@@ -39,6 +40,15 @@ export function PostEditor({ post }: { post: MyBlogPost | null }) {
   const set = <K extends keyof typeof d>(k: K, v: (typeof d)[K]) => setD((p) => ({ ...p, [k]: v }));
   const valid = blogPostInputSchema.safeParse(d).success;
 
+  // Show the message left by the save that moved the page to this post's own address.
+  useEffect(() => {
+    const flash = sessionStorage.getItem(FLASH_KEY);
+    if (!flash) return;
+    sessionStorage.removeItem(FLASH_KEY);
+    toast.push(flash);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const save = (publish: boolean, message: string) =>
     start(async () => {
       setErrors({});
@@ -49,10 +59,13 @@ export function PostEditor({ post }: { post: MyBlogPost | null }) {
       }
       setStatus(r.data.status);
       setSlug(r.data.slug);
-      toast.push(message);
       if (!id) {
         setId(r.data.id);
+        // The page moves to the post's own address and remounts, so the message is shown there.
+        sessionStorage.setItem(FLASH_KEY, message);
         router.replace(`/write/${r.data.id}`);
+      } else {
+        toast.push(message);
       }
     });
 

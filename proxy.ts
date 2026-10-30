@@ -5,16 +5,18 @@ import { visibleSeedPosts } from '@/lib/posts/query';
 import { supabaseEnv } from '@/lib/supabase/env';
 
 /**
- * Unknown /news/<slug> URLs get a real 404 status. The article page streams, so by the time it
+ * Unknown /news/<slug> and /blog/<slug> URLs get a real 404 status. The article page streams, so by the time it
  * calls notFound() the 200 status has been sent. A cheap anonymous lookup here fixes the status;
  * Row Level Security makes sure drafts and scheduled posts count as missing.
  */
-async function newsSlugExists(slug: string): Promise<boolean> {
+async function liveSlugExists(table: 'posts' | 'blog_posts', slug: string): Promise<boolean> {
   const env = supabaseEnv();
-  if (!env) return visibleSeedPosts(SEED_POSTS).some((p) => p.slug === slug);
+  if (!env) return table === 'posts' && visibleSeedPosts(SEED_POSTS).some((p) => p.slug === slug);
   try {
     const base = env.url.replace(/\/$/, '');
-    const url = `${base}/rest/v1/posts?select=id&status=eq.published&limit=1&slug=eq.${encodeURIComponent(slug)}`;
+    // Community posts are filtered to live ones by Row Level Security, so the status filter is for news only.
+    const live = table === 'posts' ? 'status=eq.published&' : '';
+    const url = `${base}/rest/v1/${table}?select=id&${live}limit=1&slug=eq.${encodeURIComponent(slug)}`;
     const res = await fetch(url, {
       headers: { apikey: env.anonKey, Authorization: `Bearer ${env.anonKey}` },
       cache: 'no-store',
@@ -33,15 +35,17 @@ async function newsSlugExists(slug: string): Promise<boolean> {
  * rule in Postgres.
  */
 export async function proxy(request: NextRequest) {
-  if (request.nextUrl.pathname.startsWith('/news/')) {
+  const sluggedArea = ['/news/', '/blog/'].find((p) => request.nextUrl.pathname.startsWith(p));
+  if (sluggedArea && !request.nextUrl.pathname.slice(sluggedArea.length).includes('/')) {
     let slug = '';
     try {
-      slug = decodeURIComponent(request.nextUrl.pathname.slice('/news/'.length));
+      slug = decodeURIComponent(request.nextUrl.pathname.slice(sluggedArea.length));
     } catch {
       // A malformed escape such as /news/%E0%A4%A is simply an unknown article.
       return NextResponse.rewrite(new URL('/_missing-page', request.url), { status: 404 });
     }
-    if (slug && !(await newsSlugExists(slug))) {
+    const table = sluggedArea === '/news/' ? 'posts' : 'blog_posts';
+    if (slug && !(await liveSlugExists(table, slug))) {
       return NextResponse.rewrite(new URL('/_missing-page', request.url), { status: 404 });
     }
     return NextResponse.next();
@@ -107,6 +111,7 @@ export const config = {
   matcher: [
     '/admin/:path*',
     '/news/:slug',
+    '/blog/:slug',
     '/login',
     '/register',
     '/forgot-password',

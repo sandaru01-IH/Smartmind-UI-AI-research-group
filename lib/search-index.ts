@@ -1,12 +1,13 @@
 import 'server-only';
 import { PAGE_INDEX } from '@/components/layout/nav-items';
-import { getPublications } from '@/lib/catalog/public';
+import { listBlogPosts } from '@/lib/blog/public';
+import { getMediumArticles, getPublications } from '@/lib/catalog/public';
 import { listPosts } from '@/lib/posts/public';
 import { getTeamNetwork } from '@/lib/team/public';
 
 export interface SearchEntry {
   id: string;
-  group: 'pages' | 'news' | 'publications' | 'team';
+  group: 'pages' | 'news' | 'blog' | 'medium' | 'publications' | 'team';
   label: string;
   hint?: string;
   href: string;
@@ -15,10 +16,12 @@ export interface SearchEntry {
 
 /** Everything the command palette can find: pages, live news, publications and team. */
 export async function buildSearchIndex(): Promise<SearchEntry[]> {
-  const [{ posts }, { members }, publications] = await Promise.all([
+  const [{ posts }, { members }, publications, blog, medium] = await Promise.all([
     listPosts({ type: 'article', limit: 50 }),
     getTeamNetwork(),
     getPublications(),
+    listBlogPosts({ limit: 50 }),
+    getMediumArticles(50),
   ]);
   return [
     ...PAGE_INDEX.map((p) => ({
@@ -33,6 +36,21 @@ export async function buildSearchIndex(): Promise<SearchEntry[]> {
       label: p.title,
       hint: p.category,
       href: `/news/${p.slug}`,
+    })),
+    ...blog.posts.map((p) => ({
+      id: `blog:${p.slug}`,
+      group: 'blog' as const,
+      label: p.title,
+      hint: p.author?.displayName,
+      href: `/blog/${p.slug}`,
+    })),
+    ...medium.map((a) => ({
+      id: `medium:${a.id}`,
+      group: 'medium' as const,
+      label: a.title,
+      hint: a.author_name || undefined,
+      href: a.url,
+      external: true,
     })),
     ...publications.flatMap((p) =>
       p.href && !p.fromPost

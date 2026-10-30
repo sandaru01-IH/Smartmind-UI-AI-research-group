@@ -44,12 +44,44 @@ export async function registerMember(page: Page, name: string, baseURL: string) 
   return email;
 }
 
+/** A confirmed member made through the admin API. Registration is rate limited, so most tests skip the form. */
+export async function createMember(name: string): Promise<string> {
+  const email = memberEmail(name);
+  const { error } = await serviceClient().auth.admin.createUser({
+    email,
+    password: PASSWORD,
+    email_confirm: true,
+    user_metadata: { display_name: `E2E ${name}` },
+  });
+  if (error) throw error;
+  return email;
+}
+
 export async function logInMember(page: Page, email: string, next = '/', expectSuccess = true) {
   await page.goto(`/login?next=${encodeURIComponent(next)}`, { waitUntil: 'networkidle' });
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password', { exact: true }).fill(PASSWORD);
   await page.getByRole('button', { name: 'Log in' }).click();
   if (expectSuccess) await page.waitForURL((u) => !u.pathname.startsWith('/login'));
+}
+
+/** Writes and publishes a post as the signed-in member. Returns its address (slug) and id. */
+export async function publishPost(
+  page: Page,
+  title: string,
+  body = 'Some words to read.',
+): Promise<{ slug: string; id: string }> {
+  await page.goto('/write', { waitUntil: 'networkidle' });
+  await page.getByLabel('Title', { exact: true }).fill(title);
+  await page.getByLabel('Short summary').fill(`Summary of ${title}`);
+  await addThumbnail(page);
+  await page.getByLabel('Body (Markdown)').fill(body);
+  await page.getByRole('button', { name: 'Publish', exact: true }).click();
+  await expect(page.getByText('Published. It is live now.')).toBeVisible();
+  await expect(page).toHaveURL(/\/write\/[0-9a-f-]{36}$/);
+  const id = page.url().split('/').pop()!;
+  const href = await page.getByRole('link', { name: 'View post' }).getAttribute('href');
+  return { slug: href!.split('/').pop()!, id };
 }
 
 test.afterAll(async () => {
@@ -106,9 +138,8 @@ test.describe('member accounts', () => {
 
   test('a member cannot get into the admin, with or without trying the admin login', async ({
     page,
-    baseURL,
   }) => {
-    const email = await registerMember(page, 'mallory', baseURL!);
+    const email = await createMember('mallory');
     await logInMember(page, email);
     await expect(page.getByRole('button', { name: /Your account/ })).toBeVisible();
 
@@ -151,9 +182,8 @@ test.describe('member accounts', () => {
 
   test('a member writes a post with images, saves a draft, publishes, unpublishes and deletes it', async ({
     page,
-    baseURL,
   }) => {
-    const email = await registerMember(page, 'writer', baseURL!);
+    const email = await createMember('writer');
     await logInMember(page, email);
     const title = `E2E Post ${stamp}`;
 
@@ -196,5 +226,40 @@ test.describe('member accounts', () => {
   test('signed-out visitors are sent to log in before writing', async ({ page }) => {
     await page.goto('/write');
     await expect(page).toHaveURL(/\/login\?next=%2Fwrite/);
+  });
+
+  test('a published post shows on the blog, its own page and its author page, and is searchable', async ({
+    page,
+    browser,
+  }) => {
+    const email = await createMember('reader');
+    await logInMember(page, email);
+    const title = `E2E Public ${stamp}`;
+    const { slug } = await publishPost(page, title, '## Heading\n\n' + 'word '.repeat(450));
+
+    const visitor = await (await browser.newContext()).newPage();
+    await visitor.goto('/blog', { waitUntil: 'networkidle' });
+    await expect(visitor.getByRole('link', { name: title })).toBeVisible();
+
+    const res = await visitor.goto(`/blog/${slug}`, { waitUntil: 'networkidle' });
+    expect(res?.status()).toBe(200);
+    await expect(visitor.getByRole('heading', { level: 1, name: title })).toBeVisible();
+    await expect(visitor.getByText('3 min read')).toBeVisible();
+    await expect(visitor.getByRole('link', { name: 'E2E reader' }).first()).toBeVisible();
+    await expect(visitor.locator('meta[property="og:title"]')).toHaveAttribute('content', title);
+
+    await visitor.getByRole('link', { name: 'E2E reader' }).first().click();
+    await expect(visitor).toHaveURL(/\/blog\/authors\/[0-9a-f-]{36}$/);
+    await expect(visitor.getByRole('link', { name: title })).toBeVisible();
+
+    const sitemap = await (await visitor.request.get('/sitemap.xml')).text();
+    expect(sitemap).toContain(`/blog/${slug}`);
+    const index = await (await visitor.request.get('/search-index.json')).text();
+    expect(index).toContain(title);
+  });
+
+  test('an unknown blog address is a real 404', async ({ page }) => {
+    const res = await page.goto('/blog/no-such-post-abc123');
+    expect(res?.status()).toBe(404);
   });
 });
