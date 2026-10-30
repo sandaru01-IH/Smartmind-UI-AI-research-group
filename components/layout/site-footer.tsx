@@ -4,7 +4,7 @@ import { ExternalLink } from '@/components/ui/external-link';
 import { BRAND, CONTACT_EMAIL, LINKS } from '@/content/brand';
 import { TEAM_CONTACTS, formatLkPhone, telHref } from '@/content/philosophy';
 import { t } from '@/content/strings';
-import { NAV_ITEMS, CTA_ITEM } from './nav-items';
+import { FLAT_NAV_ITEMS, CTA_ITEM } from './nav-items';
 
 export function SiteFooter() {
   return (
@@ -19,7 +19,7 @@ export function SiteFooter() {
         <nav aria-label={t.nav.footer} className="col-span-6 md:col-span-3">
           <p className="label-mono text-muted">{t.nav.primary}</p>
           <ul className="mt-4 space-y-1">
-            {[...NAV_ITEMS, CTA_ITEM].map((item) => (
+            {[...FLAT_NAV_ITEMS, CTA_ITEM].map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}

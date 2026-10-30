@@ -8,7 +8,8 @@ import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { buttonClass } from '@/components/ui/button';
 import { t } from '@/content/strings';
 import { NavLink, RouteChange } from './nav-link';
-import { CTA_ITEM, NAV_ITEMS } from './nav-items';
+import { NavDropdown } from './nav-dropdown';
+import { CTA_ITEM, NAV_ITEMS, isNavGroup } from './nav-items';
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -66,22 +67,26 @@ export function SiteHeader() {
 
           <nav aria-label={t.nav.primary} className="hidden xl:block">
             <ul className="flex items-center gap-1">
-              {NAV_ITEMS.map((item) => (
-                <li key={item.href}>
-                  <NavLink
-                    href={item.href}
-                    className="relative inline-flex min-h-11 items-center px-3 text-[0.95rem] text-muted transition-colors hover:text-fg aria-[current=page]:text-fg"
-                    activeMark={
-                      <span
-                        aria-hidden="true"
-                        className="absolute inset-x-3 bottom-1.5 h-px bg-signal"
-                      />
-                    }
-                  >
-                    {item.label}
-                  </NavLink>
-                </li>
-              ))}
+              {NAV_ITEMS.map((item) =>
+                isNavGroup(item) ? (
+                  <NavDropdown key={item.label} group={item} />
+                ) : (
+                  <li key={item.href}>
+                    <NavLink
+                      href={item.href}
+                      className="relative inline-flex min-h-11 items-center px-3 text-[0.95rem] text-muted transition-colors hover:text-fg aria-[current=page]:text-fg"
+                      activeMark={
+                        <span
+                          aria-hidden="true"
+                          className="absolute inset-x-3 bottom-1.5 h-px bg-signal"
+                        />
+                      }
+                    >
+                      {item.label}
+                    </NavLink>
+                  </li>
+                ),
+              )}
             </ul>
           </nav>
 
@@ -151,16 +156,43 @@ export function SiteHeader() {
           <nav aria-label={t.nav.primary} className="container-site flex-1 overflow-y-auto py-6">
             <ul className="divide-y divide-line">
               {[...NAV_ITEMS, CTA_ITEM].map((item, i) => (
-                <li key={item.href} className="menu-item" style={{ '--i': i } as CSSProperties}>
-                  <NavLink
-                    href={item.href}
-                    className="flex min-h-14 items-baseline gap-4 py-3 font-display text-3xl tracking-tight aria-[current=page]:text-fg"
-                  >
-                    <span aria-hidden="true" className="numeral w-8 text-sm text-muted">
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
-                    {item.label}
-                  </NavLink>
+                <li
+                  key={isNavGroup(item) ? item.label : item.href}
+                  className="menu-item"
+                  style={{ '--i': i } as CSSProperties}
+                >
+                  {isNavGroup(item) ? (
+                    <div className="py-3">
+                      <p className="flex min-h-14 items-baseline gap-4 font-display text-3xl tracking-tight">
+                        <span aria-hidden="true" className="numeral w-8 text-sm text-muted">
+                          {String(i + 1).padStart(2, '0')}
+                        </span>
+                        {item.label}
+                      </p>
+                      <ul aria-label={item.label} className="ml-12 mt-1 space-y-1">
+                        {item.children.map((child) => (
+                          <li key={child.href}>
+                            <NavLink
+                              href={child.href}
+                              className="flex min-h-11 items-center text-xl text-muted aria-[current=page]:text-fg"
+                            >
+                              {child.label}
+                            </NavLink>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <NavLink
+                      href={item.href}
+                      className="flex min-h-14 items-baseline gap-4 py-3 font-display text-3xl tracking-tight aria-[current=page]:text-fg"
+                    >
+                      <span aria-hidden="true" className="numeral w-8 text-sm text-muted">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      {item.label}
+                    </NavLink>
+                  )}
                 </li>
               ))}
             </ul>

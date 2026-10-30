@@ -10,6 +10,9 @@ const ROUTES = [
   '/awards',
   '/gallery',
   '/news',
+  '/blog',
+  '/medium',
+  '/videos',
   '/news/participatory-chatbot-flood-landslide-resilience',
   '/contact',
 ];
@@ -93,6 +96,27 @@ test.describe('accessibility (axe, WCAG 2.2 AA)', () => {
 });
 
 test.describe('features', () => {
+  test('Stories dropdown lists Blog, Medium articles, Videos and News', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/', { waitUntil: 'networkidle' });
+    const nav = page.getByRole('navigation', { name: 'Primary' }).first();
+    const button = nav.getByRole('button', { name: 'Stories' });
+    await expect(button).toHaveAttribute('aria-expanded', 'false');
+    await button.focus();
+    await page.keyboard.press('ArrowDown');
+    await expect(button).toHaveAttribute('aria-expanded', 'true');
+    const links = nav.getByRole('list', { name: 'Stories' }).getByRole('link');
+    await expect(links).toHaveText(['Blog', 'Medium articles', 'Videos', 'News']);
+    await expect(links.first()).toBeFocused();
+    await page.keyboard.press('Escape');
+    await expect(button).toHaveAttribute('aria-expanded', 'false');
+    await expect(button).toBeFocused();
+    await button.click();
+    await nav.getByRole('link', { name: 'News' }).click();
+    await expect(page).toHaveURL(/\/news$/);
+    await expect(button).toHaveAttribute('aria-expanded', 'false');
+  });
+
   test('theme toggle switches and persists', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' });
     await page.goto('/');

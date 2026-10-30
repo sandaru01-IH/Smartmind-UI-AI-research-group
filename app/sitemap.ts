@@ -11,6 +11,9 @@ const STATIC_PATHS = [
   '/awards',
   '/gallery',
   '/news',
+  '/blog',
+  '/medium',
+  '/videos',
   '/collaborate',
   '/contact',
 ];
