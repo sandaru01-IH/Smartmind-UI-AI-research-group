@@ -133,6 +133,21 @@ describe.skipIf(!enabled)('Row Level Security: community blog', () => {
     expect(data?.blocked).toBe(false);
   });
 
+  it('lets only an admin list members with their email addresses', async () => {
+    const asAdmin = await admin.rpc('admin_list_members');
+    expect(asAdmin.error).toBeNull();
+    const mine = (
+      asAdmin.data as { id: string; email: string; display_name: string; blocked: boolean }[]
+    ).find((m) => m.id === ids.alice);
+    expect(mine).toMatchObject({
+      email: `rls-alice-${RUN}@example.test`,
+      display_name: 'Rls alice',
+      blocked: false,
+    });
+    expect((await alice.rpc('admin_list_members')).error).not.toBeNull();
+    expect((await anon.rpc('admin_list_members')).error).not.toBeNull();
+  });
+
   it('lets a verified member publish, and the public read it', async () => {
     const ins = await alice
       .from('blog_posts')

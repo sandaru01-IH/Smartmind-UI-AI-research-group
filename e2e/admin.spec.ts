@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { createMember, logInMember, publishPost, stamp as memberStamp } from './members-support';
 import {
   ADMIN_EMAIL,
   TITLE_PREFIX,
@@ -304,6 +305,89 @@ test.describe('home page sections', () => {
     await expect(page.getByText('Latest on Medium is now on.')).toBeVisible();
     await eventually(page, '/', async () => {
       await expect(page.locator('#latest-medium')).toContainText(title);
+    });
+  });
+});
+
+test.describe('community moderation', () => {
+  const title = `E2E Moderated ${memberStamp}`;
+
+  test.afterAll(async () => {
+    const db = serviceClient();
+    await db.from('blog_posts').delete().like('title', 'E2E Moderated %');
+    const { data } = await db.auth.admin.listUsers({ perPage: 200 });
+    for (const u of data?.users ?? []) {
+      if (u.email?.startsWith('e2e-mod-') && u.email.includes(memberStamp)) {
+        await db.auth.admin.deleteUser(u.id);
+      }
+    }
+  });
+
+  test('the admin hides a post, a comment and a member, and cannot edit what was written', async ({
+    page,
+    browser,
+  }) => {
+    test.setTimeout(240_000);
+    const writer = await (await browser.newContext()).newPage();
+    await logInMember(writer, await createMember('mod-writer'));
+    const { slug } = await publishPost(writer, title);
+
+    const fan = await (await browser.newContext()).newPage();
+    await logInMember(fan, await createMember('mod-fan'));
+    await fan.goto(`/blog/${slug}`, { waitUntil: 'networkidle' });
+    await fan.getByLabel('Add a comment').fill('Moderate me please');
+    await fan.getByRole('button', { name: 'Post comment' }).click();
+    await expect(fan.getByText('Comment posted.')).toBeVisible();
+
+    const visitor = await (await browser.newContext()).newPage();
+    const postStatus = async () => (await visitor.goto(`/blog/${slug}`))?.status();
+
+    await signIn(page);
+
+    // Posts: hide, then the public loses it and its writer is told.
+    await page.goto('/admin/community', { waitUntil: 'networkidle' });
+    const postSwitch = page.getByRole('switch', { name: `Show post: ${title}` });
+    await expect(postSwitch).toBeChecked();
+    await postSwitch.uncheck();
+    await expect(page.getByText('Hidden', { exact: true }).first()).toBeVisible();
+    await eventually(visitor, '/blog', async () => {
+      await expect(visitor.getByRole('link', { name: title })).toHaveCount(0);
+    });
+    await expect(async () => expect(await postStatus()).toBe(404)).toPass({ timeout: 20_000 });
+    await writer.goto('/account/posts', { waitUntil: 'networkidle' });
+    await expect(writer.getByText('Hidden by an admin').first()).toBeVisible();
+
+    // The admin has no way to edit the writing.
+    await expect(page.getByRole('link', { name: /edit/i })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /^(save|edit)/i })).toHaveCount(0);
+
+    // Show it again.
+    await postSwitch.check();
+    await eventually(visitor, '/blog', async () => {
+      await expect(visitor.getByRole('link', { name: title })).toBeVisible();
+    });
+
+    // Comments: hide the comment, the post page loses it.
+    await page.goto('/admin/community/comments', { waitUntil: 'networkidle' });
+    await page.getByRole('switch', { name: 'Show comment by E2E mod-fan' }).uncheck();
+    await expect(page.getByText('Hidden', { exact: true }).first()).toBeVisible();
+    await eventually(visitor, `/blog/${slug}`, async () => {
+      await expect(visitor.getByText('Moderate me please')).toHaveCount(0);
+    });
+
+    // Members: block the writer; their posts leave the site and they cannot publish.
+    await page.goto('/admin/community/members', { waitUntil: 'networkidle' });
+    await page.getByRole('switch', { name: 'Allow E2E mod-writer to post' }).uncheck();
+    await expect(page.getByText('Blocked', { exact: true }).first()).toBeVisible();
+    await eventually(visitor, '/blog', async () => {
+      await expect(visitor.getByRole('link', { name: title })).toHaveCount(0);
+    });
+    await writer.goto('/write', { waitUntil: 'networkidle' });
+    await expect(writer.getByText(/cannot post right now/)).toBeVisible();
+
+    await page.getByRole('switch', { name: 'Allow E2E mod-writer to post' }).check();
+    await eventually(visitor, '/blog', async () => {
+      await expect(visitor.getByRole('link', { name: title })).toBeVisible();
     });
   });
 });

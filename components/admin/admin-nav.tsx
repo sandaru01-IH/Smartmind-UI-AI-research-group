@@ -3,7 +3,7 @@
 import Link, { useLinkStatus } from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { ExternalLink, FileText, Home, Loader2, Plus, Users } from 'lucide-react';
+import { ExternalLink, FileText, Home, Loader2, MessagesSquare, Plus, Users } from 'lucide-react';
 import { buttonClass } from '@/components/ui/button';
 
 /** Spinner that shows while the link it sits in is loading its page. */
@@ -54,6 +54,11 @@ export function AdminNav() {
         <Home size={16} aria-hidden="true" />
         <span className="hidden sm:inline">Home page</span>
         <span className="sr-only sm:hidden">Home page</span>
+      </NavLink>
+      <NavLink href="/admin/community" active={path.startsWith('/admin/community')}>
+        <MessagesSquare size={16} aria-hidden="true" />
+        <span className="hidden sm:inline">Community</span>
+        <span className="sr-only sm:hidden">Community</span>
       </NavLink>
       <NavLink href="/admin/team" active={path.startsWith('/admin/team')}>
         <Users size={16} aria-hidden="true" />
