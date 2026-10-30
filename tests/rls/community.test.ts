@@ -368,6 +368,40 @@ describe.skipIf(!enabled)('Row Level Security: community blog', () => {
     );
   });
 
+  it('keeps a blocked member’s writing hidden after they delete their account', async () => {
+    const gina = await makeUser('gina');
+    const ins = await gina
+      .from('blog_posts')
+      .insert(postOf(ids.gina, 'gina'))
+      .select('id')
+      .single();
+    expect(ins.error).toBeNull();
+    const cmt = await gina
+      .from('blog_comments')
+      .insert({ post_id: ins.data!.id, author_id: ids.gina, body: 'Spam comment' })
+      .select('id')
+      .single();
+    expect(cmt.error).toBeNull();
+    expect((await mineByTag(anon, 'gina')).data).toHaveLength(1);
+
+    expect(
+      (await admin.rpc('admin_set_member_blocked', { p_id: ids.gina, p_blocked: true })).error,
+    ).toBeNull();
+    expect((await mineByTag(anon, 'gina')).data).toEqual([]);
+
+    expect((await gina.rpc('delete_my_account')).error).toBeNull();
+    userIds.splice(userIds.indexOf(ids.gina), 1);
+
+    expect((await mineByTag(anon, 'gina')).data).toEqual([]);
+    expect((await anon.from('blog_comments').select('id').eq('id', cmt.data!.id)).data).toEqual([]);
+    const { data: row } = await service
+      .from('blog_posts')
+      .select('hidden,author_id')
+      .eq('slug', `rls-blog-gina-${RUN}`)
+      .single();
+    expect(row).toEqual({ hidden: true, author_id: null });
+  });
+
   it('never lets an admin account delete itself through the member function', async () => {
     expect((await admin.rpc('delete_my_account')).error).not.toBeNull();
     expect((await service.from('profiles').select('id').eq('id', ids.admin)).data).toHaveLength(1);

@@ -354,6 +354,11 @@ test.describe('community moderation', () => {
       await expect(visitor.getByRole('link', { name: title })).toHaveCount(0);
     });
     await expect(async () => expect(await postStatus()).toBe(404)).toPass({ timeout: 20_000 });
+    // A hidden post's address also leaves the sitemap.
+    await expect(async () => {
+      const sitemap = await (await visitor.request.get('/sitemap.xml')).text();
+      expect(sitemap).not.toContain(`/blog/${slug}`);
+    }).toPass({ timeout: 20_000 });
     await writer.goto('/account/posts', { waitUntil: 'networkidle' });
     await expect(writer.getByText('Hidden by an admin').first()).toBeVisible();
 

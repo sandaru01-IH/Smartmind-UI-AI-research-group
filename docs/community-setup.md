@@ -12,12 +12,13 @@ What the new features are, in one minute:
 
 ## 1. Put the database changes on the live Supabase project
 
-Four new files in `supabase/migrations/` create the tables and the security rules:
+Five new files in `supabase/migrations/` create the tables and the security rules:
 
 1. `20261030000000_medium_articles.sql`
 2. `20261030000100_home_sections.sql`
 3. `20261030000200_community.sql`
 4. `20261030000300_admin_members.sql`
+5. `20261030000400_delete_account_keeps_blocks.sql`
 
 Run them **in that order**. Either way works:
 
