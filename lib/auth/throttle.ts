@@ -72,3 +72,31 @@ export const accountThrottle = createThrottle({
   windowMs: 60 * 60_000,
   lockMs: 15 * 60_000,
 });
+
+/** Member sign-up: every attempt counts, so one address cannot create accounts in bulk. */
+export const registerThrottle = createThrottle({
+  maxFailures: 5,
+  windowMs: 60 * 60_000,
+  lockMs: 60 * 60_000,
+});
+
+/** Member log-in failures per address and email. */
+export const memberLoginThrottle = createThrottle({
+  maxFailures: 8,
+  windowMs: 15 * 60_000,
+  lockMs: 15 * 60_000,
+});
+
+/** Member log-in failures per email, whatever the address. */
+export const memberAccountThrottle = createThrottle({
+  maxFailures: 20,
+  windowMs: 60 * 60_000,
+  lockMs: 15 * 60_000,
+});
+
+/** Password-reset emails per address. */
+export const resetThrottle = createThrottle({
+  maxFailures: 5,
+  windowMs: 60 * 60_000,
+  lockMs: 60 * 60_000,
+});

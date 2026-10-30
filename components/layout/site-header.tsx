@@ -4,9 +4,11 @@ import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { Menu, Search, X } from 'lucide-react';
 import { Wordmark } from '@/components/brand/logo';
+import { AccountMenu, MobileAccountLinks } from '@/components/members/account-menu';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { buttonClass } from '@/components/ui/button';
 import { t } from '@/content/strings';
+import { hasSupabase } from '@/lib/supabase/env';
 import { NavLink, RouteChange } from './nav-link';
 import { NavDropdown } from './nav-dropdown';
 import { CTA_ITEM, NAV_ITEMS, isNavGroup } from './nav-items';
@@ -101,6 +103,7 @@ export function SiteHeader() {
               <kbd className="label-mono hidden text-[0.7rem] md:inline">Ctrl K</kbd>
             </button>
             <ThemeToggle />
+            {hasSupabase() ? <AccountMenu /> : null}
             <div className="hidden md:block">
               <Link
                 href={CTA_ITEM.href}
@@ -196,6 +199,7 @@ export function SiteHeader() {
                 </li>
               ))}
             </ul>
+            {hasSupabase() ? <MobileAccountLinks /> : null}
           </nav>
         </div>
       ) : null}

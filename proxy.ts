@@ -28,7 +28,7 @@ async function newsSlugExists(slug: string): Promise<boolean> {
 
 /**
  * First line of defence for /admin/*: no valid Supabase session, no entry. It also refreshes the
- * session cookies. It does not decide who is an admin. Every page, server action and route handler
+ * session cookies for /admin and for the member pages. It does not decide who is an admin. Every page, server action and route handler
  * calls requireAdmin() itself (lib/auth/require-admin.ts), and Row Level Security enforces the same
  * rule in Postgres.
  */
@@ -74,6 +74,13 @@ export async function proxy(request: NextRequest) {
   // Verifies the token (locally when the project uses asymmetric keys) and refreshes the cookies.
   const { data } = await supabase.auth.getClaims();
   const { pathname, search } = request.nextUrl;
+
+  // Member pages (login, writing, account) only need their session cookies kept fresh. They check
+  // the signed-in member themselves.
+  if (!pathname.startsWith('/admin')) {
+    response.headers.set('Cache-Control', 'private, no-store');
+    return response;
+  }
   const isLogin = pathname === '/admin/login';
 
   if (!data?.claims && !isLogin) {
@@ -96,4 +103,17 @@ export async function proxy(request: NextRequest) {
   return response;
 }
 
-export const config = { matcher: ['/admin/:path*', '/news/:slug'] };
+export const config = {
+  matcher: [
+    '/admin/:path*',
+    '/news/:slug',
+    '/login',
+    '/register',
+    '/forgot-password',
+    '/reset-password',
+    '/write/:path*',
+    '/account/:path*',
+    '/auth/:path*',
+    '/api/me',
+  ],
+};

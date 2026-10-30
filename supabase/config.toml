@@ -244,6 +244,15 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
+# The site's own links: the email opens /auth/confirm on the site, which swaps the token for a session.
+[auth.email.template.confirmation]
+subject = "Confirm your Smartmind account"
+content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "Reset your Smartmind password"
+content_path = "./supabase/templates/recovery.html"
+
 # Uncomment to customize email template
 # [auth.email.template.invite]
 # subject = "You have been invited"
