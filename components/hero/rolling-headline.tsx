@@ -2,22 +2,24 @@ import type { CSSProperties } from 'react';
 
 /**
  * Headline that rolls out word by word. Pure CSS (see .roll-word in globals.css): each word rises
- * out of its own mask, staggered.
- * Under reduced motion the words simply sit in place.
+ * out of its own mask. A piece of a longer headline sets its own start time (`base`), the gap
+ * between its words (`step`) and how long each rise takes (`duration`), so the pieces can be timed
+ * as one sequence. Under reduced motion the words simply sit in place.
  */
 export function RollingHeadline({
   words,
-  offset = 0,
-  total = words.length,
+  base = 150,
+  step = Math.min(110, Math.round(1400 / Math.max(words.length, 1))),
+  duration = 900,
 }: {
   words: string[];
-  /** Position of the first word in the whole headline, when it is shown in several pieces. */
-  offset?: number;
-  /** Word count of the whole headline, so every piece uses the same pace. */
-  total?: number;
+  /** Milliseconds before the first word starts rising. */
+  base?: number;
+  /** Milliseconds between one word starting and the next. */
+  step?: number;
+  /** Milliseconds each word takes to rise. */
+  duration?: number;
 }) {
-  // Long headlines step faster so the last word still arrives in about a second and a half.
-  const step = Math.min(110, Math.round(1400 / total));
   return (
     <>
       {words.map((word, i) => (
@@ -25,7 +27,12 @@ export function RollingHeadline({
           <span className="roll-mask">
             <span
               className="roll-word"
-              style={{ '--roll-i': offset + i, '--roll-step': `${step}ms` } as CSSProperties}
+              style={
+                {
+                  '--roll-delay': `${base + i * step}ms`,
+                  '--roll-dur': `${duration}ms`,
+                } as CSSProperties
+              }
             >
               {word}
             </span>

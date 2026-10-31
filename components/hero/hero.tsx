@@ -13,7 +13,7 @@ export function Hero() {
   return (
     <section
       aria-labelledby="hero-title"
-      className="relative isolate flex min-h-[calc(100svh-var(--header-h)-var(--ticker-h))] flex-col justify-start overflow-hidden"
+      className="relative isolate flex min-h-[calc(100svh-var(--header-h)-var(--ticker-h))] flex-col justify-center overflow-hidden"
     >
       <div className="absolute inset-0 -z-10">
         <HeroFallback />
@@ -30,7 +30,7 @@ export function Hero() {
         />
       </div>
 
-      <div className="container-site pb-12 pt-10 md:pb-20 md:pt-14">
+      <div className="container-site py-10 md:py-14">
         <p className="label-mono text-muted">{t.hero.eyebrow}</p>
         <HeroHeadline />
         <p className="mt-6 max-w-[60ch] text-muted md:text-lg">

@@ -47,10 +47,14 @@
   --ticker-h: 45px;
   /* The home page headline is a long sentence, so it is set well below the display size. */
   --text-headline: clamp(1.85rem, 1rem + 3.6vw, 3.75rem);
-  /* The three tiers of the home headline: lead, supporting clause, closing phrase. */
-  --text-hero-1: clamp(2.4rem, 1rem + 6.4vw, 5.25rem);
-  --text-hero-2: clamp(1.1rem, 0.9rem + 1.1vw, 1.75rem);
-  --text-hero-3: clamp(1.5rem, 0.8rem + 3vw, 3rem);
+  /*
+   * The three tiers of the home headline: the lead (two lines, sized by the screen's width and
+   * also its height so it never pushes the buttons off a short screen), the supporting clause and
+   * the closing phrase.
+   */
+  --text-hero-1: clamp(2.6rem, min(0.9rem + 7.2vw, 12vh), 8rem);
+  --text-hero-2: clamp(1.1rem, 0.9rem + 1.1vw, 2rem);
+  --text-hero-3: clamp(1.5rem, 0.8rem + 3vw, 3.5rem);
   --dur-fast: 150ms;
   --dur: 250ms;
   --dur-slow: 400ms;
@@ -307,7 +311,7 @@ html:not(.js) [data-reveal] {
   animation-delay: calc(90ms + var(--i, 0) * 45ms);
 }
 
-/* Rolling headline: each word rises out of its own mask, staggered. */
+/* Rolling headline: each word rises out of its own mask. Start time and pace come from the component. */
 .roll-mask {
   display: inline-block;
   overflow: hidden;
@@ -319,17 +323,36 @@ html:not(.js) [data-reveal] {
 .roll-word {
   display: inline-block;
   position: relative;
-  animation: roll-up 900ms var(--ease-out-signal) both;
-  animation-delay: calc(var(--roll-i, 0) * var(--roll-step, 110ms) + 150ms);
+  transform-origin: 0 100%;
+  animation: roll-up var(--roll-dur, 900ms) var(--ease-out-signal) both;
+  animation-delay: var(--roll-delay, 150ms);
 }
 @keyframes roll-up {
   from {
-    transform: translateY(105%) rotate(4deg);
+    transform: translateY(108%) rotate(3deg);
     opacity: 0;
   }
   to {
     transform: none;
     opacity: 1;
+  }
+}
+/*
+ * The lime highlight on the closing phrase. It is a background that wipes in from the left, like a
+ * highlighter pen, so it is never on screen before its words. The resting state is the finished
+ * highlight, so without animation (reduced motion) it is simply there.
+ */
+.hl-wipe {
+  background: linear-gradient(var(--signal), var(--signal)) no-repeat left center / 100% 100%;
+  animation: hl-wipe var(--hl-dur, 700ms) cubic-bezier(0.65, 0, 0.35, 1) both;
+  animation-delay: var(--hl-delay, 0ms);
+}
+@keyframes hl-wipe {
+  from {
+    background-size: 0% 100%;
+  }
+  to {
+    background-size: 100% 100%;
   }
 }
 /* Team network: gentle float, travelling pulses and flowing links. */
@@ -462,6 +485,10 @@ html:not(.js) [data-reveal] {
   [data-reveal] {
     opacity: 1;
     transform: none;
+  }
+  .roll-word,
+  .hl-wipe {
+    animation: none !important;
   }
   .live-dot {
     animation: none;
