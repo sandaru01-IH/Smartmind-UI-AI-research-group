@@ -1,4 +1,160 @@
-<h2>Confirm your Smartmind account</h2>
-<p>Thanks for registering. Press the link below to confirm your email address.</p>
-<p><a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email">Confirm my email</a></p>
-<p>If you did not register, you can ignore this email.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirm your email | Smartmind</title>
+</head>
+<!--
+  The two links below must stay exactly as they are: they open /auth/confirm on the site with the
+  one-use token, and the site uses it when the person presses its button. Do not replace them with
+  Supabase's ready-made ConfirmationURL link: that makes Supabase use the token before the site
+  sees it, and the site then reports "expired or already used".
+-->
+
+<body style="margin:0;padding:0;background:#f4f4f0;
+font-family:Arial,Helvetica,sans-serif;color:#161a1d;">
+
+<table role="presentation" width="100%" cellpadding="0"
+cellspacing="0" style="background:#f4f4f0;">
+<tr>
+<td align="center" style="padding:48px 18px;">
+
+<table role="presentation" width="100%" cellpadding="0"
+cellspacing="0" style="max-width:600px;background:#ffffff;
+border:1px solid #e8e8e3;">
+
+<!-- BRAND HEADER -->
+<tr>
+<td style="padding:35px 42px;
+border-bottom:1px solid #ededeb;">
+
+<div style="font-size:23px;font-weight:700;
+letter-spacing:-1px;">
+SMARTMIND
+<span style="color:#d87a4a;">&#9650;</span>
+</div>
+
+<div style="font-size:10px;letter-spacing:2px;
+color:#777d80;margin-top:7px;">
+UI &amp; SI · INTELLIGENCE + LOVE
+</div>
+
+</td>
+</tr>
+
+<!-- MAIN CONTENT -->
+<tr>
+<td style="padding:52px 42px 45px;">
+
+<p style="font-size:11px;font-weight:700;
+letter-spacing:2px;color:#bb6c45;">
+01 / ACCOUNT VERIFICATION
+</p>
+
+<h1 style="font-size:40px;letter-spacing:-1.5px;
+line-height:1.18;margin:25px 0;color:#15191b;">
+You're almost<br>there.
+</h1>
+
+<p style="font-size:16px;line-height:1.8;
+color:#4d5555;">
+Welcome to Smartmind.
+</p>
+
+<p style="font-size:15px;line-height:1.85;
+color:#646a6a;margin-bottom:35px;">
+Please confirm your email address to complete
+your sign-up and start exploring ideas,
+research, and collaboration.
+</p>
+
+<!-- CONFIRMATION BUTTON -->
+<table role="presentation" cellpadding="0"
+cellspacing="0">
+<tr>
+<td bgcolor="#15191b" style="border-radius:5px;">
+
+<a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=email"
+style="display:inline-block;
+padding:18px 32px;
+color:#ffffff;
+font-size:14px;
+font-weight:700;
+text-decoration:none;
+letter-spacing:0.3px;">
+Confirm my email &nbsp; &#8594;
+</a>
+
+</td>
+</tr>
+</table>
+
+<!-- FALLBACK LINK -->
+<p style="margin-top:35px;padding-top:25px;
+border-top:1px solid #ededeb;
+font-size:12px;line-height:1.9;color:#858b8a;">
+If the button doesn't work,
+<a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=email"
+style="color:#42494a;text-decoration:underline;">
+open your verification link here</a>.
+</p>
+
+<p style="font-size:12px;line-height:1.8;
+color:#858b8a;">
+If you didn't create a Smartmind account,
+you can safely ignore this email.
+</p>
+
+</td>
+</tr>
+
+<!-- PHILOSOPHY -->
+<tr>
+<td style="padding:28px 42px;background:#f8f8f5;
+border-top:1px solid #ededeb;">
+
+<div style="font-size:10px;letter-spacing:2px;
+font-weight:700;color:#777c7c;">
+OUR APPROACH
+</div>
+
+<div style="font-size:15px;font-weight:600;
+margin-top:10px;color:#25292a;">
+Open &middot; Reproducible &middot; Simple
+</div>
+
+</td>
+</tr>
+
+<!-- FOOTER -->
+<tr>
+<td align="center" style="padding:30px;">
+
+<p style="font-size:12px;line-height:1.8;
+color:#737b7b;">
+Smartmind — Understanding complex cities<br>
+with intelligence + love.
+</p>
+
+<a href="https://www.smartminduiai.com/"
+style="font-size:12px;color:#575f60;
+text-decoration:none;">
+www.smartminduiai.com
+</a>
+
+<p style="font-size:11px;color:#a0a5a3;
+margin-top:20px;">
+This is an automated account verification email.
+</p>
+
+</td>
+</tr>
+
+</table>
+</td>
+</tr>
+</table>
+
+</body>
+</html>

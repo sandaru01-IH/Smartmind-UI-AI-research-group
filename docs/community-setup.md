@@ -39,7 +39,8 @@ If the live database was set up before `20261022000000_extra_partners.sql` and `
    - **Confirm signup:** copy the HTML from `supabase/templates/confirmation.html`.
    - **Reset password:** copy the HTML from `supabase/templates/recovery.html`.
 
-   Both rely on `{{ .RedirectTo }}` and `{{ .TokenHash }}`; leave those as they are.
+   Both build the link from `{{ .SiteURL }}` and `{{ .TokenHash }}`; leave those as they are, and keep the **Site URL** from step 2 correct.
+   **Do not use Supabase's ready-made `{{ .ConfirmationURL }}` link in these emails.** It makes Supabase use up the one-time token before the site sees it, and the person then lands on the login page with "That link has expired or was already used", and a password reset never reaches the new-password form. If you restyle the emails, keep the two links exactly as they are in the files.
 4. **Password rules:** set the minimum length to **12** (the site already asks for 12).
 5. **Do not turn on CAPTCHA yet.** The site's forms do not send a CAPTCHA answer, so enabling it in Supabase would stop **all** registrations and logins. If spam becomes a problem later, ask for CAPTCHA support to be added first.
 
