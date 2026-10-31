@@ -185,7 +185,10 @@ const en = {
     mediumBadge: 'Medium',
     videosTitle: 'Videos',
     videosLead: 'Talks and explainers from the Smartmind YouTube channel.',
-    videosEmpty: 'Videos will appear here soon.',
+    videosPlayLatest: 'Play the latest videos',
+    videosPlayerTitle: 'Latest videos from the Smartmind YouTube channel',
+    videosPlayerNote:
+      "The channel's newest uploads, played one after another. Use the player's next button to skip ahead.",
     videosChannel: 'Watch everything on the Smartmind YouTube channel',
   },
   theme: { toDark: 'Switch to dark theme', toLight: 'Switch to light theme', label: 'Theme' },

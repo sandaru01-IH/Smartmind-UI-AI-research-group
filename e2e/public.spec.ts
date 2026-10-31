@@ -112,9 +112,16 @@ test.describe('features', () => {
     await page.goto('/videos', { waitUntil: 'networkidle' });
     await expect(page.getByRole('heading', { level: 1, name: 'Videos' })).toBeVisible();
     const play = page.getByRole('button', { name: /^Play video:/ });
-    // The live feed may be unreachable where the tests run; the page then shows its empty note.
+    // The live feed may be unreachable where the tests run; the page then offers the channel's own
+    // uploads player, which also loads nothing from YouTube until it is pressed.
     if ((await play.count()) === 0) {
-      await expect(page.getByText('Videos will appear here soon.')).toBeVisible();
+      const latest = page.getByRole('button', { name: 'Play the latest videos' });
+      await expect(latest).toBeVisible();
+      expect(frames.filter((u) => u.includes('/embed/'))).toEqual([]);
+      await latest.click();
+      await expect(
+        page.locator('iframe[src^="https://www.youtube-nocookie.com/embed/videoseries?list=UU"]'),
+      ).toHaveCount(1);
       return;
     }
     expect(frames.filter((u) => u.includes('/embed/'))).toEqual([]);

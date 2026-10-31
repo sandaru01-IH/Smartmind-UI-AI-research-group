@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { ChannelPlayer } from '@/components/videos/channel-player';
 import { VideoCard } from '@/components/videos/video-card';
 import { ExternalLink } from '@/components/ui/external-link';
 import { PageHeader } from '@/components/ui/page-header';
@@ -16,7 +17,15 @@ export const metadata = pageMeta({
 
 async function Videos() {
   const videos = await getChannelVideos();
-  if (videos.length === 0) return <p className="text-muted">{t.stories.videosEmpty}</p>;
+  if (videos.length === 0) {
+    // The channel's list could not be read: offer YouTube's own player of the channel's uploads.
+    return (
+      <div className="max-w-4xl">
+        <ChannelPlayer />
+        <p className="mt-4 text-muted">{t.stories.videosPlayerNote}</p>
+      </div>
+    );
+  }
   return (
     <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {videos.map((v, i) => (
