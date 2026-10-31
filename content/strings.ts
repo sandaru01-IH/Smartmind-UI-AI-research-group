@@ -63,7 +63,15 @@ const en = {
     loginFailed: 'That email and password do not match.',
     notConfirmed: 'Confirm your email first. Check your inbox for the link we sent.',
     verifiedNotice: 'Your email is confirmed. You can log in now.',
-    confirmFailed: 'That link has expired or was already used. Log in, or ask for a new one.',
+    confirmFailed:
+      'That link has expired or was already used. If you have already confirmed your email, just log in below. If not, ask for a new link.',
+    resetLinkFailed:
+      'That reset link has expired or was already used. Enter your email to get a new one.',
+    confirmTitle: 'Confirm your email',
+    confirmLead: 'One more step to finish creating your account.',
+    confirmButton: 'Confirm my email',
+    confirmResetLead: 'Continue to choose a new password.',
+    confirmResetButton: 'Continue',
     forgot: 'Forgot your password?',
     forgotTitle: 'Reset your password',
     forgotLead: 'Enter your email and we will send you a link.',

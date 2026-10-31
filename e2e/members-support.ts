@@ -30,7 +30,8 @@ export function confirmLink(mail: { html: string; text: string }, baseURL: strin
   return `${baseURL}${link.pathname}${link.search}`;
 }
 
-export async function registerMember(page: Page, name: string, baseURL: string) {
+/** Fills in the register form and waits for "Check your email". The address is not confirmed yet. */
+export async function submitRegistration(page: Page, name: string) {
   const email = memberEmail(name);
   await page.goto('/register', { waitUntil: 'networkidle' });
   await page.getByLabel('Your name').fill(`E2E ${name}`);
@@ -39,7 +40,31 @@ export async function registerMember(page: Page, name: string, baseURL: string) 
   await page.getByLabel(/I accept the/).check();
   await page.getByRole('button', { name: 'Create account' }).click();
   await expect(page.getByText('Check your email')).toBeVisible();
+  return email;
+}
+
+const mailCount = async (to: string): Promise<number> =>
+  ((await (await fetch(`${MAIL}/api/v1/search?query=${encodeURIComponent(`to:${to}`)}`)).json())
+    .messages?.length ?? 0) as number;
+
+/** Asks for a password reset email and returns its link, once one new email has arrived. */
+export async function requestResetLink(page: Page, email: string, baseURL: string) {
+  const before = await mailCount(email);
+  await page.goto('/forgot-password', { waitUntil: 'networkidle' });
+  await page.getByLabel('Email').fill(email);
+  await page.getByRole('button', { name: 'Send reset link' }).click();
+  await expect(page.getByText(/reset link is on its way/)).toBeVisible();
+  await expect(async () => expect(await mailCount(email)).toBeGreaterThan(before)).toPass({
+    timeout: 20_000,
+  });
+  return confirmLink(await latestMail(email), baseURL);
+}
+
+export async function registerMember(page: Page, name: string, baseURL: string) {
+  const email = await submitRegistration(page, name);
   await page.goto(confirmLink(await latestMail(email), baseURL));
+  // The link only opens a page; the token is used when the button is pressed.
+  await page.getByRole('button', { name: 'Confirm my email' }).click();
   await expect(page).toHaveURL(/\/login\?verified=1/);
   return email;
 }

@@ -1,14 +1,16 @@
 import { expect, test } from '@playwright/test';
 import {
-  MAIL,
   PASSWORD,
   confirmLink,
+  latestMail,
   createMember,
   logInMember,
   memberEmail,
   publishPost,
   registerMember,
+  requestResetLink,
   stamp,
+  submitRegistration,
 } from './members-support';
 import { PNG_1X1, addThumbnail, serviceClient } from './support';
 
@@ -41,6 +43,36 @@ test.describe('member accounts', () => {
     await expect(page.getByRole('link', { name: 'Write', exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Log out' }).click();
     await expect(page.getByRole('link', { name: 'Log in' })).toBeVisible();
+  });
+
+  test('opening the confirm link does not use it up; only the button does', async ({
+    page,
+    baseURL,
+  }) => {
+    const email = await submitRegistration(page, 'scanner');
+    const link = confirmLink(await latestMail(email), baseURL!);
+
+    // A mail scanner or link checker only opens the link. Twice, to be sure.
+    await page.goto(link);
+    await expect(page.getByRole('button', { name: 'Confirm my email' })).toBeVisible();
+    await page.goto(link);
+    await expect(page).not.toHaveURL(/\/login/);
+
+    // The person's own click still works afterwards.
+    await page.getByRole('button', { name: 'Confirm my email' }).click();
+    await expect(page).toHaveURL(/\/login\?verified=1/);
+    await expect(page.getByText('Your email is confirmed.')).toBeVisible();
+
+    // A second use of the same link says so kindly and points at logging in.
+    await page.goto(link);
+    await page.getByRole('button', { name: 'Confirm my email' }).click();
+    await expect(page).toHaveURL(/\/login\?error=confirm/);
+    await expect(page.getByText(/already confirmed your email, just log in/)).toBeVisible();
+  });
+
+  test('a link with no token goes to the login page with the message', async ({ page }) => {
+    await page.goto('/auth/confirm');
+    await expect(page).toHaveURL(/\/login\?error=confirm/);
   });
 
   test('a wrong password gives one generic message', async ({ page }) => {
@@ -86,28 +118,44 @@ test.describe('member accounts', () => {
 
   test('a reset link lets a member choose a new password', async ({ page, baseURL }) => {
     const email = await registerMember(page, 'grace', baseURL!);
-    await page.goto('/forgot-password', { waitUntil: 'networkidle' });
-    await page.getByLabel('Email').fill(email);
-    await page.getByRole('button', { name: 'Send reset link' }).click();
-    await expect(page.getByText(/reset link is on its way/)).toBeVisible();
-
-    await expect(async () => {
-      const list = await (
-        await fetch(`${MAIL}/api/v1/search?query=${encodeURIComponent(`to:${email}`)}`)
-      ).json();
-      expect(list.messages.length).toBeGreaterThanOrEqual(2);
-    }).toPass({ timeout: 20_000 });
-    const list = await (
-      await fetch(`${MAIL}/api/v1/search?query=${encodeURIComponent(`to:${email}`)}`)
-    ).json();
-    const msg = await (await fetch(`${MAIL}/api/v1/message/${list.messages[0].ID}`)).json();
-    await page.goto(
-      confirmLink({ html: String(msg.HTML ?? ''), text: String(msg.Text ?? '') }, baseURL!),
-    );
+    await page.goto(await requestResetLink(page, email, baseURL!));
+    await page.getByRole('button', { name: 'Continue' }).click();
     await expect(page).toHaveURL(/\/reset-password/);
     await page.getByLabel('Password', { exact: true }).fill('A-brand-new-password-2!');
     await page.getByRole('button', { name: 'Save password' }).click();
     await expect(page.getByText('Your password is changed.')).toBeVisible();
+  });
+
+  test('a reset link still works if the email template names the wrong type', async ({
+    page,
+    baseURL,
+  }) => {
+    const email = await createMember('wrongtype');
+    const link = (await requestResetLink(page, email, baseURL!)).replace(
+      'type=recovery',
+      'type=email',
+    );
+    expect(link).toContain('type=email');
+    await page.goto(link);
+    await page.getByRole('button', { name: 'Confirm my email' }).click();
+    await expect(page).toHaveURL(/\/reset-password/);
+  });
+
+  test('a used reset link sends the member back to ask for a new one', async ({
+    page,
+    baseURL,
+  }) => {
+    const email = await createMember('usedreset');
+    const link = await requestResetLink(page, email, baseURL!);
+    await page.goto(link);
+    await page.getByRole('button', { name: 'Continue' }).click();
+    await expect(page).toHaveURL(/\/reset-password/);
+
+    await page.goto(link);
+    await page.getByRole('button', { name: 'Continue' }).click();
+    await expect(page).toHaveURL(/\/forgot-password\?error=expired/);
+    await expect(page.getByText(/reset link has expired or was already used/)).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Send reset link' })).toBeVisible();
   });
 
   test('a member writes a post with images, saves a draft, publishes, unpublishes and deletes it', async ({

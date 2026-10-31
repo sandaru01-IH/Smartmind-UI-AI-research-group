@@ -3,6 +3,7 @@
 import { headers } from 'next/headers';
 import { revalidatePath, updateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
+import type { EmailOtpType } from '@supabase/supabase-js';
 import { SITE_URL } from '@/content/brand';
 import { t } from '@/content/strings';
 import {
@@ -181,4 +182,57 @@ export async function deleteMyAccountAction(
   revalidatePath('/');
   await member.supabase.auth.signOut({ scope: 'local' });
   redirect('/');
+}
+
+const LINK_TYPES: readonly EmailOtpType[] = ['signup', 'email', 'recovery', 'invite', 'magiclink'];
+
+/**
+ * Checks the one-use token. A reset ("recovery") is tried first: Supabase refuses it for any token
+ * that is not a reset token without using that token up, whereas a plain email check would accept a
+ * reset token too and leave the person on the login page with no way to set a password. Then the
+ * link's own `type` and the remaining kinds are tried, because a hand-edited email template can
+ * easily name the wrong one. Returns the kind that matched, or null.
+ */
+async function verifyLinkToken(
+  supabase: NonNullable<Awaited<ReturnType<typeof createSessionClient>>>,
+  tokenHash: string,
+  type: EmailOtpType,
+): Promise<EmailOtpType | null> {
+  const order = new Set<EmailOtpType>(['recovery', type, ...LINK_TYPES]);
+  for (const kind of order) {
+    const { error } = await supabase.auth.verifyOtp({ type: kind, token_hash: tokenHash });
+    if (!error) return kind;
+  }
+  return null;
+}
+
+/**
+ * Trades the one-use token from an emailed link for a session. It runs only when the person presses
+ * the button on /auth/confirm, never when the link is merely opened: mail scanners and link
+ * checkers open links ahead of the reader, and doing the work on a plain visit would let them use
+ * the token up. Confirming an email sends the person to log in once; a reset link goes on to the
+ * new-password form, and a reset link that fails goes back to asking for a new one.
+ */
+export async function confirmLinkAction(formData: FormData): Promise<void> {
+  const tokenHash = String(formData.get('token_hash') ?? '');
+  const type = String(formData.get('type') ?? '') as EmailOtpType;
+  const code = String(formData.get('code') ?? '');
+  const supabase = await createSessionClient();
+  if (!supabase) redirect('/login?error=confirm');
+
+  if (tokenHash && LINK_TYPES.includes(type)) {
+    const kind = await verifyLinkToken(supabase, tokenHash, type);
+    if (!kind)
+      redirect(type === 'recovery' ? '/forgot-password?error=expired' : '/login?error=confirm');
+    if (kind === 'recovery') redirect('/reset-password');
+    // Make them log in once so the browser holds a fresh session.
+    await supabase.auth.signOut();
+    redirect('/login?verified=1');
+  }
+  if (code) {
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) redirect('/forgot-password?error=expired');
+    redirect('/reset-password');
+  }
+  redirect('/login?error=confirm');
 }

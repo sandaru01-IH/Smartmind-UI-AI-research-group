@@ -137,7 +137,7 @@ export function MemberLoginForm({ next, notice }: { next: string; notice?: strin
   );
 }
 
-export function ForgotPasswordForm() {
+export function ForgotPasswordForm({ notice }: { notice?: string }) {
   const [state, action, pending] = useActionState<MemberFormState, FormData>(
     forgotPasswordAction,
     {},
@@ -145,6 +145,11 @@ export function ForgotPasswordForm() {
   if (state.done) return <Done message={t.members.forgotDone} />;
   return (
     <form action={action} className="space-y-5" noValidate>
+      {notice && !state.error ? (
+        <p role="status" className="border border-line-strong p-3 text-[0.95rem] text-muted">
+          {notice}
+        </p>
+      ) : null}
       <EmailField />
       <FormMessage error={state.error} />
       <Submit pending={pending} idle={t.members.forgotSubmit} busy={t.members.loginBusy} />
