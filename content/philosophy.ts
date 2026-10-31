@@ -11,6 +11,18 @@ export const IDENTITY = {
     'Guided by the ORS Mindset — Open, Reproducible, and Simple, we envision Super Intelligence as the synergy of advanced technologies, human creativity, collective knowledge, and collaboration, grounded in empathy, compassion, and care for people, communities, and nature.',
 } as const;
 
+/**
+ * The identity sentence cut at its two natural joints, for a headline set in tiers: the lead, the
+ * supporting clause, the connector and the closing phrase. Joined with single spaces they give the
+ * original sentence back word for word. Null when the sentence no longer has that shape, so the
+ * caller can fall back to showing it whole.
+ */
+export function splitIdentityLine(line: string) {
+  const m = /^(.+?) (and Designing .+?) (— with) (.+)$/.exec(line);
+  if (!m) return null;
+  return { lead: m[1], middle: m[2], connector: m[3], close: m[4] };
+}
+
 export const PILLARS = {
   philosophy: {
     key: 'philosophy',

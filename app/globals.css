@@ -47,6 +47,10 @@
   --ticker-h: 45px;
   /* The home page headline is a long sentence, so it is set well below the display size. */
   --text-headline: clamp(1.85rem, 1rem + 3.6vw, 3.75rem);
+  /* The three tiers of the home headline: lead, supporting clause, closing phrase. */
+  --text-hero-1: clamp(2.4rem, 1rem + 6.4vw, 5.25rem);
+  --text-hero-2: clamp(1.1rem, 0.9rem + 1.1vw, 1.75rem);
+  --text-hero-3: clamp(1.5rem, 0.8rem + 3vw, 3rem);
   --dur-fast: 150ms;
   --dur: 250ms;
   --dur-slow: 400ms;
