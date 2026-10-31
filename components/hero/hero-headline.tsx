@@ -55,8 +55,8 @@ export function HeroHeadline() {
       <span className="mt-5 block max-w-[42ch] font-sans text-[length:var(--text-hero-2)] font-normal leading-[1.35] tracking-normal text-fg md:mt-7">
         <RollingHeadline words={words(parts.middle)} {...T.middle} />
       </span>{' '}
-      <span className="mt-6 block text-[length:var(--text-hero-3)] leading-[1.3] md:mt-9">
-        <span className="mr-2 font-sans text-[length:var(--text-hero-2)] font-normal tracking-normal text-muted">
+      <span className="mt-6 block text-[length:var(--text-hero-3)] font-bold leading-[1.3] md:mt-9">
+        <span className="block md:mr-[0.15em] md:inline">
           <RollingHeadline words={words(parts.connector)} {...T.connector} />
         </span>{' '}
         <span
