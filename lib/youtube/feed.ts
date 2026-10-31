@@ -64,6 +64,52 @@ export async function fetchChannelVideos(fetchImpl: typeof fetch = fetch): Promi
   return videos;
 }
 
+/**
+ * The channel's newest uploads from the official YouTube Data API (the channel's "uploads" playlist,
+ * whose id is the channel id with UC changed to UU). This is the backup for the public feed above,
+ * which YouTube answers with 404 or 500 now and then. It needs an API key, kept on the server only.
+ * Private and deleted videos are skipped. Errors never contain the key.
+ */
+export async function fetchChannelVideosFromApi(
+  apiKey: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<VideoItem[]> {
+  const params = new URLSearchParams({
+    part: 'snippet,contentDetails',
+    playlistId: `UU${YOUTUBE_CHANNEL_ID.slice(2)}`,
+    maxResults: '15',
+    key: apiKey,
+  });
+  const res = await fetchImpl(`https://www.googleapis.com/youtube/v3/playlistItems?${params}`, {
+    signal: AbortSignal.timeout(5000),
+  });
+  if (!res.ok) throw new Error(`YouTube API answered ${res.status}`);
+  const body = (await res.json()) as {
+    items?: {
+      snippet?: { title?: string; publishedAt?: string; resourceId?: { videoId?: string } };
+      contentDetails?: { videoPublishedAt?: string };
+    }[];
+  };
+  const videos: VideoItem[] = [];
+  for (const item of body.items ?? []) {
+    const id = item.snippet?.resourceId?.videoId;
+    const title = item.snippet?.title;
+    const publishedAt = item.contentDetails?.videoPublishedAt ?? item.snippet?.publishedAt;
+    if (!id || !VIDEO_ID.test(id) || !title || !publishedAt) continue;
+    if (title === 'Private video' || title === 'Deleted video') continue;
+    videos.push({
+      id,
+      title,
+      publishedAt,
+      thumbnailUrl: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+      watchUrl: `https://www.youtube.com/watch?v=${id}`,
+      embedUrl: `https://www.youtube-nocookie.com/embed/${id}`,
+    });
+  }
+  if (videos.length === 0) throw new Error('YouTube API held no videos');
+  return videos;
+}
+
 let lastGood: VideoItem[] = [];
 
 /** Test hook: forget the remembered list. */
@@ -72,17 +118,26 @@ export function resetLastGoodVideos(): void {
 }
 
 /**
- * The newest videos, or the last good list when YouTube cannot be reached, or an empty list when
- * there has never been one. Never throws.
+ * The newest videos: from the public feed, or from the official API when the feed fails and a key
+ * is set, or the last good list when neither answers, or an empty list when there has never been
+ * one. Never throws.
  */
 export async function loadChannelVideos(
   limit?: number,
   fetchImpl: typeof fetch = fetch,
+  apiKey: string | undefined = process.env.YOUTUBE_API_KEY?.trim() || undefined,
 ): Promise<VideoItem[]> {
   try {
     lastGood = await fetchChannelVideos(fetchImpl);
   } catch {
-    // Keep serving whatever worked last.
+    // The feed is down. Ask the official API if there is a key; otherwise keep whatever worked last.
+    if (apiKey) {
+      try {
+        lastGood = await fetchChannelVideosFromApi(apiKey, fetchImpl);
+      } catch {
+        // Keep serving whatever worked last.
+      }
+    }
   }
   return limit ? lastGood.slice(0, limit) : lastGood;
 }

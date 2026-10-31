@@ -3,6 +3,7 @@ import path from 'node:path';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
   fetchChannelVideos,
+  fetchChannelVideosFromApi,
   loadChannelVideos,
   parseYoutubeFeed,
   resetLastGoodVideos,
@@ -84,5 +85,102 @@ describe('loadChannelVideos', () => {
   it('honours the limit', async () => {
     const one = await loadChannelVideos(1, async () => response(fixture));
     expect(one).toHaveLength(1);
+  });
+});
+
+describe('the YouTube Data API fallback', () => {
+  const item = (id: string, title: string, at = '2026-10-28T10:00:00Z') => ({
+    snippet: { title, resourceId: { videoId: id } },
+    contentDetails: { videoPublishedAt: at },
+  });
+  const apiBody = (...items: object[]) => JSON.stringify({ items });
+  /** Answers like YouTube today: the feed is broken, the API works. */
+  const feedDownApiUp =
+    (body: string, calls: string[] = []) =>
+    async (input: RequestInfo | URL) => {
+      const url = String(input);
+      calls.push(url);
+      return url.includes('googleapis.com') ? response(body) : response('Not found', 404);
+    };
+
+  beforeEach(() => resetLastGoodVideos());
+
+  it('reads the newest uploads from the API', async () => {
+    const videos = await fetchChannelVideosFromApi('KEY', async () =>
+      response(apiBody(item('abcdefghijk', 'First'), item('lmnopqrstuv', 'Second'))),
+    );
+    expect(videos.map((v) => v.title)).toEqual(['First', 'Second']);
+    expect(videos[0]).toMatchObject({
+      id: 'abcdefghijk',
+      publishedAt: '2026-10-28T10:00:00Z',
+      watchUrl: 'https://www.youtube.com/watch?v=abcdefghijk',
+      embedUrl: 'https://www.youtube-nocookie.com/embed/abcdefghijk',
+      thumbnailUrl: 'https://i.ytimg.com/vi/abcdefghijk/hqdefault.jpg',
+    });
+  });
+
+  it('skips private and deleted videos and bad ids', async () => {
+    const videos = await fetchChannelVideosFromApi('KEY', async () =>
+      response(
+        apiBody(
+          item('abcdefghijk', 'Private video'),
+          item('lmnopqrstuv', 'Deleted video'),
+          item('bad', 'Bad id'),
+          item('wxyzabcdefg', 'Real one'),
+        ),
+      ),
+    );
+    expect(videos.map((v) => v.title)).toEqual(['Real one']);
+  });
+
+  it('asks for the uploads playlist of the channel', async () => {
+    const calls: string[] = [];
+    await fetchChannelVideosFromApi('KEY', async (input) => {
+      calls.push(String(input));
+      return response(apiBody(item('abcdefghijk', 'First')));
+    });
+    expect(calls[0]).toContain('/youtube/v3/playlistItems');
+    expect(calls[0]).toContain('playlistId=UUN7fW6O_yGOuJrma_B4ywlA');
+  });
+
+  it('throws without echoing the key when the API answers with an error', async () => {
+    const run = fetchChannelVideosFromApi('SECRET-KEY', async () => response('quota', 403));
+    await expect(run).rejects.toThrow(/403/);
+    await expect(run).rejects.not.toThrow(/SECRET-KEY/);
+  });
+
+  it('is used when the feed fails and a key is set', async () => {
+    const videos = await loadChannelVideos(
+      undefined,
+      feedDownApiUp(apiBody(item('abcdefghijk', 'From the API'))),
+      'KEY',
+    );
+    expect(videos.map((v) => v.title)).toEqual(['From the API']);
+  });
+
+  it('is not used while the feed works', async () => {
+    const calls: string[] = [];
+    await loadChannelVideos(
+      undefined,
+      async (input) => {
+        calls.push(String(input));
+        return response(fixture);
+      },
+      'KEY',
+    );
+    expect(calls.some((u) => u.includes('googleapis.com'))).toBe(false);
+  });
+
+  it('is not tried without a key', async () => {
+    const calls: string[] = [];
+    const videos = await loadChannelVideos(undefined, feedDownApiUp('{}', calls), undefined);
+    expect(videos).toEqual([]);
+    expect(calls.some((u) => u.includes('googleapis.com'))).toBe(false);
+  });
+
+  it('falls back to the last good list when both the feed and the API fail', async () => {
+    const good = await loadChannelVideos(undefined, async () => response(fixture), 'KEY');
+    const later = await loadChannelVideos(undefined, async () => response('down', 500), 'KEY');
+    expect(later).toEqual(good);
   });
 });

@@ -88,7 +88,19 @@ Save, then raise the email limit: **Authentication → Rate Limits → Emails se
 4. Log in, press **Write**, publish a short test post, and check it on **Stories → Blog**.
 5. Try **Forgot your password?** to test the reset email too.
 
-## 4. Admin accounts
+## 4. YouTube videos that always show (optional but recommended)
+
+The Videos page and the home page's "Our latest video" read the channel's newest videos from YouTube's public feed. YouTube sometimes answers that feed with an error ("404" or "500") for a few hours or days, and then the site has no videos to show. A free YouTube API key gives the site a reliable second source: it is only used when the feed fails.
+
+1. Open **console.cloud.google.com**, sign in, and create a project (or pick one), for example "Smartmind site".
+2. **APIs & Services → Library**, search for **YouTube Data API v3** and press **Enable**.
+3. **APIs & Services → Credentials → Create credentials → API key**. Copy the key.
+4. Open the key's settings and, under **API restrictions**, choose **Restrict key** and tick only **YouTube Data API v3**. (Do not use website or IP restrictions; the key is used from the server, not from visitors' browsers.)
+5. On your hosting service add an environment variable **`YOUTUBE_API_KEY`** with that key, for Production. It must **not** start with `NEXT_PUBLIC_`, so it never reaches visitors. Then redeploy.
+
+The free quota is far more than this site needs (it asks at most once an hour).
+
+## 5. Admin accounts
 
 Admins are separate from members and are made on purpose:
 
@@ -98,14 +110,14 @@ npm run create-admin -- you@example.com
 
 Registering on the site never makes anyone an admin.
 
-## 5. Before you announce it
+## 6. Before you announce it
 
 - **Read and approve the Terms and Privacy text.** It is a first draft in `content/legal.ts` and both pages show a "Draft" notice until you change it. It should be read by the team, and by someone who can advise on the law in Sri Lanka, before launch.
 - Do the full test in section 3d.
 - Walk through moderation once: **Admin → Community** has three tabs. **Posts** and **Comments** each have a Visible/Hidden switch. **Members** lists everyone with their email and a switch to block or allow them. Hiding or blocking removes the content from the public site within a minute and never deletes it. Writers see "Hidden by an admin" next to a hidden post in **My posts**. Admins cannot edit anyone's words.
 - Add your first Medium articles under **Admin → Content → Medium articles**, and look at **Admin → Home page** to choose which home sections show.
 
-## 6. Running it on your own computer
+## 7. Running it on your own computer
 
 ```bash
 npx supabase start     # starts the local database; Docker must be running
