@@ -19,7 +19,8 @@ export default function AboutPage() {
     <>
       <PageHeader
         eyebrow={`About · ${IDENTITY.full}`}
-        title="Understanding complex cities with Intelligence + Love"
+        title={IDENTITY.line}
+        compact
         lead={IDENTITY.intro}
       >
         <p className="mt-6 max-w-[62ch] text-muted">{IDENTITY.explore}</p>

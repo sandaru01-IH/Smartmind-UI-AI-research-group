@@ -102,7 +102,7 @@ test.describe('admin lifecycle', () => {
     await addThumbnail(page);
     await page.getByRole('checkbox', { name: /ticker at the top/ }).check();
     await page.getByRole('button', { name: 'Save', exact: true }).click();
-    await expect(page.getByText('Saved and published.')).toBeVisible();
+    await expect(page.getByText(/^Posted!/)).toBeVisible();
 
     // Visible within seconds on /news, the home Latest strip, the ticker and its own page.
     await eventually(visitor, '/news', async () => {
@@ -123,7 +123,7 @@ test.describe('admin lifecycle', () => {
     await page.goto(editUrl);
     await page.getByLabel('Title', { exact: true }).fill(edited);
     await page.getByRole('button', { name: 'Save', exact: true }).click();
-    await expect(page.getByText('Saved and published.')).toBeVisible();
+    await expect(page.getByText(/^Posted!/)).toBeVisible();
     await eventually(visitor, '/news', async () => {
       await expect(visitor.locator('main').getByRole('link', { name: edited })).toBeVisible();
     });
@@ -168,7 +168,8 @@ test.describe('admin lifecycle', () => {
     page,
     browser,
   }) => {
-    test.setTimeout(180_000);
+    // Up to a minute to the schedule, then the cached news list can take 2 more minutes to refresh.
+    test.setTimeout(360_000);
     const scheduled = `${TITLE_PREFIX}Scheduled ${stamp}`;
     await signIn(page);
     await page.goto('/admin/posts/new');
@@ -187,7 +188,7 @@ test.describe('admin lifecycle', () => {
         `${when.getFullYear()}-${pad(when.getMonth() + 1)}-${pad(when.getDate())}T${pad(when.getHours())}:${pad(when.getMinutes())}`,
       );
     await page.getByRole('button', { name: 'Save', exact: true }).click();
-    await expect(page.getByText('Saved and published.')).toBeVisible();
+    await expect(page.getByText(/^Posted!/)).toBeVisible();
 
     const visitor = await (await browser.newContext()).newPage();
     await visitor.goto('/news');
@@ -198,7 +199,7 @@ test.describe('admin lifecycle', () => {
       async () => {
         await expect(visitor.locator('main').getByRole('link', { name: scheduled })).toBeVisible();
       },
-      120_000,
+      300_000,
     );
   });
 

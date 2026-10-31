@@ -1,6 +1,7 @@
 'use server';
 
 import { headers } from 'next/headers';
+import { revalidatePath, updateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { SITE_URL } from '@/content/brand';
 import { t } from '@/content/strings';
@@ -174,6 +175,10 @@ export async function deleteMyAccountAction(
   }
   const { error } = await member.supabase.rpc('delete_my_account');
   if (error) return { error: t.members.deleteFailed };
+  // Their name on old posts and comments turns into "Former member" straight away.
+  updateTag('blog');
+  revalidatePath('/blog', 'layout');
+  revalidatePath('/');
   await member.supabase.auth.signOut({ scope: 'local' });
   redirect('/');
 }

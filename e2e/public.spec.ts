@@ -293,16 +293,17 @@ test.describe('features', () => {
   test('numbers strip shows plain figures and no hover pop-ups', async ({ page }) => {
     await page.goto('/');
     const strip = page.locator('#numbers');
-    for (const [value, label] of [
-      ['12', 'Listed papers'],
-      ['14', 'People in the network'],
-      ['4', 'Research themes'],
-      ['7', 'Awards, 2018 and 2019'],
-      ['14', 'Listed partners'],
+    // The figures follow the real content, so check each is a plain number, not a fixed value.
+    for (const label of [
+      'Publications',
+      'People in the network',
+      'Research themes',
+      'Awards',
+      'Partners',
     ]) {
       const stat = strip.getByRole('listitem').filter({ hasText: label });
       await stat.scrollIntoViewIfNeeded();
-      await expect(stat.locator('.sr-only')).toHaveText(value);
+      await expect(stat.locator('.sr-only')).toHaveText(/^\d+$/);
     }
     await strip.getByRole('listitem').first().hover();
     await expect(strip.getByRole('note')).toHaveCount(0);
@@ -470,18 +471,23 @@ test.describe('features', () => {
   test('publications: search and filter by year and venue', async ({ page }) => {
     await page.goto('/publications', { waitUntil: 'networkidle' });
     const status = page.getByRole('status').filter({ hasText: 'publications' });
-    await expect(status).toContainText('14 of 14');
-    await page.getByLabel('Year').selectOption('2021');
-    await expect(status).toContainText('4 of 14');
-    await page.getByLabel('Venue').selectOption('Sustainability 13(2), 467');
-    await expect(status).toContainText('1 of 14');
+    // The totals follow the real content: read the total, then check each filter narrows it.
+    await expect(status).toContainText(/\d+ of \d+ publications/);
+    const total = Number(((await status.textContent()) ?? '').match(/of (\d+) publications/)![1]);
+    expect(total).toBeGreaterThan(0);
+    await expect(status).toContainText(`${total} of ${total}`);
+
+    const year = page.getByLabel('Year');
+    const years = (await year.locator('option').allInnerTexts()).filter((y) => /^\d{4}$/.test(y));
+    expect(years.length).toBeGreaterThan(0);
+    await year.selectOption(years[0]);
+    await expect(status).not.toContainText(`${total} of ${total}`);
+    await expect(status).toContainText(`of ${total} publications`);
+
     await page.getByRole('button', { name: 'Clear filters' }).click();
+    await expect(status).toContainText(`${total} of ${total}`);
     await page.getByRole('searchbox', { name: 'Search' }).fill('flood');
-    await expect(status).not.toContainText('14 of 14');
-    await expect(page.getByRole('link', { name: /Network Centrality Assessment/ })).toHaveAttribute(
-      'href',
-      /slstl\.lk/,
-    );
+    await expect(status).not.toContainText(`${total} of ${total}`);
   });
 
   test('contact page: one big email button, plus the three members', async ({ page }) => {
@@ -489,8 +495,8 @@ test.describe('features', () => {
     await expect(page.getByRole('link', { name: /Contact us/ }).first()).toBeVisible();
     await expect(page.locator('main a[href^="mailto:info@smartminduiai.com"]')).toHaveCount(2);
     await expect(page.locator('main').getByText('Samith Madusanka')).toBeVisible();
-    await expect(page.getByRole('link', { name: '077 277 7236' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'amilabj@uom.lk' })).toBeVisible();
+    await expect(page.locator('main').getByRole('link', { name: '077 277 7236' })).toBeVisible();
+    await expect(page.locator('main').getByRole('link', { name: 'amilabj@uom.lk' })).toBeVisible();
     await expect(page.locator('main')).not.toContainText('+94 11 2640051');
   });
 

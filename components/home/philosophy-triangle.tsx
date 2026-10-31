@@ -77,7 +77,7 @@ export function PhilosophyTriangle() {
   return (
     <div ref={root} className="tri-diagram">
       <div className="grid-12 items-center gap-y-12">
-        <div className="col-span-12 md:col-span-7">
+        <div className="col-span-12 lg:col-span-7">
           <div
             className="relative mx-auto w-full max-w-[600px]"
             style={{ aspectRatio: `${W} / ${H}` }}
@@ -202,7 +202,7 @@ export function PhilosophyTriangle() {
           </div>
         </div>
 
-        <div className="col-span-12 md:col-span-5">
+        <div className="col-span-12 lg:col-span-5">
           <div className="mb-10 flex items-center gap-2">
             <button
               type="button"
@@ -212,14 +212,14 @@ export function PhilosophyTriangle() {
             >
               <ChevronLeft size={18} aria-hidden="true" />
             </button>
-            <div role="group" aria-label="Choose an idea" className="flex flex-1 gap-2">
+            <div role="group" aria-label="Choose an idea" className="flex min-w-0 flex-1 gap-2">
               {ORS.map((o) => (
                 <button
                   key={o.key}
                   type="button"
                   aria-pressed={active === o.key}
                   onClick={() => choose(o.key)}
-                  className={`min-h-11 flex-1 rounded-sharp border px-2 text-[0.85rem] font-semibold transition-colors ${
+                  className={`min-h-11 min-w-0 flex-auto rounded-sharp border px-1 text-[0.75rem] font-semibold sm:text-[0.85rem] transition-colors ${
                     active === o.key
                       ? 'border-fg bg-fg text-bg'
                       : 'border-line-strong text-fg hover:bg-surface-2'
