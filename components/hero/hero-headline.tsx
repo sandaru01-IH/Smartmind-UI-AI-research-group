@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import { IDENTITY, splitIdentityLine } from '@/content/philosophy';
+import { ChevronMark } from './chevron-mark';
 import { RollingHeadline } from './rolling-headline';
 
 const words = (text: string) => text.split(' ');
@@ -36,6 +37,8 @@ export function HeroHeadline() {
   }
 
   const [leadFirst, ...leadRest] = words(parts.lead);
+  // The connector is "— with": the dash is drawn as a ">" that rolls now and then.
+  const [dash, ...withWords] = words(parts.connector);
 
   return (
     <h1 id="hero-title" className="mt-5">
@@ -57,7 +60,13 @@ export function HeroHeadline() {
       </span>{' '}
       <span className="mt-6 block text-[length:var(--text-hero-3)] font-bold leading-[1.3] md:mt-9">
         <span className="block md:mr-[0.15em] md:inline">
-          <RollingHeadline words={words(parts.connector)} {...T.connector} />
+          <ChevronMark text={dash} delay={T.connector.base} duration={T.connector.duration} />{' '}
+          <RollingHeadline
+            words={withWords}
+            base={T.connector.base + T.connector.step}
+            step={T.connector.step}
+            duration={T.connector.duration}
+          />
         </span>{' '}
         <span
           className="hl-wipe box-decoration-clone px-[0.3em] py-[0.04em] text-signal-fg"

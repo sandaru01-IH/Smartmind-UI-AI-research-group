@@ -338,6 +338,26 @@ html:not(.js) [data-reveal] {
   }
 }
 /*
+ * The ">" before the closing phrase (see ChevronMark). It is generated content, so the sentence's
+ * own dash stays in the text. Lime on the dark theme, ink on the light one, where lime would not
+ * read against the paper. The second `content` hides it from screen readers where supported.
+ */
+.chev {
+  display: inline-block;
+  /* A little larger than the words beside it, so the small glyph carries the same weight. */
+  font-size: 1.3em;
+  line-height: 0.75;
+  vertical-align: -0.06em;
+  color: var(--signal);
+}
+[data-theme='light'] .chev {
+  color: var(--fg);
+}
+.chev::before {
+  content: '>';
+  content: '>' / '';
+}
+/*
  * The lime highlight on the closing phrase. It is a background that wipes in from the left, like a
  * highlighter pen, so it is never on screen before its words. The resting state is the finished
  * highlight, so without animation (reduced motion) it is simply there.

@@ -319,6 +319,22 @@ test.describe('features', () => {
     await expect(page.getByText('The city as an adaptive')).toHaveCount(0);
   });
 
+  test('the ">" before the closing phrase rolls again at a random moment', async ({ page }) => {
+    test.setTimeout(30_000);
+    await page.goto('/');
+    const chevron = page.locator('[data-chevron]');
+    await expect(chevron).toBeVisible();
+    // The sentence keeps its own dash for assistive technology; the ">" is drawn by CSS.
+    await expect(chevron).toContainText('—');
+    // The first roll comes within about ten seconds of the page loading.
+    await expect
+      .poll(() => chevron.evaluate((el) => el.getAnimations().length), {
+        timeout: 15_000,
+        intervals: [100],
+      })
+      .toBeGreaterThan(0);
+  });
+
   test('home: themes are renamed, partners are not repeated, journey replaces the chatbot teaser', async ({
     page,
   }) => {
