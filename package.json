@@ -18,6 +18,7 @@
     "import-posts": "tsx scripts/import-posts.ts",
     "import-people": "tsx scripts/import-people.ts",
     "import-brief": "tsx scripts/import-brief.ts",
+    "copy-to-hosted": "tsx scripts/copy-local-to-hosted.ts",
     "check:contrast": "tsx scripts/check-contrast.ts",
     "db:start": "supabase start",
     "db:reset": "supabase db reset",
