@@ -45,6 +45,8 @@
   --gutter: 1rem;
   --header-h: 3.5rem;
   --ticker-h: 45px;
+  /* The home page headline is a long sentence, so it is set well below the display size. */
+  --text-headline: clamp(1.85rem, 1rem + 3.6vw, 3.75rem);
   --dur-fast: 150ms;
   --dur: 250ms;
   --dur-slow: 400ms;
@@ -314,7 +316,7 @@ html:not(.js) [data-reveal] {
   display: inline-block;
   position: relative;
   animation: roll-up 900ms var(--ease-out-signal) both;
-  animation-delay: calc(var(--roll-i, 0) * 110ms + 150ms);
+  animation-delay: calc(var(--roll-i, 0) * var(--roll-step, 110ms) + 150ms);
 }
 @keyframes roll-up {
   from {

@@ -9,7 +9,7 @@ export const OG_SIZE = { width: 1200, height: 630 } as const;
 export async function renderOgImage({ title, label }: { title: string; label: string }) {
   const logo = await readFile(path.join(process.cwd(), 'public/brand/logo-white.png'));
   const logoSrc = `data:image/png;base64,${logo.toString('base64')}`;
-  const lines = title.length > 90 ? `${title.slice(0, 88).trimEnd()}…` : title;
+  const lines = title.length > 200 ? `${title.slice(0, 198).trimEnd()}…` : title;
   return new ImageResponse(
     <div
       style={{
@@ -41,7 +41,7 @@ export async function renderOgImage({ title, label }: { title: string; label: st
       </div>
       <div
         style={{
-          fontSize: lines.length > 50 ? 64 : 84,
+          fontSize: lines.length > 120 ? 46 : lines.length > 50 ? 64 : 84,
           fontWeight: 800,
           lineHeight: 1.04,
           letterSpacing: -2,

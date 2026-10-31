@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
+import { IDENTITY } from '../content/philosophy';
 
 const ROUTES = [
   '/',
@@ -310,11 +311,12 @@ test.describe('features', () => {
     await expect(strip.getByRole('button')).toHaveCount(0);
   });
 
-  test('hero headline rolls in word by word', async ({ page }) => {
+  test('hero headline is the identity sentence and rolls in word by word', async ({ page }) => {
     await page.goto('/');
     const h1 = page.getByRole('heading', { level: 1 });
-    await expect(h1).toHaveText('The city as an adaptive & dynamic system.');
-    await expect(h1.locator('.roll-word')).toHaveCount(8);
+    await expect(h1).toHaveText(IDENTITY.line);
+    await expect(h1.locator('.roll-word')).toHaveCount(IDENTITY.line.split(' ').length);
+    await expect(page.getByText('The city as an adaptive')).toHaveCount(0);
   });
 
   test('home: themes are renamed, partners are not repeated, journey replaces the chatbot teaser', async ({
