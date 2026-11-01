@@ -53,22 +53,43 @@ beforeEach(() => {
 });
 afterEach(() => consoleError.mockRestore());
 
+/** verifyOtp answering `byType[type]`, or `fallback` for any other type. */
+const answers =
+  (byType: Record<string, object | null>, fallback: object | null = null) =>
+  async ({ type }: { type: string }) => ({
+    data: {},
+    error: type in byType ? byType[type] : fallback,
+  });
+
 describe('confirmLinkAction with a token_hash link', () => {
-  it.each([
-    ['email', '/login?verified=1'],
-    ['signup', '/login?verified=1'],
-    ['magiclink', '/login?verified=1'],
-    ['invite', '/login?verified=1'],
-    ['recovery', '/reset-password'],
-  ])('verifies a %s link once, with its own type', async (type, to) => {
-    auth.verifyOtp.mockResolvedValue({ data: {}, error: null });
-    expect(await landing({ token_hash: 'abc', type })).toBe(to);
+  it('verifies a recovery link once, as recovery', async () => {
+    auth.verifyOtp.mockImplementation(answers({}));
+    expect(await landing({ token_hash: 'abc', type: 'recovery' })).toBe('/reset-password');
     expect(auth.verifyOtp).toHaveBeenCalledTimes(1);
-    expect(auth.verifyOtp).toHaveBeenCalledWith({ type, token_hash: 'abc' });
+    expect(auth.verifyOtp).toHaveBeenCalledWith({ type: 'recovery', token_hash: 'abc' });
+  });
+
+  it.each([['email'], ['signup'], ['magiclink'], ['invite']])(
+    'tries a %s link as recovery, then as its own type, and nothing else',
+    async (type) => {
+      auth.verifyOtp.mockImplementation(answers({ recovery: USED }));
+      expect(await landing({ token_hash: 'abc', type })).toBe('/login?verified=1');
+      expect(auth.verifyOtp.mock.calls.map(([a]) => a)).toEqual([
+        { type: 'recovery', token_hash: 'abc' },
+        { type, token_hash: 'abc' },
+      ]);
+    },
+  );
+
+  it('a reset token in a link that names the wrong type still reaches the new password', async () => {
+    auth.verifyOtp.mockImplementation(answers({}));
+    expect(await landing({ token_hash: 'abc', type: 'email' })).toBe('/reset-password');
+    expect(auth.verifyOtp).toHaveBeenCalledTimes(1);
+    expect(auth.signOut).not.toHaveBeenCalled();
   });
 
   it('signs a confirmed email out locally so they log in once', async () => {
-    auth.verifyOtp.mockResolvedValue({ data: {}, error: null });
+    auth.verifyOtp.mockImplementation(answers({ recovery: USED }));
     await landing({ token_hash: 'abc', type: 'email' });
     expect(auth.signOut).toHaveBeenCalledWith({ scope: 'local' });
   });
@@ -82,37 +103,41 @@ describe('confirmLinkAction with a token_hash link', () => {
   );
 
   it.each([
-    ['email', '/login?error=busy'],
-    ['recovery', '/forgot-password?error=busy'],
-  ])('a rate limit on a %s link says busy, not expired, and is logged', async (type, to) => {
-    auth.verifyOtp.mockResolvedValue({ data: {}, error: RATE_LIMITED });
-    expect(await landing({ token_hash: 'abc', type })).toBe(to);
-    expect(auth.verifyOtp).toHaveBeenCalledTimes(1);
-    expect(auth.signOut).not.toHaveBeenCalled();
-    expect(consoleError).toHaveBeenCalledWith('[auth]', {
-      action: 'confirmLink',
-      status: 429,
-      code: 'over_request_rate_limit',
-    });
-  });
+    ['email', {}, '/login?error=busy', 1],
+    ['email', { recovery: USED }, '/login?error=busy', 2],
+    ['recovery', {}, '/forgot-password?error=busy', 1],
+  ])(
+    'a rate limit on a %s link says busy, not expired, and stops (%o)',
+    async (type, byType, to, calls) => {
+      auth.verifyOtp.mockImplementation(answers(byType, RATE_LIMITED));
+      expect(await landing({ token_hash: 'abc', type })).toBe(to);
+      expect(auth.verifyOtp).toHaveBeenCalledTimes(calls);
+      expect(auth.signOut).not.toHaveBeenCalled();
+      expect(consoleError).toHaveBeenCalledWith('[auth]', {
+        action: 'confirmLink',
+        status: 429,
+        code: 'over_request_rate_limit',
+      });
+    },
+  );
 
   it.each([
-    ['email', '/login?error=confirm'],
-    ['recovery', '/forgot-password?error=expired'],
-  ])('a used %s link keeps its existing destination', async (type, to) => {
-    auth.verifyOtp.mockResolvedValue({ data: {}, error: USED });
+    ['email', '/login?error=confirm', 2],
+    ['recovery', '/forgot-password?error=expired', 1],
+  ])('a used %s link keeps its existing destination', async (type, to, calls) => {
+    auth.verifyOtp.mockImplementation(answers({}, USED));
     expect(await landing({ token_hash: 'abc', type })).toBe(to);
-    expect(auth.verifyOtp).toHaveBeenCalledTimes(1);
+    expect(auth.verifyOtp).toHaveBeenCalledTimes(calls);
   });
 
   it('a second press of a reset link that already signed them in goes on to the new password', async () => {
-    auth.verifyOtp.mockResolvedValue({ data: {}, error: USED });
+    auth.verifyOtp.mockImplementation(answers({}, USED));
     auth.getUser.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null });
     expect(await landing({ token_hash: 'abc', type: 'recovery' })).toBe('/reset-password');
   });
 
   it('a signed-in user does not turn a failed email link into a success', async () => {
-    auth.verifyOtp.mockResolvedValue({ data: {}, error: USED });
+    auth.verifyOtp.mockImplementation(answers({}, USED));
     auth.getUser.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null });
     expect(await landing({ token_hash: 'abc', type: 'email' })).toBe('/login?error=confirm');
   });

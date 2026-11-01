@@ -126,6 +126,21 @@ test.describe('member accounts', () => {
     await expect(page.getByText('Your password is changed.')).toBeVisible();
   });
 
+  test('a reset link still works if the email template names the wrong type', async ({
+    page,
+    baseURL,
+  }) => {
+    const email = await createMember('wrongtype');
+    const link = (await requestResetLink(page, email, baseURL!)).replace(
+      'type=recovery',
+      'type=email',
+    );
+    expect(link).toContain('type=email');
+    await page.goto(link);
+    await page.getByRole('button', { name: 'Confirm my email' }).click();
+    await expect(page).toHaveURL(/\/reset-password/);
+  });
+
   test('a used reset link sends the member back to ask for a new one', async ({
     page,
     browser,

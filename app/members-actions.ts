@@ -251,11 +251,11 @@ const LINK_TYPES: readonly EmailOtpType[] = ['email', 'signup', 'recovery', 'mag
  * Trades the one-use token from an emailed link for a session. It runs only when the person presses
  * the button on /auth/confirm, never when the link is merely opened: mail scanners and link
  * checkers open links ahead of the reader, and doing the work on a plain visit would let them use
- * the token up. The token is checked once, as the kind the link names: every check is a request
- * from this server, and Supabase limits those per address for all visitors together. Confirming an
- * email sends the person to log in once; a reset link goes on to the new-password form, and a reset
- * link that fails goes back to asking for a new one. A Supabase rate limit is reported as such,
- * never as an expired link.
+ * the token up. The token is checked at most twice: every check is a request from this server, and
+ * Supabase limits those per address for all visitors together. Confirming an email sends the
+ * person to log in once; a reset link goes on to the new-password form, and a reset link that fails
+ * goes back to asking for a new one. A Supabase rate limit is reported as such, never as an expired
+ * link.
  */
 export async function confirmLinkAction(formData: FormData): Promise<void> {
   const tokenHash = String(formData.get('token_hash') ?? '');
@@ -270,7 +270,14 @@ export async function confirmLinkAction(formData: FormData): Promise<void> {
 
   if (tokenHash) {
     if (!LINK_TYPES.includes(type)) redirect('/login?error=confirm');
-    const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+    // A template can name the wrong type, and an email check would spend a reset token; a recovery
+    // check refuses any other token without spending it, so it goes first.
+    let kind: EmailOtpType = 'recovery';
+    let { error } = await supabase.auth.verifyOtp({ type: kind, token_hash: tokenHash });
+    if (error && !recovery && classifyAuthError(error) !== 'rate_limited') {
+      kind = type;
+      ({ error } = await supabase.auth.verifyOtp({ type: kind, token_hash: tokenHash }));
+    }
     if (error) {
       if (classifyAuthError(error) === 'rate_limited') {
         logAuthTrouble('confirmLink', error);
@@ -280,7 +287,7 @@ export async function confirmLinkAction(formData: FormData): Promise<void> {
       if (recovery && (await supabase.auth.getUser()).data.user) redirect('/reset-password');
       redirect(failed);
     }
-    if (recovery) redirect('/reset-password');
+    if (kind === 'recovery') redirect('/reset-password');
     // Make them log in once so the browser holds a fresh session.
     await supabase.auth.signOut({ scope: 'local' });
     redirect('/login?verified=1');
