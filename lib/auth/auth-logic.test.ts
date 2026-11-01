@@ -61,6 +61,29 @@ describe('safeNext', () => {
   it('keeps admin paths', () => {
     expect(safeNext('/admin/posts/new')).toBe('/admin/posts/new');
     expect(safeNext('/admin?status=draft')).toBe('/admin?status=draft');
+    expect(safeNext('/admin')).toBe('/admin');
+    expect(safeNext('/admin/posts/1?x=1')).toBe('/admin/posts/1?x=1');
+    expect(safeNext('/admin?x=1')).toBe('/admin?x=1');
+  });
+  it('never returns anything that parses to another origin', () => {
+    for (const input of [
+      '/admin/\t/evil.example',
+      '/\t/evil.example',
+      '/\n/evil.example',
+      '/\r/evil.example',
+      '/\u0000/x',
+      '/admin\t',
+      '/admin/​/x',
+      '//evil.example',
+      '/\\evil.example',
+      '/..//evil',
+      '/admin?x=1',
+    ]) {
+      const out = safeNext(input);
+      expect(new URL(out, 'http://site.test').origin, JSON.stringify(input)).toBe(
+        'http://site.test',
+      );
+    }
   });
   it.each([
     'https://evil.example/admin',
@@ -69,6 +92,12 @@ describe('safeNext', () => {
     '/news',
     'javascript:alert(1)',
     '/admin/../../etc',
+    '/\t/evil.example',
+    '/\n/evil.example',
+    '/\r/evil.example',
+    '/\u0000/x',
+    '/admin\t/x',
+    '/admin/\t/evil.example',
     '',
     null,
     undefined,
