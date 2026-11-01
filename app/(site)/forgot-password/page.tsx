@@ -18,9 +18,13 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 async function Form({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   const error = Array.isArray(sp.error) ? sp.error[0] : sp.error;
-  return (
-    <ForgotPasswordForm notice={error === 'expired' ? t.members.resetLinkFailed : undefined} />
-  );
+  const notice =
+    error === 'expired'
+      ? t.members.resetLinkFailed
+      : error === 'busy'
+        ? t.members.resetLinkBusy
+        : undefined;
+  return <ForgotPasswordForm notice={notice} />;
 }
 
 export default function ForgotPasswordPage({ searchParams }: { searchParams: SearchParams }) {

@@ -25,7 +25,9 @@ async function Form({ searchParams }: { searchParams: SearchParams }) {
       ? t.members.verifiedNotice
       : one(sp.error) === 'confirm'
         ? t.members.confirmFailed
-        : undefined;
+        : one(sp.error) === 'busy'
+          ? t.members.confirmBusy
+          : undefined;
   return <MemberLoginForm next={safeMemberNext(one(sp.next))} notice={notice} />;
 }
 

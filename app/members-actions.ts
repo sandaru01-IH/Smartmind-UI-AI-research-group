@@ -245,54 +245,56 @@ export async function deleteMyAccountAction(
   redirect('/');
 }
 
-const LINK_TYPES: readonly EmailOtpType[] = ['signup', 'email', 'recovery', 'invite', 'magiclink'];
-
-/**
- * Checks the one-use token. A reset ("recovery") is tried first: Supabase refuses it for any token
- * that is not a reset token without using that token up, whereas a plain email check would accept a
- * reset token too and leave the person on the login page with no way to set a password. Then the
- * link's own `type` and the remaining kinds are tried, because a hand-edited email template can
- * easily name the wrong one. Returns the kind that matched, or null.
- */
-async function verifyLinkToken(
-  supabase: NonNullable<Awaited<ReturnType<typeof createSessionClient>>>,
-  tokenHash: string,
-  type: EmailOtpType,
-): Promise<EmailOtpType | null> {
-  const order = new Set<EmailOtpType>(['recovery', type, ...LINK_TYPES]);
-  for (const kind of order) {
-    const { error } = await supabase.auth.verifyOtp({ type: kind, token_hash: tokenHash });
-    if (!error) return kind;
-  }
-  return null;
-}
+const LINK_TYPES: readonly EmailOtpType[] = ['email', 'signup', 'recovery', 'magiclink', 'invite'];
 
 /**
  * Trades the one-use token from an emailed link for a session. It runs only when the person presses
  * the button on /auth/confirm, never when the link is merely opened: mail scanners and link
  * checkers open links ahead of the reader, and doing the work on a plain visit would let them use
- * the token up. Confirming an email sends the person to log in once; a reset link goes on to the
- * new-password form, and a reset link that fails goes back to asking for a new one.
+ * the token up. The token is checked once, as the kind the link names: every check is a request
+ * from this server, and Supabase limits those per address for all visitors together. Confirming an
+ * email sends the person to log in once; a reset link goes on to the new-password form, and a reset
+ * link that fails goes back to asking for a new one. A Supabase rate limit is reported as such,
+ * never as an expired link.
  */
 export async function confirmLinkAction(formData: FormData): Promise<void> {
   const tokenHash = String(formData.get('token_hash') ?? '');
   const type = String(formData.get('type') ?? '') as EmailOtpType;
   const code = String(formData.get('code') ?? '');
+  const recovery = type === 'recovery';
   const supabase = await createSessionClient();
   if (!supabase) redirect('/login?error=confirm');
 
-  if (tokenHash && LINK_TYPES.includes(type)) {
-    const kind = await verifyLinkToken(supabase, tokenHash, type);
-    if (!kind)
-      redirect(type === 'recovery' ? '/forgot-password?error=expired' : '/login?error=confirm');
-    if (kind === 'recovery') redirect('/reset-password');
+  const busy = recovery ? '/forgot-password?error=busy' : '/login?error=busy';
+  const failed = recovery ? '/forgot-password?error=expired' : '/login?error=confirm';
+
+  if (tokenHash) {
+    if (!LINK_TYPES.includes(type)) redirect('/login?error=confirm');
+    const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+    if (error) {
+      if (classifyAuthError(error) === 'rate_limited') {
+        logAuthTrouble('confirmLink', error);
+        redirect(busy);
+      }
+      // A double click's second use fails; any signed-in user is taken as the first one, not proof it was this link.
+      if (recovery && (await supabase.auth.getUser()).data.user) redirect('/reset-password');
+      redirect(failed);
+    }
+    if (recovery) redirect('/reset-password');
     // Make them log in once so the browser holds a fresh session.
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: 'local' });
     redirect('/login?verified=1');
   }
   if (code) {
+    // Older email templates send ?code=, which does not say what kind of link it was.
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error) redirect('/forgot-password?error=expired');
+    if (error) {
+      if (classifyAuthError(error) === 'rate_limited') {
+        logAuthTrouble('confirmLink', error);
+        redirect(busy);
+      }
+      redirect(failed);
+    }
     redirect('/reset-password');
   }
   redirect('/login?error=confirm');

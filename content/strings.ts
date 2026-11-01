@@ -67,6 +67,10 @@ const en = {
       'That link has expired or was already used. If you have already confirmed your email, just log in below. If not, ask for a new link.',
     resetLinkFailed:
       'That reset link has expired or was already used. Enter your email to get a new one.',
+    confirmBusy:
+      'We could not check that link just now because too many requests came in. Wait a few minutes, then open it again.',
+    resetLinkBusy:
+      'We could not check that reset link just now because too many requests came in. Wait a few minutes, then open it again.',
     confirmTitle: 'Confirm your email',
     confirmLead: 'One more step to finish creating your account.',
     confirmButton: 'Confirm my email',

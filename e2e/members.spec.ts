@@ -126,23 +126,9 @@ test.describe('member accounts', () => {
     await expect(page.getByText('Your password is changed.')).toBeVisible();
   });
 
-  test('a reset link still works if the email template names the wrong type', async ({
-    page,
-    baseURL,
-  }) => {
-    const email = await createMember('wrongtype');
-    const link = (await requestResetLink(page, email, baseURL!)).replace(
-      'type=recovery',
-      'type=email',
-    );
-    expect(link).toContain('type=email');
-    await page.goto(link);
-    await page.getByRole('button', { name: 'Confirm my email' }).click();
-    await expect(page).toHaveURL(/\/reset-password/);
-  });
-
   test('a used reset link sends the member back to ask for a new one', async ({
     page,
+    browser,
     baseURL,
   }) => {
     const email = await createMember('usedreset');
@@ -151,11 +137,69 @@ test.describe('member accounts', () => {
     await page.getByRole('button', { name: 'Continue' }).click();
     await expect(page).toHaveURL(/\/reset-password/);
 
-    await page.goto(link);
-    await page.getByRole('button', { name: 'Continue' }).click();
-    await expect(page).toHaveURL(/\/forgot-password\?error=expired/);
-    await expect(page.getByText(/reset link has expired or was already used/)).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Send reset link' })).toBeVisible();
+    // Someone else's browser, without the session the first use opened.
+    const other = await (await browser.newContext()).newPage();
+    await other.goto(link);
+    await other.getByRole('button', { name: 'Continue' }).click();
+    await expect(other).toHaveURL(/\/forgot-password\?error=expired/);
+    await expect(other.getByText(/reset link has expired or was already used/)).toBeVisible();
+    await expect(other.getByRole('button', { name: 'Send reset link' })).toBeVisible();
+  });
+
+  test('confirm: a double click on a sign-up link sends one request and ends confirmed', async ({
+    page,
+    baseURL,
+  }) => {
+    const email = await submitRegistration(page, 'dblsignup');
+    const posts: string[] = [];
+    page.on('request', (r) => {
+      if (r.method() === 'POST') posts.push(r.url());
+    });
+    await page.goto(confirmLink(await latestMail(email), baseURL!), { waitUntil: 'networkidle' });
+    await page.getByRole('button', { name: 'Confirm my email' }).dblclick();
+    await expect(page).toHaveURL(/\/login\?verified=1$/);
+    await page.waitForLoadState('networkidle');
+    await expect(page).toHaveURL(/\/login\?verified=1$/);
+    await expect(page.getByText('Your email is confirmed.')).toBeVisible();
+    expect(posts).toHaveLength(1);
+  });
+
+  test('confirm: a double click on a reset link ends on the new-password form', async ({
+    page,
+    baseURL,
+  }) => {
+    const email = await createMember('dblreset');
+    const link = await requestResetLink(page, email, baseURL!);
+    const seen: string[] = [];
+    page.on('framenavigated', (f) => {
+      if (f === page.mainFrame()) seen.push(f.url());
+    });
+    await page.goto(link, { waitUntil: 'networkidle' });
+    await page.getByRole('button', { name: 'Continue' }).dblclick();
+    await expect(page).toHaveURL(/\/reset-password$/);
+    await page.waitForLoadState('networkidle');
+    await expect(page).toHaveURL(/\/reset-password$/);
+    await expect(page.getByRole('heading', { name: 'Choose a new password' })).toBeVisible();
+    expect(seen.filter((u) => u.includes('/forgot-password'))).toEqual([]);
+  });
+
+  test('confirm: a made-up token goes to the login page with the message', async ({ page }) => {
+    await page.goto('/auth/confirm?token_hash=not-a-real-token&type=email', {
+      waitUntil: 'networkidle',
+    });
+    await page.getByRole('button', { name: 'Confirm my email' }).click();
+    await expect(page).toHaveURL(/\/login\?error=confirm$/);
+    await expect(page.getByText(/already confirmed your email, just log in/)).toBeVisible();
+  });
+
+  test('logging in with a tab hidden in ?next= stays on this site', async ({ page, baseURL }) => {
+    const email = await createMember('tabnext');
+    await page.goto('/login?next=%2F%09%2Fevil.example', { waitUntil: 'networkidle' });
+    await page.getByLabel('Email').fill(email);
+    await page.getByLabel('Password', { exact: true }).fill(PASSWORD);
+    await page.getByRole('button', { name: 'Log in' }).click();
+    await page.waitForURL((u) => !u.pathname.startsWith('/login'));
+    expect(new URL(page.url()).origin).toBe(new URL(baseURL!).origin);
   });
 
   test('a member writes a post with images, saves a draft, publishes, unpublishes and deletes it', async ({
