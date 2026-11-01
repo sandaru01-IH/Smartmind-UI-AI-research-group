@@ -87,6 +87,11 @@ const en = {
     fixFields: 'Fix the highlighted fields.',
     registerFailed: 'Could not create the account. Check the details and try again.',
     unavailable: 'Accounts are not available right now.',
+    tryLater: 'Too many requests right now. Wait a few minutes and try again.',
+    mailFailed: 'We could not send the email just now. Try again in a few minutes.',
+    weakPassword: 'Choose a stronger password that is harder to guess.',
+    tooManyAttempts: (minutes: number) =>
+      `Too many attempts. Try again in ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}.`,
     disabled: 'Accounts and blogging switch on once the site is connected to its database.',
     backToSite: 'Back to the site',
     deleteTitle: 'Delete your account',
@@ -282,7 +287,13 @@ const en = {
   },
 } as const;
 
-type DeepString<T> = { [K in keyof T]: T[K] extends string ? string : DeepString<T[K]> };
+type DeepString<T> = {
+  [K in keyof T]: T[K] extends string
+    ? string
+    : T[K] extends (...args: never[]) => string
+      ? T[K]
+      : DeepString<T[K]>;
+};
 export type Strings = DeepString<typeof en>;
 
 const dictionaries: Record<'en', Strings> = { en };

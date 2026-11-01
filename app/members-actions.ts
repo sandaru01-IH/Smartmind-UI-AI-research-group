@@ -6,6 +6,8 @@ import { redirect } from 'next/navigation';
 import type { EmailOtpType } from '@supabase/supabase-js';
 import { SITE_URL } from '@/content/brand';
 import { t } from '@/content/strings';
+import { classifyAuthError } from '@/lib/auth/auth-errors';
+import { clientIpFrom } from '@/lib/auth/client-ip';
 import {
   memberAccountThrottle,
   memberLoginThrottle,
@@ -30,16 +32,17 @@ export interface MemberFormState {
   done?: boolean;
 }
 
-async function clientKey(): Promise<{ ip: string; origin: string }> {
-  const h = await headers();
-  const ip = h.get('x-forwarded-for')?.split(',')[0]?.trim() || h.get('x-real-ip') || 'unknown';
-  // Supabase only honours redirect addresses on its allow-list, so a forged origin cannot hijack the link.
-  const origin = h.get('origin') || SITE_URL;
-  return { ip, origin: origin.replace(/\/$/, '') };
+/** The caller's address, or null when no trustworthy one is present. */
+async function clientIp(): Promise<string | null> {
+  return clientIpFrom(await headers());
 }
 
-const wait = (seconds: number) =>
-  `Too many attempts. Try again in ${Math.ceil(seconds / 60)} minutes.`;
+const tooMany = (seconds: number) => t.members.tooManyAttempts(Math.ceil(seconds / 60));
+
+/** Supabase limits and outages, logged without anything that identifies the person. */
+function logAuthTrouble(action: string, e: { status?: number; code?: string }): void {
+  console.error('[auth]', { action, status: e.status, code: e.code });
+}
 
 /** Creates an account and sends the confirmation email. Never says whether the email is already taken. */
 export async function registerAction(
@@ -61,21 +64,35 @@ export async function registerAction(
     return { error: t.members.fixFields, fieldErrors };
   }
 
-  const { ip, origin } = await clientKey();
-  const state = registerThrottle.check(ip);
-  if (state.locked) return { error: wait(state.retryAfterSeconds) };
-  registerThrottle.fail(ip); // Every attempt counts, successful or not.
+  const key = (await clientIp()) ?? parsed.data.email;
+  const state = registerThrottle.check(key);
+  if (state.locked) return { error: tooMany(state.retryAfterSeconds) };
 
   const supabase = await createSessionClient();
   if (!supabase) return { error: t.members.unavailable };
-  const { error } = await supabase.auth.signUp({
-    email: parsed.data.email,
-    password: parsed.data.password,
-    options: {
-      emailRedirectTo: `${origin}/auth/confirm`,
-      data: { display_name: parsed.data.displayName },
-    },
-  });
+  let error;
+  try {
+    ({ error } = await supabase.auth.signUp({
+      email: parsed.data.email,
+      password: parsed.data.password,
+      options: {
+        emailRedirectTo: `${SITE_URL}/auth/confirm`,
+        data: { display_name: parsed.data.displayName },
+      },
+    }));
+  } catch {
+    return { error: t.members.unavailable };
+  }
+  const failure = classifyAuthError(error);
+  if (error && (failure === 'rate_limited' || failure === 'send_failed')) {
+    // Supabase's own limit or outage, not this person's doing, so it does not count against them.
+    logAuthTrouble('register', error);
+    return { error: failure === 'rate_limited' ? t.members.tryLater : t.members.mailFailed };
+  }
+  registerThrottle.fail(key); // Every other attempt counts, successful or not.
+  if (failure === 'weak_password') {
+    return { error: t.members.fixFields, fieldErrors: { password: [t.members.weakPassword] } };
+  }
   if (error && !/already|registered/i.test(error.message)) {
     return { error: t.members.registerFailed };
   }
@@ -92,22 +109,32 @@ export async function memberLoginAction(
   });
   if (!parsed.success) return { error: t.members.loginFailed };
 
-  const { ip } = await clientKey();
-  const key = `${ip}|${parsed.data.email}`;
+  const ip = await clientIp();
+  const key = ip ? `${ip}|${parsed.data.email}` : parsed.data.email;
   const state = [
     memberLoginThrottle.check(key),
     memberAccountThrottle.check(parsed.data.email),
   ].find((s) => s.locked);
-  if (state) return { error: wait(state.retryAfterSeconds) };
+  if (state) return { error: tooMany(state.retryAfterSeconds) };
 
   const supabase = await createSessionClient();
   if (!supabase) return { error: t.members.unavailable };
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  let error;
+  try {
+    ({ error } = await supabase.auth.signInWithPassword(parsed.data));
+  } catch {
+    return { error: t.members.unavailable };
+  }
   if (error) {
+    const failure = classifyAuthError(error);
+    if (failure === 'rate_limited' || failure === 'send_failed') {
+      logAuthTrouble('memberLogin', error);
+      return { error: failure === 'rate_limited' ? t.members.tryLater : t.members.unavailable };
+    }
     memberLoginThrottle.fail(key);
     memberAccountThrottle.fail(parsed.data.email);
     // Supabase only reports an unconfirmed email once the password was right, so this reveals nothing.
-    if (/not confirmed/i.test(error.message)) return { error: t.members.notConfirmed };
+    if (failure === 'not_confirmed') return { error: t.members.notConfirmed };
     return { error: t.members.loginFailed };
   }
   memberLoginThrottle.reset(key);
@@ -129,16 +156,27 @@ export async function forgotPasswordAction(
   const parsed = forgotPasswordSchema.safeParse({ email: formData.get('email') });
   if (!parsed.success) return { error: t.members.emailInvalid };
 
-  const { ip, origin } = await clientKey();
-  const state = resetThrottle.check(ip);
-  if (state.locked) return { error: wait(state.retryAfterSeconds) };
-  resetThrottle.fail(ip);
+  const key = (await clientIp()) ?? parsed.data.email;
+  const state = resetThrottle.check(key);
+  if (state.locked) return { error: tooMany(state.retryAfterSeconds) };
 
   const supabase = await createSessionClient();
   if (!supabase) return { error: t.members.unavailable };
-  await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${origin}/auth/confirm`,
-  });
+  let error;
+  try {
+    ({ error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+      redirectTo: `${SITE_URL}/auth/confirm`,
+    }));
+  } catch {
+    return { error: t.members.unavailable };
+  }
+  // A limit or a failed send says nothing about whether the account exists, so it can be told.
+  const failure = classifyAuthError(error);
+  if (error && (failure === 'rate_limited' || failure === 'send_failed')) {
+    logAuthTrouble('forgotPassword', error);
+    return { error: failure === 'rate_limited' ? t.members.tryLater : t.members.mailFailed };
+  }
+  resetThrottle.fail(key);
   return { done: true };
 }
 
