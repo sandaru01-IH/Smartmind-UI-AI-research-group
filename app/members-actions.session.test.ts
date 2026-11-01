@@ -92,6 +92,32 @@ describe('resetPasswordAction', () => {
     );
   });
 
+  it('a sign-out of other devices that returns an error does not claim they were signed out', async () => {
+    auth.getClaims.mockResolvedValue(FRESH_RECOVERY());
+    auth.signOut.mockResolvedValue({
+      error: { status: 500, code: 'unexpected_failure', message: 'secret m@example.test' },
+    });
+    expect(await submit()).toEqual({ redirectTo: '/account?password=changed-only' });
+    expect(auth.updateUser).toHaveBeenCalledTimes(1);
+    expect(auth.signOut).toHaveBeenCalledTimes(1);
+    expect(consoleError).toHaveBeenCalledWith('[auth]', {
+      action: 'resetPassword',
+      status: 500,
+      code: 'unexpected_failure',
+    });
+  });
+
+  it('a sign-out of other devices that throws does not claim they were signed out', async () => {
+    auth.getClaims.mockResolvedValue(FRESH_RECOVERY());
+    auth.signOut.mockRejectedValue(new TypeError('fetch failed for m@example.test'));
+    expect(await submit()).toEqual({ redirectTo: '/account?password=changed-only' });
+    expect(auth.signOut).toHaveBeenCalledTimes(1);
+    expect(consoleError).toHaveBeenCalledWith('[auth]', {
+      action: 'resetPassword',
+      name: 'TypeError',
+    });
+  });
+
   it('a failed update keeps everyone signed in and says so', async () => {
     auth.getClaims.mockResolvedValue(FRESH_RECOVERY());
     auth.updateUser.mockResolvedValue({

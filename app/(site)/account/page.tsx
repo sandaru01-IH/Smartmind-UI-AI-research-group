@@ -14,17 +14,23 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 async function Content({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
-  const changed = (Array.isArray(sp.password) ? sp.password[0] : sp.password) === 'changed';
+  const password = Array.isArray(sp.password) ? sp.password[0] : sp.password;
+  const notice =
+    password === 'changed'
+      ? t.members.passwordChanged
+      : password === 'changed-only'
+        ? t.members.passwordChangedOthersFailed
+        : undefined;
   return (
     <MemberPage next="/account" title={t.blog.accountTitle} lead={t.blog.accountLead}>
       {(member) => (
         <>
-          {changed ? (
+          {notice ? (
             <p
               role="status"
               className="mb-8 border border-line-strong p-3 text-[0.95rem] text-muted"
             >
-              {t.members.passwordChanged}
+              {notice}
             </p>
           ) : null}
           <ProfileForm initial={member.profile} />

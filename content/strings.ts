@@ -88,6 +88,8 @@ const en = {
     resetNewLink: 'Get a new reset link',
     passwordChanged:
       'Your password is changed. You are still logged in here, and logged out everywhere else.',
+    passwordChangedOthersFailed:
+      'Your password is changed. We could not log you out on your other devices, so log out and back in on each of them, or contact the team.',
     resetFailed: 'Could not change the password. Try again.',
     passwordShort: 'Use at least 12 characters',
     emailInvalid: 'Enter a valid email address.',

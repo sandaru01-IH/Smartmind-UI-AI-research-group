@@ -232,8 +232,16 @@ export async function resetPasswordAction(
 
   const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
   if (error) return { error: t.members.resetFailed };
-  await supabase.auth.signOut({ scope: 'others' });
-  redirect('/account?password=changed');
+  // The notice must not tell them the other devices are out when they are not.
+  let othersOut = false;
+  try {
+    const { error: signOutError } = await supabase.auth.signOut({ scope: 'others' });
+    if (signOutError) logAuthTrouble('resetPassword', signOutError);
+    else othersOut = true;
+  } catch (e) {
+    logAuthThrow('resetPassword', e);
+  }
+  redirect(othersOut ? '/account?password=changed' : '/account?password=changed-only');
 }
 
 /**
