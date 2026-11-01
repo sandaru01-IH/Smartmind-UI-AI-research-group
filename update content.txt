@@ -1,0 +1,213 @@
+https://medium.com/@amilabjayasinghe/open-reproducible-simple-d720a9e7777c
+
+Our philosophy is this
+OSR UI&SI
+The city as an adaptive & dynamic system.
+Smartmind is a GeoAI network of Town & Country Planning alumni and students at the University of Moratuwa, reimagining how future cities are simulated change this Open Simple and Reproducible UI & SI for Suitanable Cities and Livable Communities
+Change as below.
+SMARTMIND UI & SI
+
+Urban Informatics & Super Intelligence
+
+Understanding Complex Cities with Intelligence + Love.
+
+SmartMind is a collaborative research network bringing together undergraduate and postgraduate candidates, alumni, and researchers from the Department of Town & Country Planning, University of Moratuwa, Sri Lanka, alongside industry partners and local communities.
+
+We explore cities as complex, adaptive, and dynamic systems, integrating urban science, urban data, urban sensing, urban computing, spatial intelligence, artificial intelligence, and collective human intelligence to transform how we understand, simulate, manage, design, and plan urban futures.
+
+Guided by the ORS Mindset — Open, Reproducible, and Simple, we envision Super Intelligence as the synergy of advanced technologies, human creativity, collective knowledge, and collaboration, grounded in empathy, compassion, and care for people, communities, and nature.
+
+Our Philosophy: Intelligence + Love.
+
+Our Approach: Open · Reproducible · Simple.
+
+Our Vision: The Highest Intelligence, the Deepest Love.
+
+Our Philosophy: Intelligence + Love
+
+At SmartMind, we believe that intelligence alone is not enough to shape better cities. Truly meaningful urban innovation emerges when scientific knowledge, technological intelligence, and human creativity are combined with compassion, empathy, and responsibility towards people and nature.
+
+Our aspiration for Super Intelligence goes beyond the capabilities of artificial intelligence. It represents a collective vision in which human intelligence, advanced technologies, and diverse perspectives work together to understand urban complexity and address real-world challenges.
+
+Our Approach: Open · Reproducible · Simple
+
+We embrace the ORS Mindset as the foundation of our research and innovation.
+
+- Open: Making urban knowledge, methods, data, and tools accessible and encouraging collaboration and knowledge sharing.
+- Reproducible: Developing transparent, verifiable, and transferable research methods that others can understand, validate, adapt, and build upon.
+- Simple: Transforming complex urban science and advanced technologies into understandable, practical, and accessible solutions for planners, decision-makers, and communities.
+
+Our Vision: The Highest Intelligence, the Deepest Love.
+
+We aspire to advance Super Intelligence that combines the greatest potential of science, technology, and collective human wisdom with the deepest compassion for humanity and nature.
+
+Through this vision, we seek to make urban innovation not only more intelligent, but also more inclusive, responsible, sustainable, and meaningful for everyone.
+For this add following digrem with animated attractive way This idea with key component
+
+For contact number Amila- 0772777236 Samith - 071 495 3771 Sandaruwan - 0776187852
+
+For emails 
+
+amilabj@uom.lk also add 
+
+Research Partners should check and validate if anything missing need to add that one
+
+National
+
+Urban Development Authority (UDA); National Building Research Organization (NBRO); Sri Lanka Land Development Corporation(SLLDC); National Transport Comession (NTC); OSGeo Sri Lanka Chapter, 
+CPCEC | Port City Colombo; Gampaha Municipal Council, Faculty of Technology, University of Sri Jayawardenapura
+
+International
+
+TU Dresden - German; TU Wien - Austria; Osaka City University - Japan; Nagaoka University of Technology - Japan; Global Disaster Resilience Centre at   the University of Huddersfield, UK; Indian Institute of Technology Kharagpur - India;
+
+need to add another tab of Ongoing research and open invitation under that add the research colloborations open invitations 
+
+for that include these sections and admin be able to add the persons and edit the photos of that researcher and details.
+An open invitation · Local & international partners
+Collaborate With Us
+Co-creating intelligent, sustainable and livable cities through open urban technologies and citizen participation.
+
+SmartMind UI & SI welcomes local and international researchers, undergraduate and postgraduate candidates, universities, public institutions, industry professionals, civil society organisations and local communities to collaborate with our ongoing projects in Urban Digital Twins, Citizen Science, Street Cloud and Urban AI Chatbots.
+
+01
+Urban Digital Twins
+Developing dynamic spatial representations of cities using geospatial data, urban sensing, modelling and simulation to inform master planning, scenario exploration and urban management.
+
+Project contact
+Samith Madusanka
+02
+Citizen Science Applications
+Co-creating accessible tools through which residents can map local conditions, contribute observations and participate in understanding and improving their cities.
+
+Project contact
+Niroshan Sanjaya Bandara
+03
+Street Cloud · Participatory Street Redesign
+Exploring AI-supported tools that enable communities and planning practitioners to visualise and evaluate alternative street designs and share ideas for more inclusive public spaces.
+
+Project contact
+Sandaruwan Silva
+04
+Urban AI Chatbots
+Exploring conversational AI interfaces that can make urban information, planning knowledge and digital research tools more understandable and accessible to diverse users.
+
+Project contact
+Harini Sawandi
+Ways to participate
+We welcome joint research, international partnerships, research internships, urban pilot projects, open methods development, collaborative sensing, co-design workshops, field observations and participatory testing.
+
+Contributions may include research ideas, technical expertise, pilot locations, institutionally shareable data, community perspectives or opportunities to apply findings in real planning processes.
+
+Our shared principles
+Our Philosophy: Intelligence + Love.
+
+Our Approach: Open · Reproducible · Simple.
+
+Our Vision: The Highest Intelligence, the Deepest Love.
+
+We aim to make urban research transparent, accessible, reproducible and useful to people and nature.
+
+Interested in collaborating?
+Tell us which project interests you, include a brief collaboration idea, and mention the relevant project contact. Individual email addresses can be added after confirmation.
+Connect via SmartMind website ↗
+
+
+_________________________________________________________________
+
+# SmartMind UI & SI: Website Research Showcase
+
+Ten research papers published since 2018, selected for broad coverage and relevance, not a citation ranking.
+
+Figures are hyperlinks/remote image references from the original publications, not generated graphics. Check hotlink availability; use high-res licensed figures and retain full figure and map-data credits.
+
+## 1. Quantum-inspired pedestrian mobility modeling: Applying probabilistic spatial simulation to urban walkability and thermal comfort in Sri Lanka (2026)
+
+This research introduces a quantum-inspired probabilistic approach to understanding and simulating pedestrian movement in complex urban environments. Combining spatial configuration, pedestrian infrastructure, connectivity, thermal comfort and crowding, the model predicts how walking patterns change across space and time. Applied to University Junction in Moratuwa, Sri Lanka, the research produces dynamic pedestrian probability maps and evaluates responses to barriers, congestion and environmental conditions. The framework offers an interpretable alternative to conventional pedestrian prediction techniques, supporting more effective street design, pedestrian infrastructure improvements and human-centred mobility planning. It demonstrates how interdisciplinary urban computing can translate sophisticated mathematical concepts into practical planning intelligence.
+
+Key partners: Malith Deshan; Chethika Abenayake â€” Urban Simulation Lab and SmartMind, University of Moratuwa
+Publication: https://doi.org/10.1371/journal.pone.0348630
+Figure: Figure 3 Â· Quantum-inspired modelling and validation workflow â€” https://doi.org/10.1371/journal.pone.0348630.g003
+
+## 2. Data-driven framework for eco-sensitive planning and design: a game theory-enhanced LUCIS approach to humanâ€“elephant conflict in Sri Lanka (2026)
+
+This study develops a data-driven spatial planning framework to address humanâ€“elephant conflict through ecological suitability analysis and game theory. Combining the Land Use Conflict Identification Strategy (LUCIS), geospatial datasets and stakeholder-informed criteria, the research evaluates competition between elephant habitats, agricultural activities and human settlements across Sri Lankaâ€™s Dry Zone. The proposed approach identifies spatial conflict zones and simulates alternative land allocation strategies that balance conservation and development needs. The study demonstrates how urban informatics and spatial decision-making tools can support more responsible humanâ€“nature coexistence, offering planning insights for landscape conservation, regional development, ecological resilience and sustainable land management.
+
+Key partners: Lahiru Waduge; Gayesha Diwyanjali; Sandaruwan Sankalpa Silva; Chethika Abenayake; Chathura De Silva â€” SCREEN and Urban Simulation Lab, University of Moratuwa
+Publication: https://doi.org/10.3389/frsus.2026.1838933
+Figure: Figure 5 Â· Conflict-optimised land-use zoning map â€” https://www.frontiersin.org/files/Articles/1838933/xml-images/frsus-07-1838933-g0005.webp
+
+## 3. The Integration of IoT (Internet of Things) Sensors and Location-Based Services for Water Quality Monitoring: A Systematic Literature Review (2025)
+
+This research systematically reviews the integration of Internet of Things sensors and location-based services for monitoring urban water quality. It examines how IoT devices, GNSS positioning technologies, wireless communication and spatial data platforms can work together to provide continuous, geographically referenced environmental information. The review identifies technological advances, existing limitations and opportunities to develop affordable and accessible water monitoring systems. Particular attention is given to improving spatial and temporal data resolution, monitoring pollution, supporting early responses and facilitating collaborative environmental management. The study provides a foundation for future urban sensing platforms that connect real-time environmental observations with informed, location-specific planning decisions.
+
+Key partners: Niroshan Sanjaya Bandara; GÃ¼nther Retscher â€” University of Moratuwa and TU Wien
+Publication: https://doi.org/10.3390/s25061918
+Figure: Figure 6 Â· Research-topic network linking IoT, positioning and water quality â€” https://www.mdpi.com/sensors/sensors-25-01918/article_deploy/html/images/sensors-25-01918-g006.png
+
+## 4. Real-Time Tracking Data and Machine Learning Approaches for Mapping Pedestrian Walking Behavior: A Case Study at the University of Moratuwa (2024)
+
+This research demonstrates how smartphone sensing and machine learning can reveal detailed pedestrian movement patterns in urban environments. Using location-based tracking data collected at the University of Moratuwa, the study analyses walking speeds, movement directions and temporal variations through unsupervised clustering techniques. The resulting maps identify pedestrian concentrations and variations in walking behaviour across the campus environment. By integrating real-time spatial data with advanced computational methods, the research offers a practical approach to identifying priority areas for pedestrian infrastructure improvements. It contributes to data-driven urban mobility planning by supporting safer, more accessible and pedestrian-friendly environments using widely available mobile technologies.
+
+Key partners: Harini Sawandi; GÃ¼nther Retscher â€” University of Moratuwa and TU Wien
+Publication: https://doi.org/10.3390/s24123822
+Figure: Figure 7 Â· Morning pedestrian concentrations by walking-speed range â€” https://www.mdpi.com/1424-8220/24/12/3822
+
+## 5. Integrating Scientific and Stakeholder-Based Knowledge to Simulate Future Urban Growth Scenarios: Findings from Kurunegala and Galle, Sri Lanka (2024)
+
+This study develops a participatory urban growth simulation framework that combines scientific analysis with stakeholder knowledge to explore alternative urban futures. Applied to Kurunegala and Galle in Sri Lanka, the research integrates open-source geospatial and simulation technologies, including GRASS GIS/FUTURES, cellular automata, agent-based modelling and land-use change simulation. Stakeholders participate in identifying development pressures, assessing suitability, defining alternative scenarios and evaluating simulation outputs. The research demonstrates how combining computational modelling with local knowledge can improve the relevance, transparency and acceptance of planning scenarios. It provides a practical pathway towards more collaborative, evidence-informed and inclusive urban development planning.
+
+Key partners: Farasath Hasan; Chethika Abenayake â€” University of Moratuwa; participating planning, environmental and community stakeholders
+Publication: https://doi.org/10.3390/su162411161
+Figure: Figure 10 Â· Six future-growth scenarios for Kurunegala and Galle â€” https://www.mdpi.com/2071-1050/16/24/11161
+
+## 6. A Game Theory-Based Decision-Making Framework for Sustainable Urban Planning: Optimizing Residential Density with the Aid of Machine Learning Techniques (2024)
+
+This research introduces a Game-Theoretic Interactive Decision-Making framework to support sustainable residential density planning. Combining machine learning, spatial suitability analysis and game theory, the study examines how developers and planning authorities make decisions within complex regulatory and economic environments. Applied to selected urban areas in Colombo and Dehiwala, the framework evaluates development suitability and alternative density decisions while considering competing stakeholder objectives. The research demonstrates how computational intelligence can improve the transparency and consistency of urban development decisions. It highlights the potential of integrating predictive models with interactive decision-making approaches to support practical, evidence-based planning and development management.
+
+Key partners: Tharindu Weragama; Farasath Hasan â€” University of Moratuwa; UDA experts and participating developers
+Publication: https://doi.org/10.4038/faruj.v11i2.324
+Figure: Figure 3 Â· Detailed game theory and machine learning research design â€” https://faruj.sljol.info/articles/324/files/67723af0ce2ae.pdf#page=4
+
+## 7. Modelling vegetation land fragmentation in urban areas of Western Province, Sri Lanka using an Artificial Intelligence-based simulation technique (2023)
+
+This study develops an artificial intelligence-based framework to understand and simulate vegetation fragmentation caused by urban development. Focusing on Sri Lankaâ€™s Western Province, the research applies artificial neural networks and decision tree analysis to investigate the complex relationships between transportation accessibility, building density, vegetation patterns and landscape structure. The findings highlight accessibility growth as a major factor associated with vegetation fragmentation and identify vulnerable landscape characteristics. The developed model also simulates future fragmentation patterns, supporting spatially informed environmental management. The research demonstrates how GeoAI and landscape analysis can help planners anticipate ecological impacts and guide more sustainable urban development decisions.
+
+Key partners: Nesha Ranaweera; Chethika Abenayake; Niroshan Bandara; Chathura De Silva â€” Urban Simulation Lab, University of Moratuwa
+Publication: https://doi.org/10.1371/journal.pone.0275457
+Figure: Figure 14 Â· Predicted vegetation fragmentation across Western Province â€” https://doi.org/10.1371/journal.pone.0275457.g014
+
+## 8. An Urban Density-Based Runoff Simulation Framework to Envisage Flood Resilience of Cities (2023)
+
+This research explores how urban density and built-form characteristics influence surface runoff and flood vulnerability. Using three urban watershed case studies in Colombo, the study integrates urban form indicators, hydrological simulation, statistical analysis and AI-based decision trees to evaluate different development conditions. Thirteen urban density indicators are examined, with impervious surface coverage, open space ratios and road density emerging as important influences on runoff generation. The framework translates spatial modelling results into potential density-control and development interventions. It offers urban planners a systematic method for assessing flood risks, comparing development options and incorporating hydrological resilience into urban planning and design decisions.
+
+Key partners: Naduni Wijayawardana; Chethika Abenayake; Nuwan Dias â€” University of Moratuwa and University of Huddersfield
+Publication: https://doi.org/10.3390/urbansci7010017
+Figure: Figure 11 Â· Observed versus predicted urban flooding â€” https://www.mdpi.com/2413-8851/7/1/17
+
+## 9. A Decision-Making Tool for Urban Planners: A Framework to Model the Interdependency among Land Use, Accessibility, Density, and Surface Runoff in Urban Areas (2022)
+
+This study investigates the interconnected relationships among land use, transport accessibility, urban density and surface runoff to better understand the functioning of complex urban systems. Using four-dimensional analysis, decision trees and structural equation modelling, the research examines how changes in one urban characteristic influence other dimensions of the built environment. The framework moves beyond isolated planning indicators towards integrated spatial decision-making, revealing trade-offs between development intensity, accessibility and environmental performance. The research contributes to systems-based urban planning by demonstrating how computational approaches can support land-use decisions, zoning policy evaluation and climate-responsive development strategies that consider multiple interacting urban processes.
+
+Key partners: Samith Madusanka; Chethika Abenayake; Chaminda Perera â€” Urban Simulation Lab and University of Moratuwa
+Publication: https://doi.org/10.3390/su14010522
+Figure: Figure 11 Â· Four-dimensional relationships among urban variables â€” https://www.mdpi.com/2071-1050/14/1/522
+
+## 10. Urban Boundary Demarcationâ€”An iCN Model Approach (2021)
+
+This research presents an Intersection-Based Clustered Network (iCN) model for identifying urban boundaries through road network configuration. Rather than relying exclusively on administrative boundaries or conventional land-cover classifications, the approach examines how spatial connectivity and clustering reveal functional patterns of urban agglomeration. Applied to selected cities in Sri Lanka, the model identifies emerging urban clusters and demonstrates how network-based boundaries correspond with patterns derived from satellite imagery. Developed using open-source geospatial techniques, the approach offers a transparent and adaptable method for analysing urban expansion. It contributes to understanding the spatial organisation of cities and supports more realistic regional planning and urban growth assessment.
+
+Key partners: Hasintha Nawod Kalpana; Chethika Abenayake; P. K. S. Mahanama â€” Urban Simulation Lab, University of Moratuwa
+Publication: https://doi.org/10.3390/socsci10120448
+Figure: Figure 4 Â· Road intersection-based urban clusters at 400 m and 500 m â€” https://www.researchgate.net/figure/iCN-model-results-under-the-400-and-500-m-threshold-distances_fig4_356459270
+
+
+
+
+
+
+i need to incoperate those research as key reseaches ( featured ones ) along with the streetcloud one, and make those highlight in like main page like that. 
+
+
+
+
