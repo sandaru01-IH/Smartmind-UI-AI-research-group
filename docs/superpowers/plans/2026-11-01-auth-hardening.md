@@ -20,6 +20,7 @@
 - Match surrounding code: terse doc comments that explain why, no decorative comments, existing naming (`*Action`, `*Throttle`, `MemberFormState`).
 - Every task: failing test first and seen failing, minimal fix, `npx tsc --noEmit` clean, `npx vitest run` green, `npx eslint` clean on touched files, one commit.
 - No push, merge, deploy, or hosted-database change by any task.
+- E2E: the suite serves a production build (`next start`, port 3100). Every e2e step is `npx next build && npx playwright test <file> [-g <name>]`. Never stop, restart or build over the owner's `next dev` on port 3000 without checking it is not in use; leave Docker/Supabase containers running. After a `supabase/config.toml` change run `npx supabase stop && npx supabase start`; `db reset` alone does not reload auth settings.
 
 ## Review Focus
 
@@ -81,9 +82,9 @@
 **Interfaces:**
 - Produces: `<ConfirmButton label: string />` (client; `useFormStatus`, disabled + spinner while pending, same `buttonClass('primary','w-full')`).
 
-- [ ] **Step 1: Failing e2e tests** (reuse `members-support.ts` Mailpit helpers): (a) sign-up link, `dblclick` on the confirm button → exactly one POST and final URL `/login?verified=1`; (b) reset link, `dblclick` → ends on `/reset-password`, never `/forgot-password`; (c) bad `token_hash` ×1 click → `/login?error=confirm` with at most ONE verifyOtp-equivalent round trip (assert via a `page.route` counter on `**/auth/v1/verify`); (d) login with `?next=%2F%09%2Fevil.example` ends on a same-origin URL.
+- [ ] **Step 1: Failing e2e tests** (reuse `members-support.ts` Mailpit helpers): (a) sign-up link, `dblclick` on the confirm button → exactly one POST and final URL `/login?verified=1`; (b) reset link, `dblclick` → ends on `/reset-password`, never `/forgot-password`; (c) bad `token_hash` ×1 click → `/login?error=confirm` in the browser; plus a vitest unit test `app/members-actions.confirm.test.ts` (mock `@/lib/supabase/server-client` and `next/navigation`'s `redirect` to throw a tagged error) asserting `verifyOtp` is called exactly once per click and a 429 maps to `/login?error=busy` (the calls are server-side, so the browser cannot count them); (d) login with `?next=%2F%09%2Fevil.example` ends on a same-origin URL.
 - [ ] **Step 2: Run** `npx playwright test e2e/members.spec.ts -g "confirm"` — FAIL.
-- [ ] **Step 3: Implement.** `confirmLinkAction` calls `verifyOtp` once with the link's `type`, accepting only `email | signup | recovery | magiclink | invite` (anything else → `/login?error=confirm`). On error classify it: `rate_limited` → `/login?error=busy` (new notice `t.members.confirmBusy`), else the existing destinations. Non-recovery success: `signOut({ scope: 'local' })` then `/login?verified=1`. `page.tsx`: use `ConfirmButton`; the reset title is `t.members.resetTitle`. Drop the `code`/PKCE branch only if no template emits it (it does not: delete it and its `reset = Boolean(code)` case).
+- [ ] **Step 3: Implement.** `confirmLinkAction` calls `verifyOtp` once with the link's `type`, accepting only `email | signup | recovery | magiclink | invite` (anything else → `/login?error=confirm`). On error classify it: `rate_limited` → `/login?error=busy` (new notice `t.members.confirmBusy`), else the existing destinations. Non-recovery success: `signOut({ scope: 'local' })` then `/login?verified=1`. `page.tsx`: use `ConfirmButton`; the reset title is `t.members.resetTitle`. Keep the `code`/PKCE branch (the hosted dashboard templates cannot be seen from the repo; if they were never synced, links arrive as `?code=`), but give its failures `/login?error=confirm` unless the link was a recovery.
 - [ ] **Step 4: Run** the e2e tests and `npx vitest run` — PASS.
 - [ ] **Step 5: Commit** `fix(auth): one-shot link verification, pending state, no false "expired" on double click`.
 
