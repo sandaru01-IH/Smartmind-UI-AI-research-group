@@ -4,8 +4,12 @@ const auth = {
   verifyOtp: vi.fn(),
   exchangeCodeForSession: vi.fn(),
   getUser: vi.fn(),
+  getClaims: vi.fn(),
   signOut: vi.fn(),
 };
+
+const now = () => Math.floor(Date.now() / 1000);
+const claims = (amr: unknown) => ({ data: { claims: { sub: 'u1', amr } }, error: null });
 
 vi.mock('next/headers', () => ({
   headers: async () => new Headers({ 'x-real-ip': '198.51.100.7' }),
@@ -49,6 +53,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   auth.signOut.mockResolvedValue({ error: null });
   auth.getUser.mockResolvedValue({ data: { user: null }, error: null });
+  auth.getClaims.mockResolvedValue({ data: null, error: null });
   consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 });
 afterEach(() => consoleError.mockRestore());
@@ -130,15 +135,25 @@ describe('confirmLinkAction with a token_hash link', () => {
     expect(auth.verifyOtp).toHaveBeenCalledTimes(calls);
   });
 
-  it('a second press of a reset link that already signed them in goes on to the new password', async () => {
-    auth.verifyOtp.mockImplementation(answers({}, USED));
-    auth.getUser.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null });
-    expect(await landing({ token_hash: 'abc', type: 'recovery' })).toBe('/reset-password');
-  });
+  it.each([['recovery'], ['email']])(
+    'a second press of a %s-typed reset link that already opened a recovery session goes on to the new password',
+    async (type) => {
+      auth.verifyOtp.mockImplementation(answers({}, USED));
+      auth.getClaims.mockResolvedValue(claims([{ method: 'otp', timestamp: now() - 20 }]));
+      expect(await landing({ token_hash: 'abc', type })).toBe('/reset-password');
+      expect(auth.signOut).not.toHaveBeenCalled();
+    },
+  );
 
-  it('a signed-in user does not turn a failed email link into a success', async () => {
+  it.each([
+    ['a password login', [{ method: 'password', timestamp: now() - 20 }]],
+    ['an old recovery session', [{ method: 'otp', timestamp: now() - 3600 }]],
+  ])('%s does not turn a failed link into a success', async (_n, amr) => {
     auth.verifyOtp.mockImplementation(answers({}, USED));
-    auth.getUser.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null });
+    auth.getClaims.mockResolvedValue(claims(amr));
+    expect(await landing({ token_hash: 'abc', type: 'recovery' })).toBe(
+      '/forgot-password?error=expired',
+    );
     expect(await landing({ token_hash: 'abc', type: 'email' })).toBe('/login?error=confirm');
   });
 });

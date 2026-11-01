@@ -162,16 +162,6 @@ export function ResetPasswordForm() {
     resetPasswordAction,
     {},
   );
-  if (state.done) {
-    return (
-      <div className="space-y-4">
-        <Done message={t.members.resetDone} />
-        <Link href="/login" className={buttonClass('primary', 'w-full')}>
-          {t.members.loginSubmit}
-        </Link>
-      </div>
-    );
-  }
   return (
     <form action={action} className="space-y-5" noValidate>
       <PasswordField
@@ -180,6 +170,16 @@ export function ResetPasswordForm() {
         errors={state.fieldErrors?.password}
       />
       <FormMessage error={state.error} />
+      {state.expired ? (
+        <p>
+          <Link
+            href="/forgot-password"
+            className="inline-flex min-h-11 items-center text-[0.95rem] underline underline-offset-4"
+          >
+            {t.members.resetNewLink}
+          </Link>
+        </p>
+      ) : null}
       <Submit pending={pending} idle={t.members.resetSubmit} busy={t.members.loginBusy} />
     </form>
   );

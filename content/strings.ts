@@ -84,8 +84,10 @@ const en = {
       'If that address has an account, a reset link is on its way. If nothing arrives in a few minutes, try again.',
     resetTitle: 'Choose a new password',
     resetSubmit: 'Save password',
-    resetDone: 'Your password is changed.',
     resetExpired: 'This reset link has expired. Ask for a new one.',
+    resetNewLink: 'Get a new reset link',
+    passwordChanged:
+      'Your password is changed. You are still logged in here, and logged out everywhere else.',
     resetFailed: 'Could not change the password. Try again.',
     passwordShort: 'Use at least 12 characters',
     emailInvalid: 'Enter a valid email address.',

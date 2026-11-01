@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createThrottle } from './throttle';
+import { createThrottle, passwordChangeThrottle } from './throttle';
 import { safeNext } from './safe-next';
 import { isValidUploadPath, newUploadPath } from '../upload-path';
 
@@ -54,6 +54,21 @@ describe('throttle', () => {
     throttle.reset('a');
     throttle.fail('a');
     expect(throttle.check('a').locked).toBe(false);
+  });
+});
+
+describe('passwordChangeThrottle', () => {
+  it('allows 5 password changes per user, then locks that user for an hour', () => {
+    const key = 'user-throttle-test';
+    for (let i = 0; i < 4; i++) passwordChangeThrottle.fail(key);
+    expect(passwordChangeThrottle.check(key).locked).toBe(false);
+    passwordChangeThrottle.fail(key);
+    const c = passwordChangeThrottle.check(key);
+    expect(c.locked).toBe(true);
+    expect(c.retryAfterSeconds).toBeGreaterThan(59 * 60);
+    expect(c.retryAfterSeconds).toBeLessThanOrEqual(60 * 60);
+    expect(passwordChangeThrottle.check('another-user').locked).toBe(false);
+    passwordChangeThrottle.reset(key);
   });
 });
 

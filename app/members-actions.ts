@@ -11,6 +11,7 @@ import { clientIpFrom } from '@/lib/auth/client-ip';
 import {
   memberAccountThrottle,
   memberLoginThrottle,
+  passwordChangeThrottle,
   registerThrottle,
   resetThrottle,
 } from '@/lib/auth/throttle';
@@ -21,6 +22,7 @@ import {
   resetPasswordSchema,
   safeMemberNext,
 } from '@/lib/members/schema';
+import { recentRecoveryUser } from '@/lib/members/recovery';
 import { getMember } from '@/lib/members/session';
 import { MEDIA_BUCKET } from '@/lib/supabase/env';
 import { createSessionClient } from '@/lib/supabase/server-client';
@@ -30,6 +32,8 @@ export interface MemberFormState {
   fieldErrors?: Record<string, string[]>;
   /** The form finished and the page should show its "done" message. */
   done?: boolean;
+  /** The reset session is missing or too old, so the form offers a new link. */
+  expired?: boolean;
 }
 
 /** The caller's address, or null when no trustworthy one is present. */
@@ -159,9 +163,10 @@ export async function memberLoginAction(
   redirect(safeMemberNext(String(formData.get('next') ?? '')));
 }
 
+/** Signs out this browser only; the member's other devices stay signed in. */
 export async function memberLogoutAction(): Promise<void> {
   const supabase = await createSessionClient();
-  await supabase?.auth.signOut();
+  await supabase?.auth.signOut({ scope: 'local' });
   redirect('/');
 }
 
@@ -203,7 +208,11 @@ export async function forgotPasswordAction(
   return { done: true };
 }
 
-/** Sets a new password. Needs the short session the reset link just opened. */
+/**
+ * Sets a new password. Needs the short session a reset link just opened: any other signed-in
+ * session (a shared laptop, a stolen cookie) must not change the password without the old one.
+ * Every other device is signed out afterwards; this one stays signed in.
+ */
 export async function resetPasswordAction(
   _prev: MemberFormState,
   formData: FormData,
@@ -214,16 +223,23 @@ export async function resetPasswordAction(
   }
   const supabase = await createSessionClient();
   if (!supabase) return { error: t.members.unavailable };
-  const { data } = await supabase.auth.getUser();
-  if (!data.user) return { error: t.members.resetExpired };
+  const userId = await recentRecoveryUser(supabase);
+  if (!userId) return { error: t.members.resetExpired, expired: true };
+
+  const state = passwordChangeThrottle.check(userId);
+  if (state.locked) return { error: tooMany(state.retryAfterSeconds) };
+  passwordChangeThrottle.fail(userId);
+
   const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
   if (error) return { error: t.members.resetFailed };
-  return { done: true };
+  await supabase.auth.signOut({ scope: 'others' });
+  redirect('/account?password=changed');
 }
 
 /**
  * Deletes the signed-in member's account for good. Their profile photo file goes too; their posts and
- * comments stay, shown as "Former member". Admin accounts cannot be deleted here.
+ * comments stay, shown as "Former member". Admin accounts cannot be deleted here: the database
+ * refuses them, so the account goes first and the photo only once that worked.
  */
 export async function deleteMyAccountAction(
   _prev: MemberFormState,
@@ -232,11 +248,12 @@ export async function deleteMyAccountAction(
   if (formData.get('confirm') !== 'DELETE') return { error: t.members.deleteTypePrompt };
   const member = await getMember();
   if (!member) return { error: t.blog.needLogin };
+  const { error } = await member.supabase.rpc('delete_my_account');
+  if (error) return { error: t.members.deleteFailed };
+  // The token still names the deleted user until it expires, which is all the storage rule checks.
   if (member.profile.photoPath) {
     await member.supabase.storage.from(MEDIA_BUCKET).remove([member.profile.photoPath]);
   }
-  const { error } = await member.supabase.rpc('delete_my_account');
-  if (error) return { error: t.members.deleteFailed };
   // Their name on old posts and comments turns into "Former member" straight away.
   updateTag('blog');
   revalidatePath('/blog', 'layout');
@@ -283,8 +300,9 @@ export async function confirmLinkAction(formData: FormData): Promise<void> {
         logAuthTrouble('confirmLink', error);
         redirect(busy);
       }
-      // A double click's second use fails; any signed-in user is taken as the first one, not proof it was this link.
-      if (recovery && (await supabase.auth.getUser()).data.user) redirect('/reset-password');
+      // A double click's second use fails. A recovery session opened moments ago is taken as the
+      // first one, whatever type the link names; a plain login is not.
+      if (await recentRecoveryUser(supabase)) redirect('/reset-password');
       redirect(failed);
     }
     if (kind === 'recovery') redirect('/reset-password');

@@ -4,7 +4,9 @@ import {
   confirmLink,
   latestMail,
   createMember,
+  expectSignedIn,
   logInMember,
+  logOutMember,
   memberEmail,
   publishPost,
   registerMember,
@@ -116,14 +118,60 @@ test.describe('member accounts', () => {
     await expect(page).toHaveURL(/\/admin\/login/);
   });
 
-  test('a reset link lets a member choose a new password', async ({ page, baseURL }) => {
+  test('a reset link lets a member choose a new password, and signs out their other devices', async ({
+    page,
+    browser,
+    baseURL,
+  }) => {
     const email = await registerMember(page, 'grace', baseURL!);
+    // Another device that was signed in before the reset.
+    const otherContext = await browser.newContext();
+    const other = await otherContext.newPage();
+    await logInMember(other, email);
+    await expectSignedIn(other, true);
+
     await page.goto(await requestResetLink(page, email, baseURL!));
     await page.getByRole('button', { name: 'Continue' }).click();
     await expect(page).toHaveURL(/\/reset-password/);
     await page.getByLabel('Password', { exact: true }).fill('A-brand-new-password-2!');
     await page.getByRole('button', { name: 'Save password' }).click();
-    await expect(page.getByText('Your password is changed.')).toBeVisible();
+    await expect(page).toHaveURL(/\/account\?password=changed$/);
+    await expect(page.locator('main').getByRole('status')).toHaveText(
+      'Your password is changed. You are still logged in here, and logged out everywhere else.',
+    );
+    await expectSignedIn(page, true);
+    await expectSignedIn(other, false);
+    await otherContext.close();
+  });
+
+  test('a signed-in member or a visitor without a reset link cannot open the new-password form', async ({
+    page,
+    browser,
+  }) => {
+    const email = await createMember('noreset');
+    await logInMember(page, email);
+    await page.goto('/reset-password');
+    await expect(page).toHaveURL(/\/forgot-password\?error=expired$/);
+    await expect(page.getByRole('button', { name: 'Send reset link' })).toBeVisible();
+
+    const visitorContext = await browser.newContext();
+    const visitor = await visitorContext.newPage();
+    await visitor.goto('/reset-password');
+    await expect(visitor).toHaveURL(/\/forgot-password\?error=expired$/);
+    await visitorContext.close();
+  });
+
+  test('logging out on one device leaves the others signed in', async ({ page, browser }) => {
+    const email = await createMember('twodevices');
+    await logInMember(page, email);
+    const otherContext = await browser.newContext();
+    const other = await otherContext.newPage();
+    await logInMember(other, email);
+
+    await logOutMember(page);
+    await expectSignedIn(page, false);
+    await expectSignedIn(other, true);
+    await otherContext.close();
   });
 
   test('a reset link still works if the email template names the wrong type', async ({
@@ -153,12 +201,14 @@ test.describe('member accounts', () => {
     await expect(page).toHaveURL(/\/reset-password/);
 
     // Someone else's browser, without the session the first use opened.
-    const other = await (await browser.newContext()).newPage();
+    const otherContext = await browser.newContext();
+    const other = await otherContext.newPage();
     await other.goto(link);
     await other.getByRole('button', { name: 'Continue' }).click();
     await expect(other).toHaveURL(/\/forgot-password\?error=expired/);
     await expect(other.getByText(/reset link has expired or was already used/)).toBeVisible();
     await expect(other.getByRole('button', { name: 'Send reset link' })).toBeVisible();
+    await otherContext.close();
   });
 
   test('confirm: a double click on a sign-up link sends one request and ends confirmed', async ({
@@ -293,6 +343,7 @@ test.describe('member accounts', () => {
     expect(sitemap).toContain(`/blog/${slug}`);
     const index = await (await visitor.request.get('/search-index.json')).text();
     expect(index).toContain(title);
+    await visitor.context().close();
   });
 
   test('an unknown blog address is a real 404', async ({ page }) => {
@@ -350,6 +401,8 @@ test.describe('member accounts', () => {
       'href',
       `/login?next=%2Fblog%2F${slug}`,
     );
+    await readerPage.context().close();
+    await visitor.context().close();
   });
 
   test('the register form links to the terms and privacy pages, which are marked as drafts', async ({
@@ -398,5 +451,6 @@ test.describe('member accounts', () => {
     const visitor = await (await browser.newContext()).newPage();
     await visitor.goto(`/blog/${slug}`, { waitUntil: 'networkidle' });
     await expect(visitor.getByText('Former member').first()).toBeVisible();
+    await visitor.context().close();
   });
 });

@@ -100,3 +100,10 @@ export const resetThrottle = createThrottle({
   windowMs: 60 * 60_000,
   lockMs: 60 * 60_000,
 });
+
+/** New passwords set per user: every attempt counts. */
+export const passwordChangeThrottle = createThrottle({
+  maxFailures: 5,
+  windowMs: 60 * 60_000,
+  lockMs: 60 * 60_000,
+});

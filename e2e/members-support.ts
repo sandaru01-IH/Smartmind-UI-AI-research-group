@@ -82,6 +82,27 @@ export async function createMember(name: string): Promise<string> {
   return email;
 }
 
+/** Whether this browser is signed in: the account page only shows to a signed-in member. */
+export async function expectSignedIn(page: Page, signedIn: boolean) {
+  await page.goto('/account');
+  if (signedIn) {
+    // The redirect to log in can arrive after the first bytes, so wait for member-only content.
+    await expect(page.getByRole('link', { name: 'Delete my account' })).toBeVisible();
+    await expect(page).toHaveURL(/\/account$/);
+  } else await expect(page).toHaveURL(/\/login\?next=%2Faccount/);
+}
+
+/** Logs out with the account menu in the header. */
+export async function logOutMember(page: Page) {
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await page.getByRole('button', { name: /^Your account/ }).click();
+  // The header flips to "Log in" before the server action ends, so wait for the action itself.
+  const done = page.waitForResponse((r) => r.request().method() === 'POST');
+  await page.getByRole('button', { name: 'Log out' }).click();
+  await done;
+  await expect(page.getByRole('link', { name: 'Log in' })).toBeVisible();
+}
+
 export async function logInMember(page: Page, email: string, next = '/', expectSuccess = true) {
   await page.goto(`/login?next=${encodeURIComponent(next)}`, { waitUntil: 'networkidle' });
   await page.getByLabel('Email').fill(email);

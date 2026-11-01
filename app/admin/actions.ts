@@ -118,7 +118,8 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
     .eq('id', data.user.id)
     .maybeSingle();
   if (profile.error || profile.data?.role !== 'admin') {
-    await supabase.auth.signOut();
+    // Only the session this login just opened; the member stays signed in on their other devices.
+    await supabase.auth.signOut({ scope: 'local' });
     loginThrottle.fail(key);
     accountThrottle.fail(accountKey);
     return { error: GENERIC_LOGIN_ERROR };
@@ -129,9 +130,10 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
   redirect(safeNext(String(formData.get('next') ?? '')));
 }
 
+/** Signs out this browser only; the admin's other devices stay signed in. */
 export async function logoutAction(): Promise<void> {
   const supabase = await createSessionClient();
-  await supabase?.auth.signOut();
+  await supabase?.auth.signOut({ scope: 'local' });
   redirect('/admin/login');
 }
 
