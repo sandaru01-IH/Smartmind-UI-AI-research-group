@@ -16,8 +16,9 @@ vi.mock('next/navigation', () => ({
 }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn(), updateTag: vi.fn() }));
 vi.mock('@/lib/members/session', () => ({ getMember: vi.fn() }));
+const session = { available: true };
 vi.mock('@/lib/supabase/server-client', () => ({
-  createSessionClient: async () => ({ auth }),
+  createSessionClient: async () => (session.available ? { auth } : null),
 }));
 
 const { t } = await import('@/content/strings');
@@ -51,6 +52,7 @@ beforeEach(() => {
   registerThrottle.reset(IP);
   resetThrottle.reset(IP);
   vi.clearAllMocks();
+  session.available = true;
   consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 });
 afterEach(() => consoleError.mockRestore());
@@ -67,7 +69,7 @@ describe('memberLoginAction', () => {
   ])('%s is told the truth and never counts as a wrong password', async (_n, error, message) => {
     auth.signInWithPassword.mockResolvedValue({ data: { user: null }, error });
     for (let i = 0; i < 9; i++) {
-      expect(await memberLoginAction({}, loginForm())).toEqual({ error: message });
+      expect(await memberLoginAction({}, loginForm())).toMatchObject({ error: message });
     }
     expect(memberLoginThrottle.check(LOGIN_KEY).locked).toBe(false);
     expect(memberAccountThrottle.check(EMAIL).locked).toBe(false);
@@ -78,7 +80,9 @@ describe('memberLoginAction', () => {
       data: { user: null },
       error: { status: 400, code: 'invalid_credentials', message: 'Invalid login credentials' },
     });
-    expect(await memberLoginAction({}, loginForm())).toEqual({ error: t.members.loginFailed });
+    expect(await memberLoginAction({}, loginForm())).toMatchObject({
+      error: t.members.loginFailed,
+    });
     for (let i = 0; i < 8; i++) await memberLoginAction({}, loginForm());
     expect(memberLoginThrottle.check(LOGIN_KEY).locked).toBe(true);
     expect((await memberLoginAction({}, loginForm())).error).toMatch(/^Too many attempts/);
@@ -86,7 +90,9 @@ describe('memberLoginAction', () => {
 
   it('a thrown call is reported as unavailable and logged by name only', async () => {
     auth.signInWithPassword.mockRejectedValue(new TypeError(`boom ${EMAIL}`));
-    expect(await memberLoginAction({}, loginForm())).toEqual({ error: t.members.unavailable });
+    expect(await memberLoginAction({}, loginForm())).toMatchObject({
+      error: t.members.unavailable,
+    });
     expect(consoleError).toHaveBeenCalledWith('[auth]', {
       action: 'memberLogin',
       name: 'TypeError',
@@ -120,7 +126,7 @@ describe('forgotPasswordAction', () => {
       data: null,
       error: { status: 429, code: 'over_request_rate_limit' },
     });
-    expect(await run()).toEqual({ error: t.members.tryLater });
+    expect(await run()).toMatchObject({ error: t.members.tryLater });
   });
 });
 
@@ -136,7 +142,7 @@ describe('registerAction', () => {
         message: 'Error sending confirmation email',
       },
     });
-    expect(await run()).toEqual({ error: t.members.mailFailed });
+    expect(await run()).toMatchObject({ error: t.members.mailFailed });
   });
 
   it('the per-address email interval looks like success', async () => {
@@ -159,5 +165,194 @@ describe('registerAction', () => {
     auth.signUp.mockRejectedValue(new TypeError('fetch failed'));
     for (let i = 0; i < 5; i++) await run();
     expect(registerThrottle.check(IP).locked).toBe(true);
+  });
+});
+
+describe('values echoed back so the form keeps what was typed', () => {
+  const PASSWORD = 'A-long-enough-password-1';
+  const typed = {
+    register: { displayName: 'Some One', email: EMAIL, acceptTerms: 'on' },
+    login: { email: EMAIL },
+    forgot: { email: EMAIL },
+  };
+  const fail = (error: object) => ({ data: {}, error });
+
+  type Run = () => Promise<{ values?: Record<string, string> }>;
+  const cases: Record<string, [Run, Record<string, string>]> = {
+    'register: validation failure': [
+      () => registerAction({}, form({ ...typed.register, password: 'short' })),
+      typed.register,
+    ],
+    'register: terms not ticked': [
+      () => registerAction({}, form({ displayName: 'Some One', email: EMAIL, password: PASSWORD })),
+      { displayName: 'Some One', email: EMAIL },
+    ],
+    'register: throttled': [
+      async () => {
+        for (let i = 0; i < 5; i++) registerThrottle.fail(IP);
+        return registerAction({}, registerForm());
+      },
+      typed.register,
+    ],
+    'register: unavailable (no client)': [
+      async () => {
+        session.available = false;
+        return registerAction({}, registerForm());
+      },
+      typed.register,
+    ],
+    'register: unavailable (thrown)': [
+      async () => {
+        auth.signUp.mockRejectedValue(new TypeError('fetch failed'));
+        return registerAction({}, registerForm());
+      },
+      typed.register,
+    ],
+    'register: try later': [
+      async () => {
+        auth.signUp.mockResolvedValue(fail({ status: 429, code: 'over_request_rate_limit' }));
+        return registerAction({}, registerForm());
+      },
+      typed.register,
+    ],
+    'register: mail failed': [
+      async () => {
+        auth.signUp.mockResolvedValue(
+          fail({ status: 500, code: 'unexpected_failure', message: 'Error sending email' }),
+        );
+        return registerAction({}, registerForm());
+      },
+      typed.register,
+    ],
+    'register: weak password': [
+      async () => {
+        auth.signUp.mockResolvedValue(fail({ status: 422, code: 'weak_password' }));
+        return registerAction({}, registerForm());
+      },
+      typed.register,
+    ],
+    'register: other failure': [
+      async () => {
+        auth.signUp.mockResolvedValue(fail({ status: 400, message: 'Something else' }));
+        return registerAction({}, registerForm());
+      },
+      typed.register,
+    ],
+    'login: validation failure': [
+      () => memberLoginAction({}, form({ email: EMAIL, password: '' })),
+      typed.login,
+    ],
+    'login: throttled': [
+      async () => {
+        for (let i = 0; i < 9; i++) memberLoginThrottle.fail(LOGIN_KEY);
+        return memberLoginAction({}, loginForm());
+      },
+      typed.login,
+    ],
+    'login: unavailable (no client)': [
+      async () => {
+        session.available = false;
+        return memberLoginAction({}, loginForm());
+      },
+      typed.login,
+    ],
+    'login: unavailable (thrown)': [
+      async () => {
+        auth.signInWithPassword.mockRejectedValue(new TypeError('fetch failed'));
+        return memberLoginAction({}, loginForm());
+      },
+      typed.login,
+    ],
+    'login: outage': [
+      async () => {
+        auth.signInWithPassword.mockResolvedValue(fail({ status: 503 }));
+        return memberLoginAction({}, loginForm());
+      },
+      typed.login,
+    ],
+    'login: request rate limit': [
+      async () => {
+        auth.signInWithPassword.mockResolvedValue(fail({ status: 429 }));
+        return memberLoginAction({}, loginForm());
+      },
+      typed.login,
+    ],
+    'login: unconfirmed': [
+      async () => {
+        auth.signInWithPassword.mockResolvedValue(
+          fail({ status: 400, code: 'email_not_confirmed' }),
+        );
+        return memberLoginAction({}, loginForm());
+      },
+      typed.login,
+    ],
+    'login: wrong password': [
+      async () => {
+        auth.signInWithPassword.mockResolvedValue(
+          fail({ status: 400, code: 'invalid_credentials' }),
+        );
+        return memberLoginAction({}, loginForm());
+      },
+      typed.login,
+    ],
+    'forgot: bad address': [
+      () => forgotPasswordAction({}, form({ email: 'not-an-address' })),
+      { email: 'not-an-address' },
+    ],
+    'forgot: throttled': [
+      async () => {
+        for (let i = 0; i < 9; i++) resetThrottle.fail(IP);
+        return forgotPasswordAction({}, form({ email: EMAIL }));
+      },
+      typed.forgot,
+    ],
+    'forgot: unavailable (no client)': [
+      async () => {
+        session.available = false;
+        return forgotPasswordAction({}, form({ email: EMAIL }));
+      },
+      typed.forgot,
+    ],
+    'forgot: unavailable (thrown)': [
+      async () => {
+        auth.resetPasswordForEmail.mockRejectedValue(new TypeError('fetch failed'));
+        return forgotPasswordAction({}, form({ email: EMAIL }));
+      },
+      typed.forgot,
+    ],
+    'forgot: request rate limit': [
+      async () => {
+        auth.resetPasswordForEmail.mockResolvedValue(
+          fail({ status: 429, code: 'over_request_rate_limit' }),
+        );
+        return forgotPasswordAction({}, form({ email: EMAIL }));
+      },
+      typed.forgot,
+    ],
+  };
+
+  it.each(Object.keys(cases))('%s echoes the non-secret fields only', async (name) => {
+    const [run, expected] = cases[name];
+    const result = await run();
+    expect(result).toHaveProperty('error');
+    expect(result.values).toEqual(expected);
+    // No password may ever travel back to the browser, whichever branch answered.
+    const wire = JSON.stringify(result);
+    for (const secret of [PASSWORD, 'whatever-password', 'short'])
+      expect(wire, `${secret} leaked`).not.toContain(secret);
+  });
+
+  it('successful states carry no values', async () => {
+    auth.resetPasswordForEmail.mockResolvedValue({ data: {}, error: null });
+    auth.signUp.mockResolvedValue({ data: {}, error: null });
+    expect(await forgotPasswordAction({}, form({ email: EMAIL }))).toEqual({ done: true });
+    expect(await registerAction({}, registerForm())).toEqual({ done: true });
+  });
+});
+
+describe('pending labels', () => {
+  it('forgot and reset do not say "Logging in"', () => {
+    expect(t.members.forgotBusy).toBe('Sending');
+    expect(t.members.resetBusy).toBe('Saving');
   });
 });

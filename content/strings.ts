@@ -60,6 +60,8 @@ const en = {
     loginLead: 'Welcome back.',
     loginSubmit: 'Log in',
     loginBusy: 'Logging in',
+    forgotBusy: 'Sending',
+    resetBusy: 'Saving',
     loginFailed: 'That email and password do not match.',
     notConfirmed: 'Confirm your email first. Check your inbox for the link we sent.',
     verifiedNotice: 'Your email is confirmed. You can log in now.',

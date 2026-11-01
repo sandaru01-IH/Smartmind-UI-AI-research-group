@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import {
   PASSWORD,
@@ -85,6 +86,88 @@ test.describe('member accounts', () => {
     await expect(page.locator('main').getByRole('alert')).toHaveText(
       'That email and password do not match.',
     );
+  });
+
+  test('a failed register keeps name, email and terms, empties and focuses the password, and explains it', async ({
+    page,
+  }) => {
+    await page.goto('/register', { waitUntil: 'networkidle' });
+    await page.getByLabel('Your name').fill('Keep Me');
+    await page.getByLabel('Email').fill('keep-me@example.test');
+    await page.getByLabel('Password', { exact: true }).fill('too-short');
+    await page.getByLabel(/I accept the/).check();
+    await page.getByRole('button', { name: 'Create account' }).click();
+    await expect(page.locator('main').getByRole('alert')).toHaveText('Fix the highlighted fields.');
+
+    await expect(page.getByLabel('Your name')).toHaveValue('Keep Me');
+    await expect(page.getByLabel('Email')).toHaveValue('keep-me@example.test');
+    await expect(page.getByLabel(/I accept the/)).toBeChecked();
+    const password = page.getByLabel('Password', { exact: true });
+    await expect(password).toHaveValue('');
+    await expect(password).toBeFocused();
+    await expect(password).toHaveAttribute('aria-invalid', 'true');
+    // The first id is the error, the second the hint; both must resolve to text.
+    const ids = ((await password.getAttribute('aria-describedby')) ?? '').split(' ');
+    expect(ids).toHaveLength(2);
+    await expect(page.locator(`[id="${ids[0]}"]`)).toHaveText('Use at least 12 characters');
+    await expect(page.locator(`[id="${ids[1]}"]`)).toContainText(/characters/);
+    // The fields that were fine are not flagged.
+    await expect(page.getByLabel('Your name')).not.toHaveAttribute('aria-invalid', 'true');
+    await expect(page.getByLabel('Email')).not.toHaveAttribute('aria-invalid', 'true');
+
+    // The error state has no accessibility violations.
+    const axe = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+      .analyze();
+    expect(axe.violations.map((v) => v.id)).toEqual([]);
+  });
+
+  test('a failed register points the email and name errors at their fields', async ({ page }) => {
+    await page.goto('/register', { waitUntil: 'networkidle' });
+    await page.getByLabel('Your name').fill('x');
+    await page.getByLabel('Email').fill('not-an-address');
+    await page.getByLabel('Password', { exact: true }).fill('a-long-enough-password');
+    await page.getByRole('button', { name: 'Create account' }).click();
+    await expect(page.locator('main').getByRole('alert')).toHaveText('Fix the highlighted fields.');
+
+    // Focus goes to the first invalid field, in page order.
+    const name = page.getByLabel('Your name');
+    await expect(name).toBeFocused();
+    for (const [field, text] of [
+      [name, 'Use at least 2 characters'],
+      [page.getByLabel('Email'), /email/i],
+      [page.getByLabel(/I accept the/), 'Accept the terms to register'],
+    ] as const) {
+      await expect(field).toHaveAttribute('aria-invalid', 'true');
+      const ids = ((await field.getAttribute('aria-describedby')) ?? '').split(' ');
+      await expect(page.locator(`[id="${ids[0]}"]`)).toHaveText(text);
+    }
+    await expect(page.getByLabel('Email')).toHaveValue('not-an-address');
+  });
+
+  test('a wrong password keeps the email and puts focus on the message', async ({ page }) => {
+    const email = memberEmail('keeper');
+    await page.goto('/login', { waitUntil: 'networkidle' });
+    await page.getByLabel('Email').fill(email);
+    await page.getByLabel('Password', { exact: true }).fill('not-the-password-1');
+    await page.getByRole('button', { name: 'Log in' }).click();
+    const alert = page.locator('main').getByRole('alert');
+    await expect(alert).toHaveText('That email and password do not match.');
+    await expect(page.getByLabel('Email')).toHaveValue(email);
+    await expect(page.getByLabel('Password', { exact: true })).toHaveValue('');
+    await expect(alert).toBeFocused();
+    // Announced once: the alert is not inside a second live region.
+    await expect(page.locator('main [aria-live]')).toHaveCount(0);
+  });
+
+  test('a mistyped address on the forgot form is kept', async ({ page }) => {
+    await page.goto('/forgot-password', { waitUntil: 'networkidle' });
+    await page.getByLabel('Email').fill('not-an-address');
+    await page.getByRole('button', { name: 'Send reset link' }).click();
+    await expect(page.locator('main').getByRole('alert')).toHaveText(
+      'Enter a valid email address.',
+    );
+    await expect(page.getByLabel('Email')).toHaveValue('not-an-address');
   });
 
   test('an unconfirmed account is told to confirm its email', async ({ page }) => {

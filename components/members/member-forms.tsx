@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState } from 'react';
+import { useActionState, useEffect, useRef, type RefObject } from 'react';
 import { Loader2 } from 'lucide-react';
 import {
   forgotPasswordAction,
@@ -12,7 +12,29 @@ import {
 } from '@/app/members-actions';
 import { buttonClass } from '@/components/ui/button';
 import { t } from '@/content/strings';
-import { FieldError, FormMessage, Label, PasswordField, fieldClass } from './auth-fields';
+import {
+  FieldError,
+  FormMessage,
+  Label,
+  PasswordField,
+  describedBy,
+  fieldClass,
+} from './auth-fields';
+
+/**
+ * After a failed submit, moves focus to the first invalid field, else to the form message. React
+ * leaves focus on the button, so a keyboard or screen reader user would not learn what went wrong.
+ * Keyed on the action state: every result is a new object, so a repeat of the same error refocuses.
+ */
+function useFocusOnError(state: MemberFormState, form: RefObject<HTMLFormElement | null>) {
+  useEffect(() => {
+    if (!state.error) return;
+    const target =
+      form.current?.querySelector<HTMLElement>('[aria-invalid="true"]') ??
+      form.current?.querySelector<HTMLElement>('[data-form-message]');
+    target?.focus();
+  }, [state, form]);
+}
 
 function Submit({ pending, idle, busy }: { pending: boolean; idle: string; busy: string }) {
   return (
@@ -28,7 +50,15 @@ function Submit({ pending, idle, busy }: { pending: boolean; idle: string; busy:
   );
 }
 
-function EmailField({ errors }: { errors?: string[] }) {
+function EmailField({
+  errors,
+  defaultValue,
+  autoComplete = 'email',
+}: {
+  errors?: string[];
+  defaultValue?: string;
+  autoComplete?: 'email' | 'username';
+}) {
   return (
     <div>
       <Label htmlFor="email">{t.members.email}</Label>
@@ -36,8 +66,11 @@ function EmailField({ errors }: { errors?: string[] }) {
         id="email"
         name="email"
         type="email"
-        autoComplete="email"
+        autoComplete={autoComplete}
         required
+        defaultValue={defaultValue}
+        aria-describedby={describedBy(!!errors?.length && 'email-error')}
+        aria-invalid={errors?.length ? true : undefined}
         className={fieldClass}
       />
       <FieldError id="email-error" messages={errors} />
@@ -46,8 +79,16 @@ function EmailField({ errors }: { errors?: string[] }) {
 }
 
 function Done({ title, message }: { title?: string; message: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  // The form it replaces held focus, which would otherwise be lost with it.
+  useEffect(() => ref.current?.focus(), []);
   return (
-    <div role="status" className="space-y-2 border border-line-strong p-4">
+    <div
+      ref={ref}
+      role="status"
+      tabIndex={-1}
+      className="space-y-2 border border-line-strong p-4 focus:outline-none"
+    >
       {title ? <p className="font-display text-lg">{title}</p> : null}
       <p className="text-muted">{message}</p>
     </div>
@@ -56,11 +97,13 @@ function Done({ title, message }: { title?: string; message: string }) {
 
 export function RegisterForm() {
   const [state, action, pending] = useActionState<MemberFormState, FormData>(registerAction, {});
+  const form = useRef<HTMLFormElement>(null);
+  useFocusOnError(state, form);
   if (state.done)
     return <Done title={t.members.registerDoneTitle} message={t.members.registerDone} />;
   const fe = state.fieldErrors ?? {};
   return (
-    <form action={action} className="space-y-5" noValidate>
+    <form ref={form} action={action} className="space-y-5" noValidate>
       <div>
         <Label htmlFor="displayName">{t.members.displayName}</Label>
         <input
@@ -70,7 +113,12 @@ export function RegisterForm() {
           required
           minLength={2}
           maxLength={80}
-          aria-describedby="displayName-hint"
+          defaultValue={state.values?.displayName}
+          aria-describedby={describedBy(
+            !!fe.displayName?.length && 'displayName-error',
+            'displayName-hint',
+          )}
+          aria-invalid={fe.displayName?.length ? true : undefined}
           className={fieldClass}
         />
         <p id="displayName-hint" className="mt-1 text-[0.9rem] text-muted">
@@ -78,7 +126,7 @@ export function RegisterForm() {
         </p>
         <FieldError id="displayName-error" messages={fe.displayName} />
       </div>
-      <EmailField errors={fe.email} />
+      <EmailField errors={fe.email} defaultValue={state.values?.email} />
       <PasswordField
         autoComplete="new-password"
         hint={t.members.passwordHint}
@@ -90,6 +138,9 @@ export function RegisterForm() {
             type="checkbox"
             name="acceptTerms"
             required
+            defaultChecked={state.values?.acceptTerms === 'on'}
+            aria-describedby={describedBy(!!fe.acceptTerms?.length && 'acceptTerms-error')}
+            aria-invalid={fe.acceptTerms?.length ? true : undefined}
             className="mt-0.5 h-5 w-5 shrink-0 accent-[var(--signal)]"
           />
           <span>
@@ -113,15 +164,17 @@ export function RegisterForm() {
 
 export function MemberLoginForm({ next, notice }: { next: string; notice?: string }) {
   const [state, action, pending] = useActionState<MemberFormState, FormData>(memberLoginAction, {});
+  const form = useRef<HTMLFormElement>(null);
+  useFocusOnError(state, form);
   return (
-    <form action={action} className="space-y-5" noValidate>
+    <form ref={form} action={action} className="space-y-5" noValidate>
       <input type="hidden" name="next" value={next} />
       {notice && !state.error ? (
         <p role="status" className="border border-line-strong p-3 text-[0.95rem] text-muted">
           {notice}
         </p>
       ) : null}
-      <EmailField />
+      <EmailField defaultValue={state.values?.email} autoComplete="username" />
       <PasswordField autoComplete="current-password" />
       <p>
         <Link
@@ -142,17 +195,19 @@ export function ForgotPasswordForm({ notice }: { notice?: string }) {
     forgotPasswordAction,
     {},
   );
+  const form = useRef<HTMLFormElement>(null);
+  useFocusOnError(state, form);
   if (state.done) return <Done message={t.members.forgotDone} />;
   return (
-    <form action={action} className="space-y-5" noValidate>
+    <form ref={form} action={action} className="space-y-5" noValidate>
       {notice && !state.error ? (
         <p role="status" className="border border-line-strong p-3 text-[0.95rem] text-muted">
           {notice}
         </p>
       ) : null}
-      <EmailField />
+      <EmailField defaultValue={state.values?.email} />
       <FormMessage error={state.error} />
-      <Submit pending={pending} idle={t.members.forgotSubmit} busy={t.members.loginBusy} />
+      <Submit pending={pending} idle={t.members.forgotSubmit} busy={t.members.forgotBusy} />
     </form>
   );
 }
@@ -162,8 +217,10 @@ export function ResetPasswordForm() {
     resetPasswordAction,
     {},
   );
+  const form = useRef<HTMLFormElement>(null);
+  useFocusOnError(state, form);
   return (
-    <form action={action} className="space-y-5" noValidate>
+    <form ref={form} action={action} className="space-y-5" noValidate>
       <PasswordField
         autoComplete="new-password"
         hint={t.members.passwordHint}
@@ -180,7 +237,7 @@ export function ResetPasswordForm() {
           </Link>
         </p>
       ) : null}
-      <Submit pending={pending} idle={t.members.resetSubmit} busy={t.members.loginBusy} />
+      <Submit pending={pending} idle={t.members.resetSubmit} busy={t.members.resetBusy} />
     </form>
   );
 }

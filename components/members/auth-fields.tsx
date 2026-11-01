@@ -5,7 +5,12 @@ import { Eye, EyeOff } from 'lucide-react';
 import { t } from '@/content/strings';
 
 export const fieldClass =
-  'h-12 w-full rounded-sharp border border-line-strong bg-surface px-3 text-base text-fg placeholder:text-muted';
+  'h-12 w-full rounded-sharp border border-line-strong bg-surface px-3 text-base text-fg placeholder:text-muted aria-invalid:border-danger';
+
+/** The ids a field is described by, space separated: its error first, then its hint. */
+export function describedBy(...ids: (string | false | undefined)[]): string | undefined {
+  return ids.filter(Boolean).join(' ') || undefined;
+}
 
 export function Label({ htmlFor, children }: { htmlFor: string; children: ReactNode }) {
   return (
@@ -50,7 +55,7 @@ export function PasswordField({
           autoComplete={autoComplete}
           required
           minLength={autoComplete === 'new-password' ? 12 : undefined}
-          aria-describedby={errors?.length ? `${id}-error` : hint ? `${id}-hint` : undefined}
+          aria-describedby={describedBy(!!errors?.length && `${id}-error`, !!hint && `${id}-hint`)}
           aria-invalid={errors?.length ? true : undefined}
           className={`${fieldClass} pr-12`}
         />
@@ -64,7 +69,7 @@ export function PasswordField({
           {show ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
         </button>
       </div>
-      {hint && !errors?.length ? (
+      {hint ? (
         <p id={`${id}-hint`} className="mt-1 text-[0.9rem] text-muted">
           {hint}
         </p>
@@ -76,9 +81,10 @@ export function PasswordField({
 
 export function FormMessage({ error }: { error?: string }) {
   return (
-    <div aria-live="assertive" className="min-h-6">
+    <div className="min-h-6">
       {error ? (
-        <p role="alert" className="text-[0.95rem] text-danger">
+        // data-form-message and tabIndex let the form move focus here when no field is to blame.
+        <p role="alert" tabIndex={-1} data-form-message className="text-[0.95rem] text-danger">
           {error}
         </p>
       ) : null}

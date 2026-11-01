@@ -34,7 +34,14 @@ export interface MemberFormState {
   done?: boolean;
   /** The reset session is missing or too old, so the form offers a new link. */
   expired?: boolean;
+  /**
+   * What the person typed, so the form can put it back: React clears a form's fields once its
+   * action settles, even on an error. Never holds a password.
+   */
+  values?: Record<string, string>;
 }
+
+const text = (v: FormDataEntryValue | null): string => (typeof v === 'string' ? v : '');
 
 /** The caller's address, or null when no trustworthy one is present. */
 async function clientIp(): Promise<string | null> {
@@ -58,6 +65,11 @@ export async function registerAction(
   _prev: MemberFormState,
   formData: FormData,
 ): Promise<MemberFormState> {
+  const values: Record<string, string> = {
+    displayName: text(formData.get('displayName')),
+    email: text(formData.get('email')),
+    ...(formData.get('acceptTerms') === 'on' ? { acceptTerms: 'on' } : {}),
+  };
   const parsed = registerSchema.safeParse({
     email: formData.get('email'),
     password: formData.get('password'),
@@ -70,16 +82,16 @@ export async function registerAction(
       const key = String(issue.path[0] ?? 'form');
       (fieldErrors[key] ??= []).push(issue.message);
     }
-    return { error: t.members.fixFields, fieldErrors };
+    return { error: t.members.fixFields, fieldErrors, values };
   }
 
   const key = (await clientIp()) ?? parsed.data.email;
   const state = registerThrottle.check(key);
-  if (state.locked) return { error: tooMany(state.retryAfterSeconds) };
+  if (state.locked) return { error: tooMany(state.retryAfterSeconds), values };
   registerThrottle.fail(key); // Every attempt counts, successful or not.
 
   const supabase = await createSessionClient();
-  if (!supabase) return { error: t.members.unavailable };
+  if (!supabase) return { error: t.members.unavailable, values };
   let error;
   try {
     ({ error } = await supabase.auth.signUp({
@@ -92,7 +104,7 @@ export async function registerAction(
     }));
   } catch (e) {
     logAuthThrow('register', e);
-    return { error: t.members.unavailable };
+    return { error: t.members.unavailable, values };
   }
   const failure = classifyAuthError(error);
   if (error && failure === 'email_rate_limited') {
@@ -103,13 +115,20 @@ export async function registerAction(
   if (error && (failure === 'rate_limited' || failure === 'send_failed')) {
     // Told truthfully: the request limit is shared by everyone, and a failed send means no email.
     logAuthTrouble('register', error);
-    return { error: failure === 'rate_limited' ? t.members.tryLater : t.members.mailFailed };
+    return {
+      error: failure === 'rate_limited' ? t.members.tryLater : t.members.mailFailed,
+      values,
+    };
   }
   if (failure === 'weak_password') {
-    return { error: t.members.fixFields, fieldErrors: { password: [t.members.weakPassword] } };
+    return {
+      error: t.members.fixFields,
+      fieldErrors: { password: [t.members.weakPassword] },
+      values,
+    };
   }
   if (error && !/already|registered/i.test(error.message)) {
-    return { error: t.members.registerFailed };
+    return { error: t.members.registerFailed, values };
   }
   return { done: true };
 }
@@ -118,11 +137,12 @@ export async function memberLoginAction(
   _prev: MemberFormState,
   formData: FormData,
 ): Promise<MemberFormState> {
+  const values = { email: text(formData.get('email')) };
   const parsed = memberLoginSchema.safeParse({
     email: formData.get('email'),
     password: formData.get('password'),
   });
-  if (!parsed.success) return { error: t.members.loginFailed };
+  if (!parsed.success) return { error: t.members.loginFailed, values };
 
   const ip = await clientIp();
   const key = ip ? `${ip}|${parsed.data.email}` : parsed.data.email;
@@ -130,33 +150,33 @@ export async function memberLoginAction(
     memberLoginThrottle.check(key),
     memberAccountThrottle.check(parsed.data.email),
   ].find((s) => s.locked);
-  if (state) return { error: tooMany(state.retryAfterSeconds) };
+  if (state) return { error: tooMany(state.retryAfterSeconds), values };
 
   const supabase = await createSessionClient();
-  if (!supabase) return { error: t.members.unavailable };
+  if (!supabase) return { error: t.members.unavailable, values };
   let error;
   try {
     ({ error } = await supabase.auth.signInWithPassword(parsed.data));
   } catch (e) {
     logAuthThrow('memberLogin', e);
-    return { error: t.members.unavailable };
+    return { error: t.members.unavailable, values };
   }
   if (error) {
     const failure = classifyAuthError(error);
     // Supabase's own limit or outage is not a wrong password, so it does not count against them.
     if (failure === 'send_failed') {
       logAuthTrouble('memberLogin', error);
-      return { error: t.members.unavailable };
+      return { error: t.members.unavailable, values };
     }
     if (failure === 'rate_limited' || failure === 'email_rate_limited') {
       logAuthTrouble('memberLogin', error);
-      return { error: t.members.tryLater };
+      return { error: t.members.tryLater, values };
     }
     memberLoginThrottle.fail(key);
     memberAccountThrottle.fail(parsed.data.email);
     // Supabase only reports an unconfirmed email once the password was right, so this reveals nothing.
-    if (failure === 'not_confirmed') return { error: t.members.notConfirmed };
-    return { error: t.members.loginFailed };
+    if (failure === 'not_confirmed') return { error: t.members.notConfirmed, values };
+    return { error: t.members.loginFailed, values };
   }
   memberLoginThrottle.reset(key);
   memberAccountThrottle.reset(parsed.data.email);
@@ -175,16 +195,17 @@ export async function forgotPasswordAction(
   _prev: MemberFormState,
   formData: FormData,
 ): Promise<MemberFormState> {
+  const values = { email: text(formData.get('email')) };
   const parsed = forgotPasswordSchema.safeParse({ email: formData.get('email') });
-  if (!parsed.success) return { error: t.members.emailInvalid };
+  if (!parsed.success) return { error: t.members.emailInvalid, values };
 
   const key = (await clientIp()) ?? parsed.data.email;
   const state = resetThrottle.check(key);
-  if (state.locked) return { error: tooMany(state.retryAfterSeconds) };
+  if (state.locked) return { error: tooMany(state.retryAfterSeconds), values };
   resetThrottle.fail(key);
 
   const supabase = await createSessionClient();
-  if (!supabase) return { error: t.members.unavailable };
+  if (!supabase) return { error: t.members.unavailable, values };
   let error;
   try {
     ({ error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
@@ -192,7 +213,7 @@ export async function forgotPasswordAction(
     }));
   } catch (e) {
     logAuthThrow('forgotPassword', e);
-    return { error: t.members.unavailable };
+    return { error: t.members.unavailable, values };
   }
   const failure = classifyAuthError(error);
   if (error && (failure === 'email_rate_limited' || failure === 'send_failed')) {
@@ -203,7 +224,7 @@ export async function forgotPasswordAction(
   // The per-request limit applies to everyone, so it reveals nothing about the account.
   if (error && failure === 'rate_limited') {
     logAuthTrouble('forgotPassword', error);
-    return { error: t.members.tryLater };
+    return { error: t.members.tryLater, values };
   }
   return { done: true };
 }
