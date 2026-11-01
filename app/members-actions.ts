@@ -44,6 +44,11 @@ function logAuthTrouble(action: string, e: { status?: number; code?: string }): 
   console.error('[auth]', { action, status: e.status, code: e.code });
 }
 
+/** A Supabase call that threw. Only the error's name is logged: its message can hold the address. */
+function logAuthThrow(action: string, e: unknown): void {
+  console.error('[auth]', { action, name: e instanceof Error ? e.name : typeof e });
+}
+
 /** Creates an account and sends the confirmation email. Never says whether the email is already taken. */
 export async function registerAction(
   _prev: MemberFormState,
@@ -67,6 +72,7 @@ export async function registerAction(
   const key = (await clientIp()) ?? parsed.data.email;
   const state = registerThrottle.check(key);
   if (state.locked) return { error: tooMany(state.retryAfterSeconds) };
+  registerThrottle.fail(key); // Every attempt counts, successful or not.
 
   const supabase = await createSessionClient();
   if (!supabase) return { error: t.members.unavailable };
@@ -80,16 +86,21 @@ export async function registerAction(
         data: { display_name: parsed.data.displayName },
       },
     }));
-  } catch {
+  } catch (e) {
+    logAuthThrow('register', e);
     return { error: t.members.unavailable };
   }
   const failure = classifyAuthError(error);
+  if (error && failure === 'email_rate_limited') {
+    // Only an existing address hits the per-address email limit, so it must look like success.
+    logAuthTrouble('register', error);
+    return { done: true };
+  }
   if (error && (failure === 'rate_limited' || failure === 'send_failed')) {
-    // Supabase's own limit or outage, not this person's doing, so it does not count against them.
+    // Told truthfully: the request limit is shared by everyone, and a failed send means no email.
     logAuthTrouble('register', error);
     return { error: failure === 'rate_limited' ? t.members.tryLater : t.members.mailFailed };
   }
-  registerThrottle.fail(key); // Every other attempt counts, successful or not.
   if (failure === 'weak_password') {
     return { error: t.members.fixFields, fieldErrors: { password: [t.members.weakPassword] } };
   }
@@ -122,14 +133,20 @@ export async function memberLoginAction(
   let error;
   try {
     ({ error } = await supabase.auth.signInWithPassword(parsed.data));
-  } catch {
+  } catch (e) {
+    logAuthThrow('memberLogin', e);
     return { error: t.members.unavailable };
   }
   if (error) {
     const failure = classifyAuthError(error);
-    if (failure === 'rate_limited' || failure === 'send_failed') {
+    // Supabase's own limit or outage is not a wrong password, so it does not count against them.
+    if (failure === 'send_failed') {
       logAuthTrouble('memberLogin', error);
-      return { error: failure === 'rate_limited' ? t.members.tryLater : t.members.unavailable };
+      return { error: t.members.unavailable };
+    }
+    if (failure === 'rate_limited' || failure === 'email_rate_limited') {
+      logAuthTrouble('memberLogin', error);
+      return { error: t.members.tryLater };
     }
     memberLoginThrottle.fail(key);
     memberAccountThrottle.fail(parsed.data.email);
@@ -159,6 +176,7 @@ export async function forgotPasswordAction(
   const key = (await clientIp()) ?? parsed.data.email;
   const state = resetThrottle.check(key);
   if (state.locked) return { error: tooMany(state.retryAfterSeconds) };
+  resetThrottle.fail(key);
 
   const supabase = await createSessionClient();
   if (!supabase) return { error: t.members.unavailable };
@@ -167,16 +185,21 @@ export async function forgotPasswordAction(
     ({ error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
       redirectTo: `${SITE_URL}/auth/confirm`,
     }));
-  } catch {
+  } catch (e) {
+    logAuthThrow('forgotPassword', e);
     return { error: t.members.unavailable };
   }
-  // A limit or a failed send says nothing about whether the account exists, so it can be told.
   const failure = classifyAuthError(error);
-  if (error && (failure === 'rate_limited' || failure === 'send_failed')) {
+  if (error && (failure === 'email_rate_limited' || failure === 'send_failed')) {
+    // Supabase only limits or sends mail for a real account, so both must look like a sent email.
     logAuthTrouble('forgotPassword', error);
-    return { error: failure === 'rate_limited' ? t.members.tryLater : t.members.mailFailed };
+    return { done: true };
   }
-  resetThrottle.fail(key);
+  // The per-request limit applies to everyone, so it reveals nothing about the account.
+  if (error && failure === 'rate_limited') {
+    logAuthTrouble('forgotPassword', error);
+    return { error: t.members.tryLater };
+  }
   return { done: true };
 }
 

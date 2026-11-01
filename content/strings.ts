@@ -76,7 +76,8 @@ const en = {
     forgotTitle: 'Reset your password',
     forgotLead: 'Enter your email and we will send you a link.',
     forgotSubmit: 'Send reset link',
-    forgotDone: 'If that address has an account, a reset link is on its way.',
+    forgotDone:
+      'If that address has an account, a reset link is on its way. If nothing arrives in a few minutes, try again.',
     resetTitle: 'Choose a new password',
     resetSubmit: 'Save password',
     resetDone: 'Your password is changed.',

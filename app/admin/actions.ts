@@ -92,15 +92,20 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
   let result;
   try {
     result = await supabase.auth.signInWithPassword(parsed.data);
-  } catch {
+  } catch (e) {
+    // Only the error's name is logged: its message can hold the address.
+    console.error('[auth]', { action: 'adminLogin', name: e instanceof Error ? e.name : typeof e });
     return { error: t.members.unavailable };
   }
   const { data, error } = result;
   const failure = classifyAuthError(error);
-  if (error && (failure === 'rate_limited' || failure === 'send_failed')) {
+  if (
+    error &&
+    (failure === 'rate_limited' || failure === 'email_rate_limited' || failure === 'send_failed')
+  ) {
     // Supabase's own limit or outage is not a wrong password, so it does not count towards a lockout.
     console.error('[auth]', { action: 'adminLogin', status: error.status, code: error.code });
-    return { error: failure === 'rate_limited' ? t.members.tryLater : t.members.unavailable };
+    return { error: failure === 'send_failed' ? t.members.unavailable : t.members.tryLater };
   }
   if (error || !data.user) {
     loginThrottle.fail(key);

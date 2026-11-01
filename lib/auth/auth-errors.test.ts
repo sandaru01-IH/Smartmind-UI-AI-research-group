@@ -6,7 +6,13 @@ describe('classifyAuthError', () => {
   it.each<[string, Parameters<typeof classifyAuthError>[0], AuthFailure]>([
     ['null', null, 'other'],
     ['request rate limit', { status: 429, code: 'over_request_rate_limit' }, 'rate_limited'],
-    ['email send rate limit', { status: 429, code: 'over_email_send_rate_limit' }, 'rate_limited'],
+    [
+      'email send rate limit',
+      { status: 429, code: 'over_email_send_rate_limit' },
+      'email_rate_limited',
+    ],
+    ['network failure', { status: 0, message: 'fetch failed' }, 'send_failed'],
+    ['retryable fetch error by name', { name: 'AuthRetryableFetchError' }, 'send_failed'],
     ['rate-limit code without a status', { code: 'over_request_rate_limit' }, 'rate_limited'],
     ['bare 429', { status: 429, message: 'Too many requests' }, 'rate_limited'],
     ['500', { status: 500, message: 'Internal error' }, 'send_failed'],
