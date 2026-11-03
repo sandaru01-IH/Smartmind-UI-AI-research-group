@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import {
   PASSWORD,
   clearMail,
@@ -649,5 +649,121 @@ test.describe('member accounts', () => {
     await visitor.goto(`/blog/${slug}`, { waitUntil: 'networkidle' });
     await expect(visitor.getByText('Former member').first()).toBeVisible();
     await visitor.context().close();
+  });
+});
+
+/** The browser's calls to `/api/me`, the header's "who is signed in" question. */
+function watchMe(page: Page) {
+  const calls: string[] = [];
+  page.on('request', (r) => {
+    if (new URL(r.url()).pathname === '/api/me') calls.push(r.url());
+  });
+  return calls;
+}
+
+test.describe('header session check', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  const headerLogIn = (page: Page) => page.locator('header').getByRole('link', { name: 'Log in' });
+  const accountButton = (page: Page) => page.getByRole('button', { name: /^Your account/ });
+  const settle = (page: Page) => page.waitForTimeout(1_000);
+
+  test('a signed-out page load asks once', async ({ page }) => {
+    const calls = watchMe(page);
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await expect(headerLogIn(page)).toBeVisible();
+    await settle(page);
+    expect(calls).toHaveLength(1);
+  });
+
+  test('a signed-in page load asks once, and each client-side navigation asks once', async ({
+    page,
+  }) => {
+    await ownClientAddress(page);
+    await logInMember(page, await createMember('hdr-nav'));
+    // Logging in moves the page client-side, and that move asks too: let it finish before counting.
+    await expect(accountButton(page)).toBeVisible();
+    await settle(page);
+    const calls = watchMe(page);
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await expect(accountButton(page)).toBeVisible();
+    await settle(page);
+    expect(calls).toHaveLength(1);
+
+    for (const [name, path] of [
+      ['About', '/about'],
+      ['Research', '/research'],
+    ] as const) {
+      const before = calls.length;
+      await page.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name }).click();
+      await expect(page).toHaveURL(new RegExp(`${path}$`));
+      await settle(page);
+      expect(calls.length - before, `navigating to ${path}`).toBe(1);
+      await expect(accountButton(page)).toBeVisible();
+    }
+  });
+
+  test('opening the mobile menu asks nothing more', async ({ page }) => {
+    await ownClientAddress(page);
+    await logInMember(page, await createMember('hdr-mobile'));
+    await page.setViewportSize({ width: 390, height: 844 });
+    const calls = watchMe(page);
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await settle(page);
+    const before = calls.length;
+    expect(before).toBe(1);
+    await page.getByRole('button', { name: 'Menu' }).click();
+    const menu = page.locator('#mobile-menu');
+    // The account links are there at once, from what the header already knows.
+    await expect(menu.getByRole('button', { name: 'Log out' })).toBeVisible();
+    await settle(page);
+    expect(calls.length - before).toBe(0);
+  });
+
+  test('after logging out the header stays on "Log in" and nobody is told signed-in again', async ({
+    page,
+  }) => {
+    await ownClientAddress(page);
+    await logInMember(page, await createMember('hdr-out'));
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await expect(accountButton(page)).toBeVisible();
+
+    const signedInAnswers: string[] = [];
+    let loggedOut = false;
+    page.on('response', async (r) => {
+      if (!loggedOut || new URL(r.url()).pathname !== '/api/me') return;
+      const body = (await r.json().catch(() => null)) as { signedIn?: boolean } | null;
+      if (body?.signedIn) signedInAnswers.push(r.url());
+    });
+    await accountButton(page).click();
+    loggedOut = true;
+    await page.getByRole('button', { name: 'Log out' }).click();
+    await expect(headerLogIn(page)).toBeVisible();
+    // Three seconds, checked often: it must not flip back to the account button and then to Log in.
+    for (let i = 0; i < 6; i++) {
+      await expect(accountButton(page)).toHaveCount(0);
+      await expect(headerLogIn(page)).toBeVisible();
+      await page.waitForTimeout(500);
+    }
+    expect(signedInAnswers).toEqual([]);
+  });
+
+  test('a failing /api/me keeps what the header already knew', async ({ page }) => {
+    await ownClientAddress(page);
+    await logInMember(page, await createMember('hdr-500'));
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await expect(accountButton(page)).toBeVisible();
+
+    await page.route('**/api/me', (route) =>
+      route.fulfill({ status: 500, contentType: 'application/json', body: '{}' }),
+    );
+    await page
+      .getByRole('navigation', { name: 'Primary' })
+      .getByRole('link', { name: 'About' })
+      .click();
+    await expect(page).toHaveURL(/\/about$/);
+    await settle(page);
+    await expect(accountButton(page)).toBeVisible();
+    await expect(headerLogIn(page)).toHaveCount(0);
   });
 });
