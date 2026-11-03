@@ -118,13 +118,37 @@ describe('resetPasswordAction', () => {
     });
   });
 
-  it('a failed update keeps everyone signed in and says so', async () => {
+  it.each([
+    [
+      'a weak or leaked password points at the password field',
+      { status: 422, code: 'weak_password', message: 'weak' },
+      {
+        error: t.members.fixFields,
+        fieldErrors: { password: [t.members.weakPassword] },
+      },
+    ],
+    [
+      'the same password points at the password field',
+      { status: 422, code: 'same_password', message: 'same' },
+      {
+        error: t.members.fixFields,
+        fieldErrors: { password: [t.members.samePassword] },
+      },
+    ],
+    [
+      'a rate limit says try later',
+      { status: 429, code: 'over_request_rate_limit', message: 'slow down' },
+      { error: t.members.tryLater },
+    ],
+    [
+      'anything else keeps the generic message',
+      { status: 500, code: 'unexpected_failure', message: 'boom' },
+      { error: t.members.resetFailed },
+    ],
+  ])('a failed update keeps everyone signed in: %s', async (_n, error, expected) => {
     auth.getClaims.mockResolvedValue(FRESH_RECOVERY());
-    auth.updateUser.mockResolvedValue({
-      data: { user: null },
-      error: { status: 422, code: 'same_password', message: 'same' },
-    });
-    expect(await submit()).toEqual({ error: t.members.resetFailed });
+    auth.updateUser.mockResolvedValue({ data: { user: null }, error });
+    expect(await submit()).toEqual(expected);
     expect(auth.signOut).not.toHaveBeenCalled();
   });
 

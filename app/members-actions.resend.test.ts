@@ -66,7 +66,14 @@ describe('resendConfirmationAction', () => {
   it.each([
     ['sent', null],
     ['unknown or already confirmed address', null],
-    ['email send interval', { status: 429, code: 'over_email_send_rate_limit' }],
+    [
+      'email send interval',
+      {
+        status: 429,
+        code: 'over_email_send_rate_limit',
+        message: 'For security purposes, you can only request this after 52 seconds.',
+      },
+    ],
     ['failed send', { status: 500, code: 'unexpected_failure', message: 'Error sending email' }],
     ['some other refusal', { status: 422, code: 'validation_failed', message: 'nope' }],
   ])('%s gets the one neutral answer', async (_n, error) => {
@@ -90,6 +97,17 @@ describe('resendConfirmationAction', () => {
 
   it('the request rate limit says try later and keeps the address', async () => {
     auth.resend.mockResolvedValue(fail({ status: 429, code: 'over_request_rate_limit' }));
+    expect(await resend()).toEqual({ error: t.members.tryLater, values: { email: EMAIL } });
+  });
+
+  it('the project-wide email cap says try later and keeps the address', async () => {
+    auth.resend.mockResolvedValue(
+      fail({
+        status: 429,
+        code: 'over_email_send_rate_limit',
+        message: 'email rate limit exceeded',
+      }),
+    );
     expect(await resend()).toEqual({ error: t.members.tryLater, values: { email: EMAIL } });
   });
 
@@ -160,7 +178,14 @@ describe('registerAction tells the panel where the link went', () => {
       'already registered',
       { status: 422, code: 'user_already_exists', message: 'User already registered' },
     ],
-    ['email send interval', { status: 429, code: 'over_email_send_rate_limit' }],
+    [
+      'email send interval',
+      {
+        status: 429,
+        code: 'over_email_send_rate_limit',
+        message: 'For security purposes, you can only request this after 52 seconds.',
+      },
+    ],
   ])('%s: done, with the address and never the password', async (_n, error) => {
     auth.signUp.mockResolvedValue({ data: {}, error });
     const result = await run();

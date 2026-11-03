@@ -7,9 +7,23 @@ describe('classifyAuthError', () => {
     ['null', null, 'other'],
     ['request rate limit', { status: 429, code: 'over_request_rate_limit' }, 'rate_limited'],
     [
-      'email send rate limit',
-      { status: 429, code: 'over_email_send_rate_limit' },
+      'per-address email interval',
+      {
+        status: 429,
+        code: 'over_email_send_rate_limit',
+        message: 'For security purposes, you can only request this after 52 seconds.',
+      },
       'email_rate_limited',
+    ],
+    [
+      'project-wide email cap is not an account signal',
+      { status: 429, code: 'over_email_send_rate_limit', message: 'email rate limit exceeded' },
+      'rate_limited',
+    ],
+    [
+      'email limit with no message is treated as the shared cap',
+      { status: 429, code: 'over_email_send_rate_limit' },
+      'rate_limited',
     ],
     ['network failure', { status: 0, message: 'fetch failed' }, 'send_failed'],
     ['retryable fetch error by name', { name: 'AuthRetryableFetchError' }, 'send_failed'],

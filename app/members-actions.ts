@@ -226,8 +226,17 @@ export async function forgotPasswordAction(
     return { error: t.members.unavailable, values };
   }
   const failure = classifyAuthError(error);
+  if (
+    error &&
+    failure === 'send_failed' &&
+    (error.status === 0 || error.name === 'AuthRetryableFetchError')
+  ) {
+    // Supabase could not be reached at all, for every address alike: nothing was sent.
+    logAuthTrouble('forgotPassword', error);
+    return { error: t.members.unavailable, values };
+  }
   if (error && (failure === 'email_rate_limited' || failure === 'send_failed')) {
-    // Supabase only limits or sends mail for a real account, so both must look like a sent email.
+    // Supabase only waits or sends mail for a real account, so both must look like a sent email.
     logAuthTrouble('forgotPassword', error);
     return { done: true };
   }
@@ -302,7 +311,19 @@ export async function resetPasswordAction(
   passwordChangeThrottle.fail(userId);
 
   const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
-  if (error) return { error: t.members.resetFailed };
+  if (error) {
+    // Say what was wrong, so a person who picked a breached or reused password does not keep
+    // guessing and use up the hour's attempts without knowing why.
+    const failure = classifyAuthError(error);
+    if (failure === 'weak_password') {
+      return { error: t.members.fixFields, fieldErrors: { password: [t.members.weakPassword] } };
+    }
+    if (failure === 'same_password') {
+      return { error: t.members.fixFields, fieldErrors: { password: [t.members.samePassword] } };
+    }
+    if (failure === 'rate_limited') return { error: t.members.tryLater };
+    return { error: t.members.resetFailed };
+  }
   // The notice must not tell them the other devices are out when they are not.
   let othersOut = false;
   try {

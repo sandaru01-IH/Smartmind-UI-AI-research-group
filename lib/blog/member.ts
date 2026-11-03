@@ -118,6 +118,14 @@ export async function deleteMyPost(db: SupabaseClient, userId: string, id: strin
   if (error) throw new Error(error.message);
 }
 
+/** The database refused the display name (reserved, or nothing usable left once tidied). */
+export class ProfileNameRejectedError extends Error {
+  constructor() {
+    super('That display name cannot be used.');
+    this.name = 'ProfileNameRejectedError';
+  }
+}
+
 export async function saveMyProfile(
   db: SupabaseClient,
   userId: string,
@@ -126,5 +134,6 @@ export async function saveMyProfile(
   const patch: Record<string, unknown> = { display_name: input.display_name, bio: input.bio };
   if (input.photo_path !== undefined) patch.photo_path = input.photo_path;
   const { error } = await db.from('member_profiles').update(patch).eq('id', userId);
+  if (error?.code === '23514') throw new ProfileNameRejectedError();
   if (error) throw new Error(error.message);
 }

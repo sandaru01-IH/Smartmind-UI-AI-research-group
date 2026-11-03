@@ -101,11 +101,17 @@ describe('memberLoginAction', () => {
   });
 });
 
+const INTERVAL_MESSAGE = 'For security purposes, you can only request this after 52 seconds.';
+const CAP_MESSAGE = 'email rate limit exceeded';
+
 describe('forgotPasswordAction', () => {
   const run = () => forgotPasswordAction({}, form({ email: EMAIL }));
 
   it.each([
-    ['email send interval', { status: 429, code: 'over_email_send_rate_limit' }],
+    [
+      'email send interval',
+      { status: 429, code: 'over_email_send_rate_limit', message: INTERVAL_MESSAGE },
+    ],
     [
       'failed send',
       { status: 500, code: 'unexpected_failure', message: 'Error sending recovery email' },
@@ -128,6 +134,22 @@ describe('forgotPasswordAction', () => {
     });
     expect(await run()).toMatchObject({ error: t.members.tryLater });
   });
+
+  it('the project-wide email cap says try later instead of "on its way"', async () => {
+    auth.resetPasswordForEmail.mockResolvedValue({
+      data: null,
+      error: { status: 429, code: 'over_email_send_rate_limit', message: CAP_MESSAGE },
+    });
+    expect(await run()).toMatchObject({ error: t.members.tryLater });
+  });
+
+  it('an unreachable Supabase says unavailable instead of "on its way"', async () => {
+    auth.resetPasswordForEmail.mockResolvedValue({
+      data: null,
+      error: { status: 0, name: 'AuthRetryableFetchError', message: 'fetch failed' },
+    });
+    expect(await run()).toMatchObject({ error: t.members.unavailable });
+  });
 });
 
 describe('registerAction', () => {
@@ -148,9 +170,17 @@ describe('registerAction', () => {
   it('the per-address email interval looks like success', async () => {
     auth.signUp.mockResolvedValue({
       data: {},
-      error: { status: 429, code: 'over_email_send_rate_limit' },
+      error: { status: 429, code: 'over_email_send_rate_limit', message: INTERVAL_MESSAGE },
     });
     expect(await run()).toEqual({ done: true, values: { email: EMAIL } });
+  });
+
+  it('the project-wide email cap is told as try later, not as a sent email', async () => {
+    auth.signUp.mockResolvedValue({
+      data: {},
+      error: { status: 429, code: 'over_email_send_rate_limit', message: CAP_MESSAGE },
+    });
+    expect(await run()).toMatchObject({ error: t.members.tryLater, values: expect.anything() });
   });
 
   it('an address already registered looks like success', async () => {

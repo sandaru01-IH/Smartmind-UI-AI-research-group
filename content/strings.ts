@@ -109,6 +109,7 @@ const en = {
     tryLater: 'Too many requests right now. Wait a few minutes and try again.',
     mailFailed: 'We could not send the email just now. Try again in a few minutes.',
     weakPassword: 'Choose a stronger password that is harder to guess.',
+    samePassword: 'That is your current password. Choose a new one.',
     tooManyAttempts: (minutes: number) =>
       `Too many attempts. Try again in ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}.`,
     disabled: 'Accounts and blogging switch on once the site is connected to its database.',
@@ -130,6 +131,8 @@ const en = {
     uploadFailed: 'The upload failed. Try again.',
     imageRules: 'Use a JPEG, PNG or WebP image of 5 MB or less.',
     saveFailed: 'Could not save. Try again.',
+    nameNotAllowed:
+      'Choose a different name. It must have at least 2 visible characters, and cannot use words like admin, moderator or smartmind.',
     deleteFailed: 'Could not delete this post.',
     writeTitle: 'Write a post',
     editTitle: 'Edit your post',
@@ -183,6 +186,8 @@ const en = {
     unlike: 'Remove your like',
     needVerifyShort: 'Confirm your email to comment and like.',
     commentFailed: 'Could not post your comment. Try again.',
+    commentNotDeleted:
+      'This comment could not be deleted. It may already be gone or hidden by the team.',
     likeFailed: 'Could not save your like. Try again.',
   },
   stories: {

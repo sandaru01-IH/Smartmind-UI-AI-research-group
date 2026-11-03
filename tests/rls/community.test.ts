@@ -528,25 +528,100 @@ describe.skipIf(!enabled)('Row Level Security: community blog', () => {
       ).toBeNull();
     });
 
-    it('rejects impersonating, invisible and reserved display names, and keeps ordinary ones', async () => {
+    it('lets an author edit a post whose old cover is not in the new folder shape, but not swap the cover', async () => {
+      const made = await service
+        .from('blog_posts')
+        .insert(postOf(hardIds.hardA, 'hcover-legacy'))
+        .select('id')
+        .single();
+      expect(made.error).toBeNull();
+      // Written the way posts were before the folder rule: straight to the table, bypassing the trigger.
+      sql(
+        `alter table public.blog_posts disable trigger blog_posts_cover_path; ` +
+          `update public.blog_posts set cover_path = 'covers/2026/legacy.webp', cover_alt = 'Old' where id = '${made.data!.id}'; ` +
+          `alter table public.blog_posts enable trigger blog_posts_cover_path;`,
+      );
+      const edit = await hardA
+        .from('blog_posts')
+        .update({ summary: 'Edited', cover_path: 'covers/2026/legacy.webp', cover_alt: 'Old' })
+        .eq('id', made.data!.id);
+      expect(edit.error, 'sending the same cover back is not a new cover').toBeNull();
+      const swap = await hardA
+        .from('blog_posts')
+        .update({ cover_path: `covers/2026/${uuid()}.webp`, cover_alt: 'New' })
+        .eq('id', made.data!.id);
+      expect(swap.error?.code).toBe('23514');
+    });
+
+    it('refuses reserved and unusable display names, with a check violation', async () => {
       const rename = async (name: string) =>
         hardA.from('member_profiles').update({ display_name: name }).eq('id', hardIds.hardA);
       for (const bad of [
         'Smartmind Team',
         'Admin',
+        'Admin Rossi',
         'smartmind',
         'Site Administrator',
         'Former member',
-        'ab​',
-        '‮evil',
-        'two\nlines',
-        'tab\there',
         'x',
-        ' padded ',
+        '\u200b\u200b',
+        '\u202e\u2060',
+        '   ',
       ])
         expect((await rename(bad)).error?.code, JSON.stringify(bad)).toBe('23514');
       expect((await rename('Ada Lovelace')).error).toBeNull();
       expect((await rename('Ada Smartmindful')).error, 'a longer word is not reserved').toBeNull();
+    });
+
+    it('saves a name that only needs tidying in its tidy form instead of refusing it', async () => {
+      const rename = async (name: string) => {
+        const { error } = await hardA
+          .from('member_profiles')
+          .update({ display_name: name })
+          .eq('id', hardIds.hardA);
+        const { data } = await service
+          .from('member_profiles')
+          .select('display_name')
+          .eq('id', hardIds.hardA)
+          .single();
+        return { error, stored: data?.display_name as string };
+      };
+      const cases: [string, string][] = [
+        ['Ana\u00a0Silva', 'Ana Silva'],
+        ['Zo\u00eb\u2026', 'Zo\u00eb...'],
+        ['Ann\u00b2', 'Ann2'],
+        ['Ab\u200b', 'Ab'],
+        ['\u202eEvil', 'Evil'],
+        ['two\nlines', 'two lines'],
+        ['tab\there', 'tab here'],
+        [' padded ', 'padded'],
+        ['Family \u{1f468}\u200d\u{1f469}\u200d\u{1f467}', 'Family \u{1f468}\u{1f469}\u{1f467}'],
+        ['e\u200b\u0301va', '\u00e9va'],
+      ];
+      for (const [typed, expected] of cases) {
+        const { error, stored } = await rename(typed);
+        expect(error, JSON.stringify(typed)).toBeNull();
+        expect(stored, JSON.stringify(typed)).toBe(expected);
+      }
+    });
+
+    it('cleans a name the same way twice over, so a stored name always passes its own check', () => {
+      const samples = [
+        'e\u200b\u0301va',
+        'Zo\u00eb\u2026',
+        '\ufb01nal',
+        'a\u3000b',
+        '\u2028x\u2029y',
+        'Family \u{1f468}\u200d\u{1f469}',
+        '\u202e\u202dA\u2060B',
+      ];
+      for (const s of samples) {
+        const once = sqlOut(`select public.clean_display_name($q$${s}$q$)`);
+        const twice = sqlOut(
+          `select public.clean_display_name(public.clean_display_name($q$${s}$q$))`,
+        );
+        expect(twice, JSON.stringify(s)).toBe(once);
+      }
     });
 
     it('turns hostile sign-up metadata into a safe name and never blocks the sign-up', async () => {

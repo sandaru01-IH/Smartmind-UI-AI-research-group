@@ -7,14 +7,21 @@
 -- Normalises a name: compatibility-composed Unicode (NFKC, so look-alike forms collapse), line breaks
 -- and tabs become spaces, invisible and direction-changing characters are removed, ends are trimmed,
 -- and it is cut to 80 characters.
-create or replace function public.clean_display_name(t text) returns text
+create or replace function public.clean_display_name_once(t text) returns text
 language sql immutable set search_path = public as $$
   select btrim(left(btrim(
     regexp_replace(
-      regexp_replace(normalize(coalesce(t, ''), NFKC), '[\t\n\r\f\v\u0085  ]', ' ', 'g'),
-      '[\u0000-\u001F\u007F-\u009F­͏؜ᅟᅠ឴឵᠋-᠎​-‏‪-‮⁠-⁯ㅤ﻿ﾠ￹-￻]',
+      regexp_replace(normalize(coalesce(t, ''), NFKC), '[\t\n\r\f\v\u0085\u2028\u2029]', ' ', 'g'),
+      '[\u0000-\u001F\u007F-\u009F\u00AD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180B-\u180E\u200B-\u200F\u202A-\u202E\u2060-\u206F\u3164\uFEFF\uFFA0\uFFF9-\uFFFB]',
       '', 'g')
   ), 80));
+$$;
+
+-- Applied twice so the result is stable: cleaning an already clean name changes nothing (stripping an
+-- invisible character can leave two characters that combine under NFKC, which a single pass misses).
+create or replace function public.clean_display_name(t text) returns text
+language sql immutable set search_path = public as $$
+  select public.clean_display_name_once(public.clean_display_name_once(t));
 $$;
 
 -- Names that would pass for the site or its team, or for the label shown for deleted accounts.
@@ -41,8 +48,24 @@ where exists (select 1 from public.profiles p where p.id = m.id);
 update public.member_profiles set display_name = public.safe_display_name(display_name)
 where display_name is distinct from public.safe_display_name(display_name);
 
+-- Names are cleaned on every write (trigger below), so a name with a non-breaking space or an invisible
+-- character is saved tidied instead of being refused. The constraint is the backstop: it refuses what
+-- cleaning cannot fix (too short once cleaned, or a reserved name).
+create or replace function public.member_profile_clean_name() returns trigger
+language plpgsql set search_path = public as $$
+begin
+  new.display_name := public.clean_display_name(new.display_name);
+  return new;
+end;
+$$;
+drop trigger if exists member_profiles_clean_name on public.member_profiles;
+create trigger member_profiles_clean_name before insert or update of display_name on public.member_profiles
+  for each row execute function public.member_profile_clean_name();
+
+alter table public.member_profiles drop constraint if exists member_display_name_clean;
 alter table public.member_profiles add constraint member_display_name_clean check (
   display_name = public.clean_display_name(display_name)
+  and char_length(display_name) between 2 and 80
   and not public.is_reserved_display_name(display_name)
 ) not valid;
 alter table public.member_profiles validate constraint member_display_name_clean;
@@ -54,6 +77,7 @@ where photo_path is not null and photo_path !~ (
   '^members/' || id::text || '/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpg|png|webp)$'
 );
 
+alter table public.member_profiles drop constraint if exists member_photo_own_folder;
 alter table public.member_profiles add constraint member_photo_own_folder check (
   photo_path is null or photo_path ~ (
     '^members/' || id::text || '/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpg|png|webp)$'
@@ -66,6 +90,11 @@ alter table public.member_profiles validate constraint member_photo_own_folder;
 create or replace function public.blog_cover_own_folder() returns trigger
 language plpgsql set search_path = public as $$
 begin
+  -- An edit that sends the same cover back (every post edit does) is not a new cover: posts written
+  -- before this migration stay editable.
+  if tg_op = 'UPDATE' and new.cover_path is not distinct from old.cover_path then
+    return new;
+  end if;
   if new.cover_path is not null and (new.author_id is null or new.cover_path !~ (
     '^members/' || new.author_id::text || '/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpg|png|webp)$'
   )) then
@@ -74,6 +103,7 @@ begin
   return new;
 end;
 $$;
+drop trigger if exists blog_posts_cover_path on public.blog_posts;
 create trigger blog_posts_cover_path before insert or update of cover_path on public.blog_posts
   for each row execute function public.blog_cover_own_folder();
 
@@ -113,6 +143,7 @@ language sql stable security definer set search_path = public, auth as $$
 $$;
 
 drop policy "member_profiles: public reads unblocked" on public.member_profiles;
+drop policy if exists "member_profiles: public reads confirmed members" on public.member_profiles;
 create policy "member_profiles: public reads confirmed members" on public.member_profiles
   for select to anon, authenticated using (public.member_is_public(id));
 
@@ -146,17 +177,20 @@ revoke all on function
   public.limit_blog_comments(),
   public.milestone_takes_post_tbc(),
   public.post_tbc_to_milestones(),
-  public.blog_cover_own_folder()
+  public.blog_cover_own_folder(),
+  public.member_profile_clean_name()
   from public, anon, authenticated;
 
 -- The name checks run as the member who edits their profile (every update evaluates every check
 -- constraint), so the signed-in role must be able to run them. They only look at the text they get.
 revoke all on function
+  public.clean_display_name_once(text),
   public.clean_display_name(text),
   public.is_reserved_display_name(text),
   public.safe_display_name(text)
   from public, anon;
 grant execute on function
+  public.clean_display_name_once(text),
   public.clean_display_name(text),
   public.is_reserved_display_name(text),
   public.safe_display_name(text)

@@ -11,14 +11,19 @@ export type AuthFailure =
 /**
  * Sorts a Supabase Auth error into what the person should be told. Rate limits and outages are
  * Supabase's problem, not a wrong password, so they must never be shown or counted as one.
- * `email_rate_limited` is kept apart because GoTrue only hits that limit for a real account.
+ * `email_rate_limited` is kept apart because GoTrue only hits the per-address wait ("you can only
+ * request this after N seconds") for a real account. GoTrue uses the same error code for the
+ * project-wide hourly mail cap, which says nothing about any account and means no mail went out for
+ * anyone, so that one is a plain `rate_limited`.
  */
 export function classifyAuthError(
   e: { status?: number; code?: string; message?: string; name?: string } | null,
 ): AuthFailure {
   if (!e) return 'other';
   const { status, code, message = '', name } = e;
-  if (code === 'over_email_send_rate_limit') return 'email_rate_limited';
+  if (code === 'over_email_send_rate_limit') {
+    return /only request this after/i.test(message) ? 'email_rate_limited' : 'rate_limited';
+  }
   if (code === 'over_request_rate_limit' || status === 429) return 'rate_limited';
   if (
     // auth-js returns network failures (DNS, refused, timeout) as status 0, not as a throw.
