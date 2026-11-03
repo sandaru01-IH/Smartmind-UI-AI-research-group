@@ -150,7 +150,7 @@ describe('registerAction', () => {
       data: {},
       error: { status: 429, code: 'over_email_send_rate_limit' },
     });
-    expect(await run()).toEqual({ done: true });
+    expect(await run()).toEqual({ done: true, values: { email: EMAIL } });
   });
 
   it('an address already registered looks like success', async () => {
@@ -158,7 +158,7 @@ describe('registerAction', () => {
       data: {},
       error: { status: 422, code: 'user_already_exists', message: 'User already registered' },
     });
-    expect(await run()).toEqual({ done: true });
+    expect(await run()).toEqual({ done: true, values: { email: EMAIL } });
   });
 
   it('every attempt is reserved before the call', async () => {
@@ -342,11 +342,14 @@ describe('values echoed back so the form keeps what was typed', () => {
       expect(wire, `${secret} leaked`).not.toContain(secret);
   });
 
-  it('successful states carry no values', async () => {
+  it('successful states carry no values, except the address a register link went to', async () => {
     auth.resetPasswordForEmail.mockResolvedValue({ data: {}, error: null });
     auth.signUp.mockResolvedValue({ data: {}, error: null });
     expect(await forgotPasswordAction({}, form({ email: EMAIL }))).toEqual({ done: true });
-    expect(await registerAction({}, registerForm())).toEqual({ done: true });
+    expect(await registerAction({}, registerForm())).toEqual({
+      done: true,
+      values: { email: EMAIL },
+    });
   });
 });
 

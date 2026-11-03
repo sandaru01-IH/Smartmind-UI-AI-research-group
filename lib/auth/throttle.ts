@@ -101,6 +101,20 @@ export const resetThrottle = createThrottle({
   lockMs: 60 * 60_000,
 });
 
+/** Confirmation emails sent again, per address: every attempt counts. */
+export const resendThrottle = createThrottle({
+  maxFailures: 3,
+  windowMs: 60 * 60_000,
+  lockMs: 60 * 60_000,
+});
+
+/** The same per email, whatever the address, so rotating addresses cannot flood one inbox. */
+export const resendEmailThrottle = createThrottle({
+  maxFailures: 3,
+  windowMs: 60 * 60_000,
+  lockMs: 60 * 60_000,
+});
+
 /** New passwords set per user: every attempt counts. */
 export const passwordChangeThrottle = createThrottle({
   maxFailures: 5,

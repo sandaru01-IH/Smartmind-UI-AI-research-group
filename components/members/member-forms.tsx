@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState, useEffect, useRef, type RefObject } from 'react';
+import { useActionState, useEffect, useRef, type ReactNode, type RefObject } from 'react';
 import { Loader2 } from 'lucide-react';
 import {
   forgotPasswordAction,
   memberLoginAction,
   registerAction,
+  resendConfirmationAction,
   resetPasswordAction,
   type MemberFormState,
 } from '@/app/members-actions';
@@ -54,35 +55,47 @@ function EmailField({
   errors,
   defaultValue,
   autoComplete = 'email',
+  id = 'email',
 }: {
   errors?: string[];
   defaultValue?: string;
   autoComplete?: 'email' | 'username';
+  /** Set when a second form on the page has its own email field. */
+  id?: string;
 }) {
   return (
     <div>
-      <Label htmlFor="email">{t.members.email}</Label>
+      <Label htmlFor={id}>{t.members.email}</Label>
       <input
-        id="email"
+        id={id}
         name="email"
         type="email"
         autoComplete={autoComplete}
         required
         defaultValue={defaultValue}
-        aria-describedby={describedBy(!!errors?.length && 'email-error')}
+        aria-describedby={describedBy(!!errors?.length && `${id}-error`)}
         aria-invalid={errors?.length ? true : undefined}
         className={fieldClass}
       />
-      <FieldError id="email-error" messages={errors} />
+      <FieldError id={`${id}-error`} messages={errors} />
     </div>
   );
 }
 
-function Done({ title, message }: { title?: string; message: string }) {
+/** Anything after the message (a follow-up form, links) sits outside the live region. */
+function Done({
+  title,
+  message,
+  children,
+}: {
+  title?: string;
+  message: string;
+  children?: ReactNode;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   // The form it replaces held focus, which would otherwise be lost with it.
   useEffect(() => ref.current?.focus(), []);
-  return (
+  const status = (
     <div
       ref={ref}
       role="status"
@@ -93,14 +106,64 @@ function Done({ title, message }: { title?: string; message: string }) {
       <p className="text-muted">{message}</p>
     </div>
   );
+  return children ? (
+    <div className="space-y-6">
+      {status}
+      {children}
+    </div>
+  ) : (
+    status
+  );
+}
+
+const textLink =
+  'inline-flex min-h-11 items-center text-[0.95rem] underline underline-offset-4 hover:text-fg';
+
+/**
+ * Sends the confirmation email again. Always answers the same, whether or not the address has an
+ * account. Pages show it where a missing or dead link leaves someone stuck.
+ */
+export function ResendForm({ email, lead }: { email?: string; lead?: string }) {
+  const [state, action, pending] = useActionState<MemberFormState, FormData>(
+    resendConfirmationAction,
+    {},
+  );
+  const form = useRef<HTMLFormElement>(null);
+  useFocusOnError(state, form);
+  if (state.done) return <Done message={t.members.resendDone} />;
+  return (
+    <form ref={form} action={action} className="space-y-4" noValidate>
+      {lead ? <p className="text-[0.95rem] text-muted">{lead}</p> : null}
+      <EmailField id="resend-email" defaultValue={state.values?.email ?? email} />
+      <FormMessage error={state.error} />
+      <Submit pending={pending} idle={t.members.resendSubmit} busy={t.members.resendBusy} />
+    </form>
+  );
 }
 
 export function RegisterForm() {
   const [state, action, pending] = useActionState<MemberFormState, FormData>(registerAction, {});
   const form = useRef<HTMLFormElement>(null);
   useFocusOnError(state, form);
-  if (state.done)
-    return <Done title={t.members.registerDoneTitle} message={t.members.registerDone} />;
+  if (state.done) {
+    const email = state.values?.email ?? '';
+    return (
+      <Done title={t.members.registerDoneTitle} message={t.members.registerDone(email)}>
+        <ResendForm email={email} lead={t.members.registerDoneResend} />
+        <div className="space-y-1 border-t border-line pt-4 text-[0.95rem] text-muted">
+          <p>{t.members.registerDoneHaveAccount}</p>
+          <p className="flex flex-wrap gap-x-6">
+            <Link href="/login" className={textLink}>
+              {t.members.login}
+            </Link>
+            <Link href="/forgot-password" className={textLink}>
+              {t.members.forgot}
+            </Link>
+          </p>
+        </div>
+      </Done>
+    );
+  }
   const fe = state.fieldErrors ?? {};
   return (
     <form ref={form} action={action} className="space-y-5" noValidate>
@@ -162,31 +225,57 @@ export function RegisterForm() {
   );
 }
 
-export function MemberLoginForm({ next, notice }: { next: string; notice?: string }) {
+/**
+ * `resend` puts the "send the link again" form under the log-in form from the start (a dead confirm
+ * link); otherwise it appears once a log-in fails because the email is not confirmed.
+ */
+export function MemberLoginForm({
+  next,
+  notice,
+  resend = false,
+}: {
+  next: string;
+  notice?: string;
+  resend?: boolean;
+}) {
   const [state, action, pending] = useActionState<MemberFormState, FormData>(memberLoginAction, {});
   const form = useRef<HTMLFormElement>(null);
   useFocusOnError(state, form);
   return (
-    <form ref={form} action={action} className="space-y-5" noValidate>
-      <input type="hidden" name="next" value={next} />
-      {notice && !state.error ? (
-        <p role="status" className="border border-line-strong p-3 text-[0.95rem] text-muted">
-          {notice}
+    <>
+      <form ref={form} action={action} className="space-y-5" noValidate>
+        <input type="hidden" name="next" value={next} />
+        {notice && !state.error ? (
+          <p role="status" className="border border-line-strong p-3 text-[0.95rem] text-muted">
+            {notice}
+          </p>
+        ) : null}
+        <EmailField defaultValue={state.values?.email} autoComplete="username" />
+        <PasswordField autoComplete="current-password" />
+        <p>
+          <Link
+            href="/forgot-password"
+            className="inline-flex min-h-11 items-center text-[0.95rem] text-muted underline underline-offset-4 hover:text-fg"
+          >
+            {t.members.forgot}
+          </Link>
         </p>
+        <FormMessage error={state.error} />
+        <Submit pending={pending} idle={t.members.loginSubmit} busy={t.members.loginBusy} />
+      </form>
+      {resend || state.unconfirmed ? (
+        // Keyed on the address so a later unconfirmed log-in refills the field.
+        <ResendSection key={state.values?.email ?? ''} email={state.values?.email} />
       ) : null}
-      <EmailField defaultValue={state.values?.email} autoComplete="username" />
-      <PasswordField autoComplete="current-password" />
-      <p>
-        <Link
-          href="/forgot-password"
-          className="inline-flex min-h-11 items-center text-[0.95rem] text-muted underline underline-offset-4 hover:text-fg"
-        >
-          {t.members.forgot}
-        </Link>
-      </p>
-      <FormMessage error={state.error} />
-      <Submit pending={pending} idle={t.members.loginSubmit} busy={t.members.loginBusy} />
-    </form>
+    </>
+  );
+}
+
+function ResendSection({ email }: { email?: string }) {
+  return (
+    <section className="mt-8 border-t border-line pt-6">
+      <ResendForm email={email} lead={t.members.resendLead} />
+    </section>
   );
 }
 

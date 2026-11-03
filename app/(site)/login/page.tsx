@@ -28,7 +28,14 @@ async function Form({ searchParams }: { searchParams: SearchParams }) {
         : one(sp.error) === 'busy'
           ? t.members.confirmBusy
           : undefined;
-  return <MemberLoginForm next={safeMemberNext(one(sp.next))} notice={notice} />;
+  return (
+    <MemberLoginForm
+      next={safeMemberNext(one(sp.next))}
+      notice={notice}
+      // A dead confirm link needs a way to get a new one.
+      resend={one(sp.error) === 'confirm'}
+    />
+  );
 }
 
 export default function LoginPage({ searchParams }: { searchParams: SearchParams }) {

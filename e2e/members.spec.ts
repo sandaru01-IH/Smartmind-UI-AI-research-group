@@ -2,13 +2,17 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import {
   PASSWORD,
+  clearMail,
   confirmLink,
   latestMail,
   createMember,
+  createUnconfirmedMember,
   expectSignedIn,
   logInMember,
   logOutMember,
+  mailCount,
   memberEmail,
+  ownClientAddress,
   publishPost,
   registerMember,
   requestResetLink,
@@ -181,6 +185,112 @@ test.describe('member accounts', () => {
     await expect(page.getByText('Check your email')).toBeVisible();
     await logInMember(page, email, '/', false);
     await expect(page.locator('main').getByRole('alert')).toContainText('Confirm your email first');
+    // The way out is right there, already holding the address they typed.
+    await expect(page.getByRole('button', { name: 'Send the link again' })).toBeVisible();
+    await expect(page.getByLabel('Email', { exact: true }).nth(1)).toHaveValue(email);
+  });
+
+  test('the register panel names the address, and "Send the link again" sends exactly one new email', async ({
+    page,
+    baseURL,
+  }) => {
+    await ownClientAddress(page);
+    const email = await submitRegistration(page, 'resend');
+    await expect(page.locator('main').getByRole('status')).toContainText(email);
+    // The panel's own links, not the page footer's.
+    const account = page.getByText(/Then no new link is sent/).locator('..');
+    await expect(account.getByRole('link', { name: 'Log in' })).toHaveAttribute('href', '/login');
+    await expect(account.getByRole('link', { name: 'Forgot your password?' })).toHaveAttribute(
+      'href',
+      '/forgot-password',
+    );
+    await expect(page.getByLabel('Email', { exact: true })).toHaveValue(email);
+
+    await latestMail(email);
+    await clearMail(email);
+    // Supabase refuses a second email to one address within a second, which would send nothing.
+    await page.waitForTimeout(1_100);
+    await page.getByRole('button', { name: 'Send the link again' }).click();
+    // The answer takes focus from the button it replaces.
+    await expect(
+      page
+        .getByRole('status')
+        .filter({ hasText: 'If that address is waiting for confirmation, we sent a new link.' }),
+    ).toBeFocused();
+    await expect(async () => expect(await mailCount(email)).toBe(1)).toPass({ timeout: 20_000 });
+    // Exactly one: nothing else follows it.
+    await page.waitForTimeout(2_000);
+    expect(await mailCount(email)).toBe(1);
+
+    // The new link confirms the account.
+    await page.goto(confirmLink(await latestMail(email), baseURL!));
+    await page.getByRole('button', { name: 'Confirm my email' }).click();
+    await expect(page).toHaveURL(/\/login\?verified=1/);
+  });
+
+  test('registering an address that already has an account points at log in and reset', async ({
+    page,
+  }) => {
+    await ownClientAddress(page);
+    const email = await createMember('again');
+    await page.goto('/register', { waitUntil: 'networkidle' });
+    await page.getByLabel('Your name').fill('E2E again');
+    await page.getByLabel('Email').fill(email);
+    await page.getByLabel('Password', { exact: true }).fill(PASSWORD);
+    await page.getByLabel(/I accept the/).check();
+    await page.getByRole('button', { name: 'Create account' }).click();
+    // The same panel as a new address, so it cannot tell anyone the account exists.
+    await expect(page.getByText('Check your email')).toBeVisible();
+    await expect(page.locator('main').getByRole('status')).toContainText(email);
+    const account = page
+      .getByText(/Already have an account\? Then no new link is sent/)
+      .locator('..');
+    await expect(account.getByRole('link', { name: 'Log in' })).toHaveAttribute('href', '/login');
+    await expect(account.getByRole('link', { name: 'Forgot your password?' })).toHaveAttribute(
+      'href',
+      '/forgot-password',
+    );
+  });
+
+  test('a dead confirm link offers to send a new one, and it arrives', async ({
+    page,
+    baseURL,
+  }) => {
+    await ownClientAddress(page);
+    const email = await createUnconfirmedMember('deadlink');
+    await page.goto('/login?error=confirm', { waitUntil: 'networkidle' });
+    await expect(page.getByText(/send yourself a new link/)).toBeVisible();
+    const field = page.locator('#resend-email');
+    await expect(field).toHaveValue('');
+    await field.fill(email);
+    await page.getByRole('button', { name: 'Send the link again' }).click();
+    await expect(
+      page.getByText('If that address is waiting for confirmation, we sent a new link.'),
+    ).toBeVisible();
+    await page.goto(confirmLink(await latestMail(email), baseURL!));
+    await page.getByRole('button', { name: 'Confirm my email' }).click();
+    await expect(page).toHaveURL(/\/login\?verified=1/);
+  });
+
+  test('a fourth resend within the hour is refused', async ({ page }) => {
+    await ownClientAddress(page);
+    const email = await createUnconfirmedMember('spammed');
+    const send = async () => {
+      await page.goto('/login?error=confirm', { waitUntil: 'networkidle' });
+      await page.locator('#resend-email').fill(email);
+      await page.getByRole('button', { name: 'Send the link again' }).click();
+    };
+    for (let i = 0; i < 3; i++) {
+      await send();
+      await expect(
+        page.getByText('If that address is waiting for confirmation, we sent a new link.'),
+      ).toBeVisible();
+    }
+    await send();
+    const alert = page.locator('main').getByRole('alert');
+    await expect(alert).toHaveText(/^Too many attempts\. Try again in 60 minutes\.$/);
+    await expect(alert).toBeFocused();
+    await expect(page.locator('#resend-email')).toHaveValue(email);
   });
 
   test('a member cannot get into the admin, with or without trying the admin login', async ({

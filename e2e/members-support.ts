@@ -43,9 +43,42 @@ export async function submitRegistration(page: Page, name: string) {
   return email;
 }
 
-const mailCount = async (to: string): Promise<number> =>
+export const mailCount = async (to: string): Promise<number> =>
   ((await (await fetch(`${MAIL}/api/v1/search?query=${encodeURIComponent(`to:${to}`)}`)).json())
     .messages?.length ?? 0) as number;
+
+/** Deletes every email sent to an address, so a test can count what arrives next. */
+export async function clearMail(to: string) {
+  await fetch(`${MAIL}/api/v1/search?query=${encodeURIComponent(`to:${to}`)}`, {
+    method: 'DELETE',
+  });
+  expect(await mailCount(to)).toBe(0);
+}
+
+let lastOctet = 0;
+/**
+ * Gives this page a client address of its own (x-real-ip, which `next start` passes through).
+ * Every e2e request otherwise comes from one address and shares its per-address throttles, which
+ * would leave the order of the tests deciding which ones are refused.
+ */
+export async function ownClientAddress(page: Page) {
+  lastOctet += 1;
+  const third = Number.parseInt(stamp.slice(-2), 36) % 256;
+  await page.setExtraHTTPHeaders({ 'x-real-ip': `198.18.${third}.${lastOctet}` });
+}
+
+/** An account that exists but has not confirmed its email. No email is sent for it. */
+export async function createUnconfirmedMember(name: string): Promise<string> {
+  const email = memberEmail(name);
+  const { error } = await serviceClient().auth.admin.createUser({
+    email,
+    password: PASSWORD,
+    email_confirm: false,
+    user_metadata: { display_name: `E2E ${name}` },
+  });
+  if (error) throw error;
+  return email;
+}
 
 /** Asks for a password reset email and returns its link, once one new email has arrived. */
 export async function requestResetLink(page: Page, email: string, baseURL: string) {

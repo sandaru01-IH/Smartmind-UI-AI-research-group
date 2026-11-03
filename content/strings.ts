@@ -52,8 +52,15 @@ const en = {
     registerSubmit: 'Create account',
     registerBusy: 'Creating account',
     registerDoneTitle: 'Check your email',
-    registerDone:
-      'If that address can be registered, we have sent a link to confirm it. Open it to finish creating your account.',
+    registerDone: (email: string) =>
+      `We have sent a link to ${email} to confirm it, unless that address already has an account. It can take a few minutes to arrive and may land in your spam folder. Open it to finish creating your account.`,
+    registerDoneResend: 'Nothing arrived after a few minutes?',
+    registerDoneHaveAccount:
+      'Already have an account? Then no new link is sent. Log in, or reset your password if you have forgotten it.',
+    resendLead: 'Need a new confirmation link? Enter your email and we will send one.',
+    resendSubmit: 'Send the link again',
+    resendBusy: 'Sending',
+    resendDone: 'If that address is waiting for confirmation, we sent a new link.',
     haveAccount: 'Already have an account?',
     noAccount: 'New here?',
     loginTitle: 'Log in',
@@ -63,10 +70,11 @@ const en = {
     forgotBusy: 'Sending',
     resetBusy: 'Saving',
     loginFailed: 'That email and password do not match.',
-    notConfirmed: 'Confirm your email first. Check your inbox for the link we sent.',
+    notConfirmed:
+      'Confirm your email first. Check your inbox and spam folder for the link we sent, or send it again below.',
     verifiedNotice: 'Your email is confirmed. You can log in now.',
     confirmFailed:
-      'That link has expired or was already used. If you have already confirmed your email, just log in below. If not, ask for a new link.',
+      'That link has expired or was already used. If you have already confirmed your email, just log in below. If not, send yourself a new link at the bottom of this page.',
     resetLinkFailed:
       'That reset link has expired or was already used. Enter your email to get a new one.',
     confirmBusy:

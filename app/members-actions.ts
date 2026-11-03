@@ -13,12 +13,15 @@ import {
   memberLoginThrottle,
   passwordChangeThrottle,
   registerThrottle,
+  resendEmailThrottle,
+  resendThrottle,
   resetThrottle,
 } from '@/lib/auth/throttle';
 import {
   forgotPasswordSchema,
   memberLoginSchema,
   registerSchema,
+  resendConfirmationSchema,
   resetPasswordSchema,
   safeMemberNext,
 } from '@/lib/members/schema';
@@ -34,6 +37,8 @@ export interface MemberFormState {
   done?: boolean;
   /** The reset session is missing or too old, so the form offers a new link. */
   expired?: boolean;
+  /** The email is not confirmed yet, so the form offers to send the link again. */
+  unconfirmed?: boolean;
   /**
    * What the person typed, so the form can put it back: React clears a form's fields once its
    * action settles, even on an error. Never holds a password.
@@ -60,7 +65,10 @@ function logAuthThrow(action: string, e: unknown): void {
   console.error('[auth]', { action, name: e instanceof Error ? e.name : typeof e });
 }
 
-/** Creates an account and sends the confirmation email. Never says whether the email is already taken. */
+/**
+ * Creates an account and sends the confirmation email. Never says whether the email is already taken.
+ * Every "done" carries the address back, so the panel can name where the link went.
+ */
 export async function registerAction(
   _prev: MemberFormState,
   formData: FormData,
@@ -107,10 +115,11 @@ export async function registerAction(
     return { error: t.members.unavailable, values };
   }
   const failure = classifyAuthError(error);
+  const done = { done: true, values: { email: parsed.data.email } };
   if (error && failure === 'email_rate_limited') {
     // Only an existing address hits the per-address email limit, so it must look like success.
     logAuthTrouble('register', error);
-    return { done: true };
+    return done;
   }
   if (error && (failure === 'rate_limited' || failure === 'send_failed')) {
     // Told truthfully: the request limit is shared by everyone, and a failed send means no email.
@@ -130,7 +139,7 @@ export async function registerAction(
   if (error && !/already|registered/i.test(error.message)) {
     return { error: t.members.registerFailed, values };
   }
-  return { done: true };
+  return done;
 }
 
 export async function memberLoginAction(
@@ -175,7 +184,8 @@ export async function memberLoginAction(
     memberLoginThrottle.fail(key);
     memberAccountThrottle.fail(parsed.data.email);
     // Supabase only reports an unconfirmed email once the password was right, so this reveals nothing.
-    if (failure === 'not_confirmed') return { error: t.members.notConfirmed, values };
+    if (failure === 'not_confirmed')
+      return { error: t.members.notConfirmed, unconfirmed: true, values };
     return { error: t.members.loginFailed, values };
   }
   memberLoginThrottle.reset(key);
@@ -226,6 +236,46 @@ export async function forgotPasswordAction(
     logAuthTrouble('forgotPassword', error);
     return { error: t.members.tryLater, values };
   }
+  return { done: true };
+}
+
+/**
+ * Sends the sign-up confirmation email again. Like the reset form it always answers the same, so it
+ * cannot tell anyone whether an address has an account or is already confirmed. Every attempt is
+ * counted per client address and per email before Supabase is asked.
+ */
+export async function resendConfirmationAction(
+  _prev: MemberFormState,
+  formData: FormData,
+): Promise<MemberFormState> {
+  const values = { email: text(formData.get('email')) };
+  const parsed = resendConfirmationSchema.safeParse({ email: formData.get('email') });
+  if (!parsed.success) return { error: t.members.emailInvalid, values };
+
+  const key = (await clientIp()) ?? parsed.data.email;
+  const state = [resendThrottle.check(key), resendEmailThrottle.check(parsed.data.email)].find(
+    (s) => s.locked,
+  );
+  if (state) return { error: tooMany(state.retryAfterSeconds), values };
+  resendThrottle.fail(key);
+  resendEmailThrottle.fail(parsed.data.email);
+
+  const supabase = await createSessionClient();
+  if (!supabase) return { error: t.members.unavailable, values };
+  let error;
+  try {
+    // No redirect: the email templates build their links from the Site URL.
+    ({ error } = await supabase.auth.resend({ type: 'signup', email: parsed.data.email }));
+  } catch (e) {
+    logAuthThrow('resendConfirmation', e);
+    return { error: t.members.unavailable, values };
+  }
+  if (error) {
+    logAuthTrouble('resendConfirmation', error);
+    // The per-request limit applies to everyone, so it reveals nothing about the account.
+    if (classifyAuthError(error) === 'rate_limited') return { error: t.members.tryLater, values };
+  }
+  // Sent, an interval limit, a failed send, an unknown or confirmed address: all look alike.
   return { done: true };
 }
 

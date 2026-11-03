@@ -18,6 +18,8 @@ export const memberLoginSchema = z.object({
 
 export const forgotPasswordSchema = z.object({ email });
 
+export const resendConfirmationSchema = z.object({ email });
+
 export const resetPasswordSchema = z.object({ password: newPassword });
 
 /** Where to go after logging in: an on-site path, never another site and never the admin. */
