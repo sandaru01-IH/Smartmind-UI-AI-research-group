@@ -1,14 +1,22 @@
 /**
  * Creates (or resets) an admin account. The only way to get an admin.
- *   npm run create-admin -- you@example.com
+ *   npm run create-admin -- you@example.com [--force]
  * Password: read from ADMIN_PASSWORD, or generated and printed once. Minimum 12 characters.
+ * An existing member account is NOT turned into an admin (and its password is not replaced)
+ * unless --force is given; an existing admin can always be reset.
  */
 import { randomBytes } from 'node:crypto';
 import { serviceClient } from './_env';
+import { shouldPromote, type ExistingAccount } from './create-admin-logic';
 
-const email = process.argv[2]?.trim().toLowerCase();
+const args = process.argv.slice(2);
+const force = args.includes('--force');
+const email = args
+  .find((a) => !a.startsWith('--'))
+  ?.trim()
+  .toLowerCase();
 if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-  console.error('Usage: npm run create-admin -- you@example.com');
+  console.error('Usage: npm run create-admin -- you@example.com [--force]');
   process.exit(1);
 }
 
@@ -20,19 +28,38 @@ if (supplied && supplied.length < 12) {
 const password = supplied ?? randomBytes(15).toString('base64url');
 const db = serviceClient();
 
-async function findUserId(): Promise<string | null> {
-  for (let page = 1; page <= 20; page++) {
-    const { data, error } = await db.auth.admin.listUsers({ page, perPage: 200 });
+async function findExisting(): Promise<ExistingAccount | null> {
+  const perPage = 200;
+  for (let page = 1; ; page++) {
+    const { data, error } = await db.auth.admin.listUsers({ page, perPage });
     if (error) throw error;
     const hit = data.users.find((u) => u.email?.toLowerCase() === email);
-    if (hit) return hit.id;
-    if (data.users.length < 200) return null;
+    if (hit) {
+      const { data: profile, error: profileError } = await db
+        .from('profiles')
+        .select('role')
+        .eq('id', hit.id)
+        .maybeSingle();
+      if (profileError) throw profileError;
+      return { id: hit.id, isAdmin: profile?.role === 'admin' };
+    }
+    if (data.users.length < perPage) return null;
   }
-  return null;
 }
 
 async function main() {
-  let id = await findUserId();
+  const existing = await findExisting();
+  const action = shouldPromote(existing, force);
+  if (action === 'refuse') {
+    console.error(
+      `${email} already has a member account that is not an admin. Nothing was changed.\n` +
+        'Promoting it would also replace its password. If that is really what you want,\n' +
+        'run the command again with --force.',
+    );
+    process.exit(2);
+  }
+
+  let id = existing?.id ?? null;
   let created = false;
   if (id) {
     const { error } = await db.auth.admin.updateUserById(id, { password, email_confirm: true });

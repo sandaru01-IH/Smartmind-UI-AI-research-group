@@ -25,6 +25,11 @@ Run them **in that order**. Either way works:
 - **From your computer** (the project is already linked): `npx supabase db push`. It asks for the database password and applies whatever is missing.
 - **In the dashboard:** open **SQL Editor**, paste each file in turn and press **Run**.
 
+Two security migrations come after those. They are safe to run on a live database (the first tidies existing rows before adding its rules), and `npx supabase db push` applies them with the rest:
+
+6. `20261101000000_member_hardening.sql` (member file paths and display names, hides unconfirmed and admin profiles, indexes)
+7. `20261101000100_media_listing.sql` (stops anyone from listing every file in the `media` bucket; the public file links keep working)
+
 If the live database was set up before `20261022000000_extra_partners.sql` and `20261023000000_collab_projects.sql` existed, run those two first. `supabase db push` does this for you.
 
 > `hosted-clean-install.sql` rebuilds the **whole** database from nothing and **deletes all data and all logins**. Only use it on an empty or throw-away project.
@@ -41,6 +46,7 @@ If the live database was set up before `20261022000000_extra_partners.sql` and `
 
    Both build the link from `{{ .SiteURL }}` and `{{ .TokenHash }}`; leave those as they are, and keep the **Site URL** from step 2 correct.
    **Do not use Supabase's ready-made `{{ .ConfirmationURL }}` link in these emails.** It makes Supabase use up the one-time token before the site sees it, and the person then lands on the login page with "That link has expired or was already used", and a password reset never reaches the new-password form. If you restyle the emails, keep the two links exactly as they are in the files.
+
 4. **Password rules:** set the minimum length to **12** (the site already asks for 12).
 5. **Do not turn on CAPTCHA yet.** The site's forms do not send a CAPTCHA answer, so enabling it in Supabase would stop **all** registrations and logins. If spam becomes a problem later, ask for CAPTCHA support to be added first.
 
@@ -62,11 +68,11 @@ Supabase's built-in email sender only allows a handful of emails an hour, which 
 
 In Brevo open **SMTP & API → SMTP** (top-right menu → **SMTP & API**). You need:
 
-| Setting | Value |
-| --- | --- |
-| Host | `smtp-relay.brevo.com` |
-| Port | `587` |
-| Login | the SMTP login shown on that page (it is **not** your account email) |
+| Setting  | Value                                                                                                               |
+| -------- | ------------------------------------------------------------------------------------------------------------------- |
+| Host     | `smtp-relay.brevo.com`                                                                                              |
+| Port     | `587`                                                                                                               |
+| Login    | the SMTP login shown on that page (it is **not** your account email)                                                |
 | Password | press **Generate a new SMTP key**, give it a name such as "Smartmind site", and copy the key now (it is shown once) |
 
 ### 3c. Give them to Supabase
@@ -110,6 +116,8 @@ npm run create-admin -- you@example.com
 
 Registering on the site never makes anyone an admin.
 
+If that address already belongs to an ordinary member, the command stops and changes nothing, because promoting it would also replace that member's password. Add `--force` only if you really mean to take over that account: `npm run create-admin -- you@example.com --force`. Resetting the password of an account that is already an admin never needs `--force`.
+
 ## 6. Before you announce it
 
 - **Read and approve the Terms and Privacy text.** It is a first draft in `content/legal.ts` and both pages show a "Draft" notice until you change it. It should be read by the team, and by someone who can advise on the law in Sri Lanka, before launch.
@@ -127,3 +135,47 @@ npm run dev
 Local emails are never sent anywhere. Open the test inbox at **http://127.0.0.1:54324** to read the confirmation and reset emails.
 
 `npm run e2e` builds the site and runs the browser tests against the local database. Browser tests that register people need the local Supabase to be running.
+
+## 8. Hardening checklist for the live project
+
+`supabase/config.toml` only configures the **local** stack. The hosted project keeps its own copy of every setting below, so each one has to be checked in the dashboard once (names move around; look for the closest one). Tick them off after you have set them.
+
+**Authentication → URL configuration / Sign-in methods**
+
+- [ ] **Site URL** is the real public address, and **Redirect URLs** lists `https://your-address/auth/confirm`. A wrong Site URL breaks every emailed link.
+- [ ] **Confirm email** is **on**.
+- [ ] **Secure password change** is **on** (config.toml: `secure_password_change = true`). A session older than about 24 hours must then re-authenticate before the password can be changed.
+- [ ] **Email OTP expiry** is **1800** seconds (30 minutes) or less (config.toml: `otp_expiry = 1800`). This is how long a confirmation or reset link stays valid.
+- [ ] **Minimum password length** is **12**.
+- [ ] **Leaked password protection** (checks new passwords against the HaveIBeenPwned list) is **on**. On Supabase this is a Pro-plan setting; if the plan does not include it, note that here and rely on the 12-character minimum.
+- [ ] **Sessions:** set a **time-box** (for example 30 days) and, if the plan allows it, an **inactivity timeout** (for example 7 days), so a lost device does not stay signed in for ever. Both are commented out in `config.toml`; they are plan-dependent on the hosted project.
+
+**Email**
+
+- [ ] **Custom SMTP** is switched on (section 3) and **Emails sent per hour** is raised to match what Brevo allows. The site's resend button, the register form and "Forgot your password?" all send mail, so the hourly cap is also the ceiling for how many people can register in an hour.
+- [ ] A real registration was tested end to end (section 3d), including the confirmation email, the resend button and the reset email.
+
+**Database**
+
+- [ ] Migrations `20261101000000` and `20261101000100` are applied (section 1).
+- [ ] In **Storage → media → Policies** there is no policy called `media: public read`.
+
+### Not done by code (needs an account, a service or a decision)
+
+These are known gaps. The site works without them, but they are the next things to do if abuse shows up:
+
+- **CAPTCHA** on register, forgot-password and resend. Needs a Cloudflare Turnstile (or hCaptcha) account, then support added to the forms; do **not** switch it on in Supabase before that (section 2, step 5).
+- **A shared rate-limit store.** The site limits repeated attempts (per address and per e-mail) in the memory of each running server instance, so the limits reset when an instance restarts and are not shared between instances. Moving them to Upstash/Redis is the follow-up.
+- **Admin two-factor sign-in (TOTP).** Admin sign-in is password only. Enabling it needs the admin pages to require the second factor as well.
+- **Per-account sign-in lockout, upload and like budgets, blocked-address list.** Only the per-address and per-e-mail attempt limits exist.
+
+### Known residual risk: password change with a stolen token
+
+The site only lets someone change a password from the account page when they have proved control of the inbox in the last 15 minutes (or are using a reset link). Supabase's own sign-in service, however, also accepts `PUT /auth/v1/user` directly with a valid access token and the public key, and that route does not go through the site.
+
+With **Secure password change** on (checked on the local stack, 2026-11-04):
+
+- a session **older than about 24 hours** is refused with `reauthentication_needed`;
+- a session **younger than that** can still change the password with just its access token.
+
+So someone who steals a live access token (for example from a compromised browser) in the first day of a session could still set a new password. Access tokens last an hour, and a password change signs out every other device (the site calls `signOut({ scope: 'others' })`), so the damage window is small, but it is not zero. Closing it fully would mean turning off direct password changes at the service level or adding a re-authentication step; neither is available as a plain setting today.
