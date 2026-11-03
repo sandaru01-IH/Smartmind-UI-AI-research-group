@@ -25,7 +25,7 @@ Run them **in that order**. Either way works:
 - **From your computer** (the project is already linked): `npx supabase db push`. It asks for the database password and applies whatever is missing.
 - **In the dashboard:** open **SQL Editor**, paste each file in turn and press **Run**.
 
-Two security migrations come after those. They are safe to run on a live database (the first tidies existing rows before adding its rules), and `npx supabase db push` applies them with the rest:
+Two security migrations come after those. **Do not run them on the live project blind**: they change existing rows (renames, clears photo references) and some posts or comments could look different afterwards. Follow [`docs/hosted-rollout.md`](hosted-rollout.md), which has the read-only checks to run first and the exact apply steps:
 
 6. `20261101000000_member_hardening.sql` (member file paths and display names, hides unconfirmed and admin profiles, indexes)
 7. `20261101000100_media_listing.sql` (stops anyone from listing every file in the `media` bucket; the public file links keep working)
@@ -167,15 +167,17 @@ These are known gaps. The site works without them, but they are the next things 
 - **CAPTCHA** on register, forgot-password and resend. Needs a Cloudflare Turnstile (or hCaptcha) account, then support added to the forms; do **not** switch it on in Supabase before that (section 2, step 5).
 - **A shared rate-limit store.** The site limits repeated attempts (per address and per e-mail) in the memory of each running server instance, so the limits reset when an instance restarts and are not shared between instances. Moving them to Upstash/Redis is the follow-up.
 - **Admin two-factor sign-in (TOTP).** Admin sign-in is password only. Enabling it needs the admin pages to require the second factor as well.
-- **Per-account sign-in lockout, upload and like budgets, blocked-address list.** Only the per-address and per-e-mail attempt limits exist.
+- **A per-address cap on member sign-in.** Sign-in attempts are limited per address-and-email pair and per email, but one address that keeps changing the email it tries is not limited by the site (Supabase's own limit still applies, and that limit is shared by every visitor). Also missing: upload and like budgets and a blocked-address list.
 
-### Known residual risk: password change with a stolen token
+### Known residual risk: account takeover with a stolen session
 
 The site only lets someone change a password from the account page when they have proved control of the inbox in the last 15 minutes (or are using a reset link). Supabase's own sign-in service, however, also accepts `PUT /auth/v1/user` directly with a valid access token and the public key, and that route does not go through the site.
 
 With **Secure password change** on (checked on the local stack, 2026-11-04):
 
 - a session **older than about 24 hours** is refused with `reauthentication_needed`;
-- a session **younger than that** can still change the password with just its access token.
+- a session **younger than that** can change the password with just its access token.
 
-So someone who steals a live access token (for example from a compromised browser) in the first day of a session could still set a new password. Access tokens last an hour, and a password change signs out every other device (the site calls `signOut({ scope: 'others' })`), so the damage window is small, but it is not zero. Closing it fully would mean turning off direct password changes at the service level or adding a re-authentication step; neither is available as a plain setting today.
+Supabase also signs out **every other session** whenever a password changes, and keeps the one that made the change (checked: the other session's refresh token stopped working, the changing session's kept working). So someone who steals a session in its first day (for example a copied browser cookie) can set a new password, lock the real owner out and stay signed in. The site's own sign-out of other devices adds nothing here; it protects nothing that Supabase does not already do.
+
+What limits it: the thief needs a session less than a day old, and the owner can still use "Forgot your password?" to get back in (that needs their inbox, which the thief does not have). What would close it: a service-level switch to disable direct password changes, or asking for the current password on every change; neither is available as a plain Supabase setting today. For the admin account, add two-factor sign-in (see the list above).
