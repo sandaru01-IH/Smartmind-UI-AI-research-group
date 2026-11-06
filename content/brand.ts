@@ -1,3 +1,5 @@
+import { resolveSiteUrl } from './site-url';
+
 // Source: this.md > "What SmartMind is" (table) and "Suggested site map".
 // Brand spelling is the client's answer to the spelling question: "Smartmind".
 export const BRAND = {
@@ -34,9 +36,10 @@ export const LINKS = {
 
 /** The address every "contact us" action opens. */
 export const CONTACT_EMAIL = 'info@smartminduiai.com';
-export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'http://localhost:3000'
-).replace(/\/$/, '');
+export const SITE_URL = resolveSiteUrl({
+  NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+  VERCEL_ENV: process.env.VERCEL_ENV,
+});
 
 /** The research group's YouTube channel, used to read its public video feed. */
 export const YOUTUBE_CHANNEL_ID = 'UCN7fW6O_yGOuJrma_B4ywlA';
