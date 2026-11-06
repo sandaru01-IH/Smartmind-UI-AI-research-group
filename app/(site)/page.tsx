@@ -17,6 +17,7 @@ import { BRAND, LINKS, SITE_URL, UNIVERSITY_CONTACT } from '@/content/brand';
 import { t } from '@/content/strings';
 import { getMilestones, getNumberStats, getResearch } from '@/lib/catalog/public';
 import { numberWordCap } from '@/lib/number-words';
+import { websiteJsonLd } from '@/lib/seo';
 import { getTeamNetwork } from '@/lib/team/public';
 
 export const metadata: Metadata = {
@@ -51,6 +52,7 @@ async function ResearchHeading() {
 export default function HomePage() {
   return (
     <>
+      <JsonLd data={websiteJsonLd()} />
       <JsonLd
         data={{
           '@context': 'https://schema.org',
