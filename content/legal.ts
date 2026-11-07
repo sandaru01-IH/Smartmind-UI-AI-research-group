@@ -79,7 +79,7 @@ export const PRIVACY: LegalDocument = {
   title: 'Privacy notice',
   lead: 'What we keep about people who register, who can see it, and how to remove it.',
   draftNotice: DRAFT_NOTICE,
-  updated: '30 October 2026',
+  updated: '7 November 2026',
   sections: [
     {
       heading: 'What we collect',
@@ -87,6 +87,7 @@ export const PRIVACY: LegalDocument = {
         'When you register: your email address, a password (stored only in a scrambled form), and the name you choose.',
         'Later, if you add them: a photo and a short bio. Everything you write: posts, comments and likes.',
         'We also keep a login session so you stay signed in. The site remembers your light or dark theme choice in your browser.',
+        'For every visitor, registered or not, we count visits with Vercel Web Analytics: which pages were viewed, the site you came from, and the general type of device, browser and country. It uses no cookies and does not follow you to other sites.',
       ],
     },
     {
@@ -107,7 +108,7 @@ export const PRIVACY: LegalDocument = {
     {
       heading: 'Who else handles it',
       body: [
-        'The site’s database and file storage are provided by Supabase. Confirmation and password emails are sent through an email service provider chosen by the team. They handle your data only to provide these services.',
+        'The site is hosted, and its visits are counted, by Vercel. The site’s database and file storage are provided by Supabase. Confirmation and password emails are sent through an email service provider chosen by the team. They handle your data only to provide these services.',
       ],
     },
     {

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Bricolage_Grotesque, Instrument_Sans, JetBrains_Mono } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/next';
 import { ViewTransition, type ReactNode } from 'react';
 import { ThemeScript } from '@/components/theme/theme-script';
 import { BRAND, SITE_URL } from '@/content/brand';
@@ -66,6 +67,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         >
           {children}
         </ViewTransition>
+        {/* Vercel Web Analytics: page views only, no cookies. Loads from this site's own /_vercel path, so the CSP needs no change. It sends data only on a Vercel deployment. */}
+        <Analytics />
       </body>
     </html>
   );
