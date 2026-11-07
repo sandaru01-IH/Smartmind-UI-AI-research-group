@@ -1,0 +1,17 @@
+import { readFileSync } from 'node:fs';
+const env = Object.fromEntries(readFileSync('E:/Work/Smartmmind/.env.local','utf8').split(/\r?\n/).filter(l=>l.includes('=')&&!l.startsWith('#')).map(l=>[l.slice(0,l.indexOf('=')),l.slice(l.indexOf('=')+1).trim()]));
+const U = env.NEXT_PUBLIC_SUPABASE_URL, K = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const post = async (path, body) => { const r = await fetch(U + path, { method:'POST', headers:{ apikey:K, 'content-type':'application/json' }, body: JSON.stringify(body) }); return { status: r.status, body: (await r.text()).slice(0, 220) }; };
+const t = Date.now();
+console.log('1 direct signup, 1-char name, no terms, spoofed identity:');
+console.log('  ', JSON.stringify(await post('/auth/v1/signup', { email:`direct.${t}@example.test`, password:'AuditPassw0rd!123', data:{ display_name:'Smartmind Admin', role:'admin', is_admin:true } })));
+console.log('2 direct signup with 11-char password (policy is 12):');
+console.log('  ', JSON.stringify(await post('/auth/v1/signup', { email:`direct2.${t}@example.test`, password:'Short1234!a', })));
+console.log('3 enumeration via signup: existing confirmed vs brand new (compare shapes):');
+const a = await post('/auth/v1/signup', { email:'audit.user1@example.test', password:'AuditPassw0rd!123' });
+const n = await post('/auth/v1/signup', { email:`direct3.${t}@example.test`, password:'AuditPassw0rd!123' });
+const shape = (x) => JSON.stringify(Object.keys(JSON.parse(x.body.length<220?x.body:'{}')));
+console.log('   existing:', a.status, a.body.slice(0,110)); console.log('   new     :', n.status, n.body.slice(0,110));
+console.log('4 member_profiles as anon (what the public can enumerate):');
+const r = await fetch(U + '/rest/v1/member_profiles?select=id,display_name,created_at&limit=100', { headers:{ apikey:K, authorization:'Bearer '+K } });
+const rows = await r.json(); console.log('   anon sees', rows.length, 'member rows, first:', JSON.stringify(rows[0]));

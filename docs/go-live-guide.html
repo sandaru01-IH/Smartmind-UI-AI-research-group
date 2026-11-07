@@ -1,0 +1,1917 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>html{color-scheme:light}body{margin:0}</style>
+<title>Smartmind Go-Live Guide</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: sticky step list on the left, one reading column on the right; code blocks are always dark panels. */
+:root {
+  --bg: #f4f7f5; --surface: #ffffff; --fg: #12201b; --muted: #50625b; --line: #d6e0db;
+  --accent: #0a7a55; --accent-ink: #ffffff; --accent-soft: #dff2ea;
+  --warn: #8f5400; --warn-soft: #fcefd3; --danger: #b3261e; --danger-soft: #fce6e3;
+  --code-bg: #0e1a16; --code-fg: #d6ebe1; --code-dim: #7fa293; --code-line: #21352d;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1210; --surface: #121c18; --fg: #e3eee9; --muted: #9bafa6; --line: #23332d;
+    --accent: #3dd6a0; --accent-ink: #06130e; --accent-soft: #12302a;
+    --warn: #f0b457; --warn-soft: #2d2411; --danger: #ff8f86; --danger-soft: #331a1a;
+    --code-bg: #070f0c; --code-fg: #d6ebe1; --code-dim: #7fa293; --code-line: #1b2d26;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1210; --surface: #121c18; --fg: #e3eee9; --muted: #9bafa6; --line: #23332d;
+  --accent: #3dd6a0; --accent-ink: #06130e; --accent-soft: #12302a;
+  --warn: #f0b457; --warn-soft: #2d2411; --danger: #ff8f86; --danger-soft: #331a1a;
+  --code-bg: #070f0c; --code-fg: #d6ebe1; --code-dim: #7fa293; --code-line: #1b2d26;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 80px;
+}
+.shell { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 40px; align-items: start; }
+@media (max-width: 920px) { .shell { grid-template-columns: minmax(0, 1fr); gap: 20px; } }
+a { color: var(--accent); }
+h1, h2, h3 { text-wrap: balance; line-height: 1.2; margin: 0; }
+h1 { font-size: clamp(1.9rem, 4.5vw, 2.6rem); font-weight: 600; letter-spacing: -0.02em; }
+h2 { font-size: 1.45rem; font-weight: 600; letter-spacing: -0.01em; }
+h3 { font-size: 1.05rem; font-weight: 600; margin-top: 22px; }
+p { margin: 10px 0; }
+ul, ol { padding-left: 1.3em; margin: 10px 0; }
+li { margin: 4px 0; }
+code { font-family: var(--font-mono); font-size: 0.88em; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+
+/* step list */
+.toc { position: sticky; top: 16px; font-size: 0.9rem; }
+@media (max-width: 920px) { .toc { position: static; } }
+.toc summary { cursor: pointer; font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 6px 0; }
+.toc ol { list-style: none; padding: 0; margin: 8px 0 0; }
+.toc li a { display: grid; grid-template-columns: 2.1em 1fr; gap: 4px; padding: 5px 8px; border-radius: 6px; color: var(--fg); text-decoration: none; }
+.toc li a:hover { background: var(--accent-soft); }
+.toc li a b { font-family: var(--font-mono); font-weight: 500; color: var(--muted); }
+.progress { margin: 14px 0 6px; font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); }
+.bar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin-top: 6px; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.25s; }
+
+/* header */
+.hero { padding-bottom: 8px; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 10px; }
+.lede { font-size: 1.1rem; color: var(--muted); max-width: 62ch; margin-top: 14px; }
+
+/* panels */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; margin: 18px 0; }
+.panel h3:first-child { margin-top: 0; }
+.callout { border-radius: 8px; padding: 12px 16px; margin: 16px 0; border: 1px solid transparent; }
+.callout > :first-child { margin-top: 0; } .callout > :last-child { margin-bottom: 0; }
+.callout.danger { background: var(--danger-soft); border-color: var(--danger); }
+.callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+.callout.ok { background: var(--accent-soft); border-color: var(--accent); }
+.callout b.t { display: block; font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+.callout.danger b.t { color: var(--danger); } .callout.warn b.t { color: var(--warn); } .callout.ok b.t { color: var(--accent); }
+
+.values { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.values label { display: block; font-size: 0.82rem; color: var(--muted); }
+.values input { display: block; width: 100%; margin-top: 4px; padding: 9px 11px; font: 0.95rem var(--font-mono); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; }
+.values input:focus-visible, button:focus-visible, summary:focus-visible, .task input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.var { background: color-mix(in srgb, var(--accent) 22%, transparent); border-radius: 3px; padding: 0 2px; }
+.hint { font-size: 0.85rem; color: var(--muted); }
+
+/* steps */
+.step { padding-top: 44px; }
+.step > header { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; border-bottom: 2px solid var(--fg); padding-bottom: 10px; margin-bottom: 8px; }
+.step .no { font-family: var(--font-mono); font-size: 0.85rem; font-weight: 500; color: var(--accent); }
+.step .time { margin-left: auto; font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); }
+.where { font-size: 0.85rem; color: var(--muted); margin: 10px 0 0; }
+.where b { font-family: var(--font-mono); font-weight: 500; color: var(--fg); }
+.done { margin-top: 14px; padding: 10px 14px; border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 6px 6px 0; font-size: 0.95rem; }
+.done > b:first-child { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-right: 8px; }
+
+/* code */
+figure.code { margin: 14px 0; border-radius: 8px; overflow: hidden; background: var(--code-bg); border: 1px solid var(--code-line); }
+figure.code figcaption { display: flex; align-items: center; gap: 10px; padding: 7px 8px 7px 14px; border-bottom: 1px solid var(--code-line); font-family: var(--font-mono); font-size: 0.74rem; color: var(--code-dim); }
+figure.code figcaption .lang { text-transform: uppercase; letter-spacing: 0.1em; color: var(--code-fg); }
+figure.code figcaption .meta { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+button.copy { font: 500 0.78rem var(--font-mono); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); cursor: pointer; flex: none; }
+button.copy:hover { filter: brightness(1.1); }
+button.copy.copied { background: transparent; color: var(--accent); }
+figure.code pre { margin: 0; padding: 14px; overflow: auto; color: var(--code-fg); font: 400 0.82rem/1.55 var(--font-mono); tab-size: 2; }
+figure.code pre.long { max-height: 24rem; }
+figure.code pre code { background: none; padding: 0; border-radius: 0; font-size: inherit; overflow-wrap: normal; color: inherit; }
+figure.code pre .c { color: var(--code-dim); }
+figure.code pre .var { background: color-mix(in srgb, var(--accent) 35%, transparent); color: var(--code-fg); }
+
+/* tables and tasks */
+.tablewrap { overflow-x: auto; margin: 14px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 34rem; font-size: 0.92rem; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); background: var(--bg); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { min-width: 9em; }
+.tag { font-family: var(--font-mono); font-size: 0.8rem; font-weight: 500; white-space: nowrap; }
+.tag.stop { color: var(--danger); } .tag.check { color: var(--warn); } .tag.go { color: var(--accent); }
+.task { display: flex; gap: 10px; align-items: flex-start; padding: 9px 12px; margin: 6px 0; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
+.task input { margin-top: 5px; width: 17px; height: 17px; accent-color: var(--accent); flex: none; }
+.task span { min-width: 0; overflow-wrap: anywhere; }
+.task:has(input:checked) { background: var(--accent-soft); }
+.task:has(input:checked) span { color: var(--muted); }
+footer.end { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.85rem; }
+@media (prefers-reduced-motion: reduce) { .bar i { transition: none; } }
+</style>
+
+</head>
+<body>
+<div class="shell">
+<nav class="toc" aria-label="Steps">
+  <details open>
+    <summary>Steps</summary>
+    <div class="progress"><span id="pcount">0 of 0 ticked</span><div class="bar"><i id="pbar"></i></div></div>
+    <ol>
+      <li><a href="#start"><b>&middot;</b>Start here</a></li>
+      <li><a href="#s1"><b>1</b>Look at the live database</a></li>
+      <li><a href="#s2"><b>2</b>Back up</a></li>
+      <li><a href="#s3"><b>3</b>Add the community tables</a></li>
+      <li><a href="#s4"><b>4</b>Safety copy and pre-flight</a></li>
+      <li><a href="#s5"><b>5</b>Apply the members file</a></li>
+      <li><a href="#s6"><b>6</b>Apply the media file</a></li>
+      <li><a href="#s7"><b>7</b>Verify the database</a></li>
+      <li><a href="#s8"><b>8</b>Record the history</a></li>
+      <li><a href="#s9"><b>9</b>Supabase settings</a></li>
+      <li><a href="#s10"><b>10</b>Vercel settings</a></li>
+      <li><a href="#s11"><b>11</b>Deploy the code</a></li>
+      <li><a href="#s12"><b>12</b>Test the live site</a></li>
+      <li><a href="#s13"><b>13</b>Search Console</a></li>
+      <li><a href="#s14"><b>14</b>Rollback</a></li>
+      <li><a href="#s15"><b>15</b>After a week</a></li>
+      <li><a href="#appx"><b>A</b>If something goes wrong</a></li>
+      <li><a href="#appb"><b>B</b>Empty project path</a></li>
+      <li><a href="#appc"><b>C</b>What was tested</a></li>
+    </ol>
+  </details>
+</nav>
+
+<main>
+<section class="hero" id="start">
+  <div class="eyebrow">Smartmind &middot; live release</div>
+  <h1>Smartmind Go-Live Guide</h1>
+  <p class="lede">Put the finished site (security hardening, community blog, SEO fixes) onto your existing Vercel site and your existing Supabase project. No post, comment, member or image is deleted. Do the steps in order. Plan for about two hours the first time.</p>
+
+  <div class="panel">
+    <h3>Your two values</h3>
+    <p class="hint">Every command and SQL block below fills these in for you. Change them here if they are different.</p>
+    <div class="values">
+      <label for="v-domain">Public address of the live site
+        <input id="v-domain" type="text" value="https://www.smartminduiai.com" spellcheck="false" autocomplete="off">
+      </label>
+      <label for="v-ref">Supabase project reference
+        <input id="v-ref" type="text" value="dbpxfhcjluidhajzjnak" spellcheck="false" autocomplete="off">
+      </label>
+    </div>
+    <p class="hint">The address must start with <code>https://</code> and have no slash at the end. Use the same form (with or without <code>www</code>) in Supabase and in Vercel. The project reference is the repository's linked project (<code>supabase/.temp/linked-project.json</code>, name &ldquo;smartmind&rdquo;). Confirm it: it is the part after <code>/project/</code> in the Supabase dashboard address bar for the project your live site uses.</p>
+  </div>
+
+  <div class="callout danger">
+    <b class="t">Four rules for the whole guide</b>
+    <ul>
+      <li>Never paste <code>hosted-clean-install.sql</code> into the live project. It deletes every login and all data.</li>
+      <li>Never run <code>supabase db reset</code>, and never run <code>supabase db push</code> on the live project unless a step says so.</li>
+      <li>Never put the <em>service-role</em> key in Vercel, in a file or in this page. It lives only in your own terminal, only for the admin step.</li>
+      <li>Each SQL block below runs inside <code>begin; &hellip; commit;</code>. If it shows an error, nothing was applied. Stop, copy the error text and send it to me. Do not retry blindly.</li>
+    </ul>
+  </div>
+
+  <div class="callout warn">
+    <b class="t">Always use the Copy button</b>
+    <p>Do not select text by hand, and do not copy from a PDF, a chat window or an older guide. The earlier rollout file broke because a hidden-character pattern in it was corrupted when copied. The SQL in this page contains only plain keyboard characters (checked when the page was built).</p>
+  </div>
+
+  <h3>What is what in your project folder</h3>
+  <div class="tablewrap"><table>
+    <tr><th>File or branch</th><th>What it is</th><th>What to do</th></tr>
+    <tr><td>This page</td><td>The one complete guide, with every command and all SQL.</td><td class="tag go">Follow it</td></tr>
+    <tr><td><code>supabase/migrations/20261101000000_member_hardening.sql</code> and <code>...000100_media_listing.sql</code></td><td>The two database security changes.</td><td>Pasted for you in steps 5 and 6. Nothing to open.</td></tr>
+    <tr><td><code>hosted-add-community.sql</code></td><td>Adds the blog tables if the live database lacks them.</td><td>Pasted for you in step 3, only if step 1 says so.</td></tr>
+    <tr><td><code>hosted-clean-install.sql</code></td><td>Wipes and rebuilds a database from nothing.</td><td class="tag stop">Never on the live project</td></tr>
+    <tr><td><code>docs/hosted-rollout.md</code>, <code>docs/community-setup.md</code></td><td>Earlier notes. The pre-flight in <code>hosted-rollout.md</code> was the broken one.</td><td>Background reading only. This page replaces them.</td></tr>
+    <tr><td>Branch <code>audit/auth-hardening</code></td><td>All the security and debugging work (20 commits).</td><td>Merged into <code>master</code> in step 11.</td></tr>
+    <tr><td>Branch <code>master</code> (on your computer)</td><td>Three commits ahead of GitHub: the SEO build guard and the content notes.</td><td>Pushed in step 11 together with the rest.</td></tr>
+    <tr><td>Branch <code>seo/site-url-guard</code>, and the two <code>vercel/...</code> branches on GitHub</td><td>The SEO branch is already inside <code>master</code>. The Vercel ones are old Web Analytics proposals from 15 October.</td><td>Ignore them.</td></tr>
+  </table></div>
+
+  <h3>Before you begin, have these ready</h3>
+  <label class="task"><input type="checkbox"><span>Logged in to the Supabase dashboard, with the live project open.</span></label>
+  <label class="task"><input type="checkbox"><span>Logged in to Vercel, with the live site's project open.</span></label>
+  <label class="task"><input type="checkbox"><span>This computer is logged in to GitHub (a <code>git push</code> works from <code>E:\Work\Smartmmind</code>).</span></label>
+  <label class="task"><input type="checkbox"><span>Docker Desktop is installed (only the backup in step 2 and the tests in step 11 need it).</span></label>
+  <label class="task"><input type="checkbox"><span>You know the database password, or you are ready to reset it (Supabase &rarr; Project Settings &rarr; Database &rarr; Reset database password). Resetting it does not affect the website, which uses API keys.</span></label>
+  <label class="task"><input type="checkbox"><span>Brevo account and a verified sender address for sign-up emails (see step 9).</span></label>
+</section>
+
+<!-- ============================================================ 1 -->
+<section class="step" id="s1">
+  <header><span class="no">STEP 1</span><h2>Look at the live database</h2><span class="time">5 min &middot; read only</span></header>
+  <p>This changes nothing. It tells you which of the later steps you need.</p>
+  <p class="where"><b>Where:</b> Supabase dashboard &rarr; your project &rarr; <b>SQL Editor</b> &rarr; <b>New query</b>. Paste, press <b>Run</b>.</p>
+  <figure class="code"><figcaption><span class="lang">SQL</span><span class="meta">Supabase dashboard &gt; SQL Editor &gt; New query (read only)  |  19 lines</span><button class="copy" type="button">Copy</button></figcaption><pre><code>select
+  to_regclass('public.posts')           is not null as has_site_tables,
+  to_regclass('public.blog_posts')      is not null as has_community,
+  to_regclass('public.medium_articles') is not null as has_medium,
+  to_regclass('public.collab_projects') is not null as has_collab,
+  to_regclass('supabase_migrations.schema_migrations') is not null as has_migration_log,
+  exists (select 1 from storage.buckets where id = 'media' and public) as media_bucket_public,
+  (select string_agg(t, ', ') from unnest(array[
+     'awards','blog_comments','blog_likes','blog_posts','collab_projects','home_sections',
+     'medium_articles','member_profiles','milestones','partners','posts','profiles',
+     'publications','research_projects','research_spotlights','research_themes',
+     'research_topics','team_links','team_members','work_people']) t
+   where to_regclass('public.' || t) is null) as missing_tables,
+  case when to_regclass('public.posts') is not null then
+    (xpath('/row/c/text()', query_to_xml('select count(*) as c from public.posts', false, true, '')))[1]::text
+  end as posts,
+  case when to_regclass('public.member_profiles') is not null then
+    (xpath('/row/c/text()', query_to_xml('select count(*) as c from public.member_profiles', false, true, '')))[1]::text
+  end as members;</code></pre></figure>
+  <p>You get one row. Write down <code>posts</code> and <code>members</code>. At the end the post count must be the same.</p>
+  <div class="tablewrap"><table>
+    <tr><th>What you see</th><th>What it means</th><th>What to do</th></tr>
+    <tr><td><code>has_site_tables</code> = f</td><td>This is the wrong project, or an empty one.</td><td class="tag stop">STOP. Check the project. If it really is empty, see Appendix B.</td></tr>
+    <tr><td><code>media_bucket_public</code> = f</td><td>The image bucket is missing or private. Step 6 would break every image.</td><td class="tag stop">STOP. In Storage, <code>media</code> must exist and be Public. Send me the row.</td></tr>
+    <tr><td><code>missing_tables</code> lists exactly <code>blog_comments, blog_likes, blog_posts, home_sections, medium_articles, member_profiles</code></td><td>The community tables are not on the live database yet.</td><td class="tag go">Do step 3.</td></tr>
+    <tr><td><code>missing_tables</code> lists anything else (for example <code>collab_projects</code>)</td><td>The live database is older than the community work.</td><td class="tag stop">STOP. Send me the row. Earlier files are needed first.</td></tr>
+    <tr><td><code>missing_tables</code> is empty</td><td>The live database is up to date apart from the two new files.</td><td class="tag go">Skip step 3.</td></tr>
+  </table></div>
+  <p>Also note <code>has_migration_log</code>. If it is <b>t</b>, do step 8 later. If it is <b>f</b>, skip step 8.</p>
+  <div class="done"><b>Done when</b>You know whether to do step 3, and you wrote down the post and member counts.</div>
+  <label class="task"><input type="checkbox"><span>Step 1 finished. Posts: ______  Members: ______</span></label>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="step" id="s2">
+  <header><span class="no">STEP 2</span><h2>Back up</h2><span class="time">15 min</span></header>
+  <p>Free Supabase projects have no automatic backups, so this file is your safety net. It is saved outside the project folder so it can never be committed by accident.</p>
+  <p class="where"><b>Where:</b> Windows PowerShell. Docker Desktop must be running. The first command opens a browser to log in; the link step asks for the database password.</p>
+  <figure class="code"><figcaption><span class="lang">PowerShell</span><span class="meta">Windows PowerShell  |  10 lines</span><button class="copy" type="button">Copy</button></figcaption><pre><code>New-Item -ItemType Directory -Force C:\Backups\smartmind | Out-Null
+cd E:\Work\Smartmmind
+
+npx supabase login
+npx supabase link --project-ref <span class="var" data-var="ref">dbpxfhcjluidhajzjnak</span>
+
+npx supabase db dump --linked -f C:\Backups\smartmind\schema.sql
+npx supabase db dump --linked --data-only -f C:\Backups\smartmind\data.sql
+
+Get-ChildItem C:\Backups\smartmind | Select-Object Name, Length</code></pre></figure>
+  <p>The dump holds your tables. It may not include login accounts or image files, and the changes in this guide never touch either. In the dashboard, also open <b>Database &rarr; Backups</b> and note whether your plan keeps backups.</p>
+  <div class="done"><b>Done when</b>The last command lists <code>schema.sql</code> and <code>data.sql</code>, both with a size above 0.</div>
+  <label class="task"><input type="checkbox"><span>Backup files exist in <code>C:\Backups\smartmind</code>.</span></label>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="step" id="s3">
+  <header><span class="no">STEP 3</span><h2>Add the community tables</h2><span class="time">5 min &middot; only if step 1 said so</span></header>
+  <p>This adds the blog, Medium and home-page tables. It only adds; it does not touch existing tables, rows or logins. Skip this step if <code>missing_tables</code> was empty.</p>
+  <p class="where"><b>Where:</b> SQL Editor &rarr; New query. Use the Copy button (the block is long, so it scrolls). The editor may warn about &ldquo;destructive operations&rdquo;. That is expected; confirm.</p>
+  <figure class="code"><figcaption><span class="lang">SQL</span><span class="meta">Supabase dashboard &gt; SQL Editor &gt; New query (already wrapped in begin / commit)  |  463 lines</span><button class="copy" type="button">Copy</button></figcaption><pre class="long"><code>begin;
+
+<span class="c">-- ============================================================================</span>
+<span class="c">-- ADD the blog, Medium, videos and home-page switches to the EXISTING hosted Supabase project.</span>
+<span class="c">-- Safe for a working site: it only ADDS six new tables, their security rules, some functions and</span>
+<span class="c">-- the member photo rules for the media bucket. It does not touch existing tables, rows or logins.</span>
+<span class="c">-- Run it ONCE:  Dashboard &gt; SQL Editor &gt; New query &gt; paste this whole file &gt; Run.</span>
+<span class="c">-- Running it a second time fails with "already exists" and changes nothing more.</span>
+<span class="c">-- (Videos need no database change; the site reads them from YouTube.)</span>
+<span class="c">-- ============================================================================</span>
+
+
+<span class="c">-- ---------------------------------------------------------------- 20261030000000_medium_articles.sql</span>
+<span class="c">-- Smartmind: Medium articles. Each row links out to an article on Medium, with a cover, summary and</span>
+<span class="c">-- author. Add and edit them in the admin: Site content &gt; Medium articles.</span>
+
+create table public.medium_articles (
+  id uuid primary key default gen_random_uuid(),
+  title text not null check (char_length(title) between 3 and 200),
+  url text not null check (url ~* '^https://' and char_length(url) &lt;= 2048),
+  summary text not null default '' check (char_length(summary) &lt;= 400),
+  cover_path text,
+  cover_alt text,
+  author_name text not null default '' check (char_length(author_name) &lt;= 120),
+  published_on date,
+  visible boolean not null default true,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint medium_cover_needs_alt check (cover_path is null or (cover_alt is not null and cover_alt &lt;&gt; ''))
+);
+
+create trigger medium_articles_set_updated_at before update on public.medium_articles
+  for each row execute function public.set_updated_at();
+
+alter table public.medium_articles enable row level security;
+
+create policy "medium_articles: public reads visible" on public.medium_articles
+  for select to anon, authenticated using (visible);
+create policy "medium_articles: admin reads all" on public.medium_articles
+  for select to authenticated using (public.is_admin());
+create policy "medium_articles: admin inserts" on public.medium_articles
+  for insert to authenticated with check (public.is_admin());
+create policy "medium_articles: admin updates" on public.medium_articles
+  for update to authenticated using (public.is_admin()) with check (public.is_admin());
+create policy "medium_articles: admin deletes" on public.medium_articles
+  for delete to authenticated using (public.is_admin());
+revoke insert, update, delete, truncate on public.medium_articles from anon;
+
+notify pgrst, 'reload schema';
+
+
+<span class="c">-- ---------------------------------------------------------------- 20261030000100_home_sections.sql</span>
+<span class="c">-- Smartmind: switches for the optional home page sections. The admin turns "Our latest video",</span>
+<span class="c">-- "Latest on Medium" and "Latest from the community" on or off. A section with nothing to show is</span>
+<span class="c">-- hidden by the site whatever its switch says.</span>
+
+create table public.home_sections (
+  id text primary key check (id in ('video', 'medium', 'blog')),
+  enabled boolean not null default true,
+  updated_at timestamptz not null default now()
+);
+
+insert into public.home_sections (id) values ('video'), ('medium'), ('blog');
+
+create trigger home_sections_set_updated_at before update on public.home_sections
+  for each row execute function public.set_updated_at();
+
+alter table public.home_sections enable row level security;
+
+create policy "home_sections: public reads" on public.home_sections
+  for select to anon, authenticated using (true);
+create policy "home_sections: admin updates" on public.home_sections
+  for update to authenticated using (public.is_admin()) with check (public.is_admin());
+revoke insert, delete, truncate on public.home_sections from anon, authenticated;
+revoke update on public.home_sections from anon;
+
+notify pgrst, 'reload schema';
+
+
+<span class="c">-- ---------------------------------------------------------------- 20261030000200_community.sql</span>
+<span class="c">-- Smartmind: the community blog. Anyone may register; registered members write posts, comment and</span>
+<span class="c">-- like. Members are NOT admins: they live in member_profiles, never in public.profiles, and nothing</span>
+<span class="c">-- here lets a member reach admin data. The admin can only hide posts and comments and block members,</span>
+<span class="c">-- through the three admin_set_* functions below. Admins have no general write access to this content.</span>
+
+<span class="c">-- ---------------------------------------------------------------- member_profiles</span>
+create table public.member_profiles (
+  id uuid primary key references auth.users (id) on delete cascade,
+  display_name text not null check (char_length(display_name) between 2 and 80),
+  bio text not null default '' check (char_length(bio) &lt;= 500),
+  photo_path text,
+  blocked boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create trigger member_profiles_set_updated_at before update on public.member_profiles
+  for each row execute function public.set_updated_at();
+
+<span class="c">-- Every new account gets a member profile. The name comes from sign-up, else the email's first part.</span>
+create function public.handle_new_member() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare
+  dn text := left(btrim(coalesce(new.raw_user_meta_data -&gt;&gt; 'display_name', '')), 80);
+begin
+  if char_length(dn) &lt; 2 then dn := left(btrim(split_part(coalesce(new.email, ''), '@', 1)), 80); end if;
+  if char_length(dn) &lt; 2 then dn := 'Member'; end if;
+  insert into public.member_profiles (id, display_name) values (new.id, dn) on conflict do nothing;
+  return new;
+end;
+$$;
+
+create trigger on_auth_user_created_member
+  after insert on auth.users
+  for each row execute function public.handle_new_member();
+
+<span class="c">-- Accounts that already exist (the admins) get a profile too.</span>
+insert into public.member_profiles (id, display_name)
+select u.id,
+  case when char_length(left(btrim(split_part(coalesce(u.email, ''), '@', 1)), 80)) &gt;= 2
+       then left(btrim(split_part(coalesce(u.email, ''), '@', 1)), 80) else 'Member' end
+from auth.users u
+on conflict do nothing;
+
+<span class="c">-- ---------------------------------------------------------------- helpers</span>
+<span class="c">-- True for a signed-in member whose email is confirmed and who is not blocked.</span>
+create function public.is_verified_member() returns boolean
+language sql stable security definer set search_path = public, auth as $$
+  select exists (
+    select 1 from public.member_profiles m
+    join auth.users u on u.id = m.id
+    where m.id = auth.uid() and u.email_confirmed_at is not null and not m.blocked
+  );
+$$;
+
+<span class="c">-- True when an author is unknown (account deleted) or not blocked.</span>
+create function public.author_ok(a uuid) returns boolean
+language sql stable security definer set search_path = public as $$
+  select a is null or not exists (select 1 from public.member_profiles m where m.id = a and m.blocked);
+$$;
+
+<span class="c">-- ---------------------------------------------------------------- blog_posts</span>
+create table public.blog_posts (
+  id uuid primary key default gen_random_uuid(),
+  author_id uuid references public.member_profiles (id) on delete set null,
+  title text not null check (char_length(title) between 3 and 160),
+  slug text not null unique check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and char_length(slug) &lt;= 80),
+  summary text not null default '' check (char_length(summary) &lt;= 300),
+  body_md text not null default '' check (char_length(body_md) &lt;= 50000),
+  cover_path text,
+  cover_alt text,
+  status text not null default 'draft' check (status in ('draft', 'published')),
+  published_at timestamptz,
+  hidden boolean not null default false,
+  like_count integer not null default 0 check (like_count &gt;= 0),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint blog_cover_needs_alt check (cover_path is null or (cover_alt is not null and cover_alt &lt;&gt; '')),
+  constraint blog_published_needs_date check (status &lt;&gt; 'published' or published_at is not null)
+);
+
+create index blog_posts_live_idx on public.blog_posts (status, published_at desc);
+create index blog_posts_author_idx on public.blog_posts (author_id);
+
+create trigger blog_posts_set_updated_at before update on public.blog_posts
+  for each row execute function public.set_updated_at();
+
+<span class="c">-- True when a post is visible to the public.</span>
+create function public.post_is_live(p_id uuid) returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (
+    select 1 from public.blog_posts p
+    where p.id = p_id and p.status = 'published' and p.published_at &lt;= now()
+      and not p.hidden and public.author_ok(p.author_id)
+  );
+$$;
+
+create function public.is_post_author(p_id uuid) returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.blog_posts p where p.id = p_id and p.author_id = auth.uid());
+$$;
+
+<span class="c">-- ---------------------------------------------------------------- blog_comments</span>
+create table public.blog_comments (
+  id uuid primary key default gen_random_uuid(),
+  post_id uuid not null references public.blog_posts (id) on delete cascade,
+  author_id uuid references public.member_profiles (id) on delete set null,
+  body text not null check (char_length(body) between 1 and 2000),
+  hidden boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+create index blog_comments_post_idx on public.blog_comments (post_id, created_at);
+
+<span class="c">-- ---------------------------------------------------------------- blog_likes</span>
+create table public.blog_likes (
+  post_id uuid not null references public.blog_posts (id) on delete cascade,
+  user_id uuid not null references public.member_profiles (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (post_id, user_id)
+);
+
+create function public.blog_like_counter() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'INSERT' then
+    update public.blog_posts set like_count = like_count + 1 where id = new.post_id;
+    return new;
+  end if;
+  update public.blog_posts set like_count = greatest(like_count - 1, 0) where id = old.post_id;
+  return old;
+end;
+$$;
+
+create trigger blog_likes_count after insert or delete on public.blog_likes
+  for each row execute function public.blog_like_counter();
+
+<span class="c">-- ---------------------------------------------------------------- rate limits</span>
+<span class="c">-- At most 10 posts and 30 comments per member per hour. Enforced here so a hand-made request cannot skip it.</span>
+create function public.limit_blog_posts() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if new.author_id is not null and (
+    select count(*) from public.blog_posts where author_id = new.author_id and created_at &gt; now() - interval '1 hour'
+  ) &gt;= 10 then
+    raise exception 'You are posting too fast. Try again later.' using errcode = 'P0001';
+  end if;
+  return new;
+end;
+$$;
+create trigger blog_posts_rate_limit before insert on public.blog_posts
+  for each row execute function public.limit_blog_posts();
+
+create function public.limit_blog_comments() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if new.author_id is not null and (
+    select count(*) from public.blog_comments where author_id = new.author_id and created_at &gt; now() - interval '1 hour'
+  ) &gt;= 30 then
+    raise exception 'You are commenting too fast. Try again later.' using errcode = 'P0001';
+  end if;
+  return new;
+end;
+$$;
+create trigger blog_comments_rate_limit before insert on public.blog_comments
+  for each row execute function public.limit_blog_comments();
+
+<span class="c">-- ---------------------------------------------------------------- privileges</span>
+<span class="c">-- Start from nothing, then grant exactly what members need. Column grants are what stop a writer</span>
+<span class="c">-- changing hidden, like_count or author_id.</span>
+revoke all on public.member_profiles, public.blog_posts, public.blog_comments, public.blog_likes
+  from anon, authenticated;
+
+grant select (id, display_name, bio, photo_path, created_at) on public.member_profiles to anon;
+grant select on public.member_profiles to authenticated;
+grant update (display_name, bio, photo_path) on public.member_profiles to authenticated;
+
+grant select on public.blog_posts to anon, authenticated;
+grant insert (author_id, title, slug, summary, body_md, cover_path, cover_alt, status, published_at)
+  on public.blog_posts to authenticated;
+grant update (title, slug, summary, body_md, cover_path, cover_alt, status, published_at)
+  on public.blog_posts to authenticated;
+grant delete on public.blog_posts to authenticated;
+
+grant select on public.blog_comments to anon, authenticated;
+grant insert (post_id, author_id, body) on public.blog_comments to authenticated;
+grant delete on public.blog_comments to authenticated;
+
+grant select, insert, delete on public.blog_likes to authenticated;
+
+<span class="c">-- ---------------------------------------------------------------- row level security</span>
+alter table public.member_profiles enable row level security;
+alter table public.blog_posts enable row level security;
+alter table public.blog_comments enable row level security;
+alter table public.blog_likes enable row level security;
+
+<span class="c">-- member_profiles</span>
+create policy "member_profiles: public reads unblocked" on public.member_profiles
+  for select to anon, authenticated using (not blocked);
+create policy "member_profiles: read own" on public.member_profiles
+  for select to authenticated using (id = auth.uid());
+create policy "member_profiles: admin reads all" on public.member_profiles
+  for select to authenticated using (public.is_admin());
+create policy "member_profiles: update own" on public.member_profiles
+  for update to authenticated using (id = auth.uid() and not blocked) with check (id = auth.uid());
+
+<span class="c">-- blog_posts</span>
+create policy "blog_posts: public reads live" on public.blog_posts
+  for select to anon, authenticated
+  using (status = 'published' and published_at &lt;= now() and not hidden and public.author_ok(author_id));
+create policy "blog_posts: author reads own" on public.blog_posts
+  for select to authenticated using (author_id = auth.uid());
+create policy "blog_posts: admin reads all" on public.blog_posts
+  for select to authenticated using (public.is_admin());
+create policy "blog_posts: member inserts own" on public.blog_posts
+  for insert to authenticated with check (author_id = auth.uid() and public.is_verified_member());
+create policy "blog_posts: member updates own" on public.blog_posts
+  for update to authenticated
+  using (author_id = auth.uid() and public.is_verified_member())
+  with check (author_id = auth.uid() and public.is_verified_member());
+create policy "blog_posts: member deletes own" on public.blog_posts
+  for delete to authenticated using (author_id = auth.uid() and public.is_verified_member());
+
+<span class="c">-- blog_comments</span>
+create policy "blog_comments: public reads live" on public.blog_comments
+  for select to anon, authenticated
+  using (not hidden and public.author_ok(author_id) and public.post_is_live(post_id));
+create policy "blog_comments: author reads own" on public.blog_comments
+  for select to authenticated using (author_id = auth.uid());
+create policy "blog_comments: admin reads all" on public.blog_comments
+  for select to authenticated using (public.is_admin());
+create policy "blog_comments: member inserts own" on public.blog_comments
+  for insert to authenticated
+  with check (author_id = auth.uid() and public.is_verified_member() and public.post_is_live(post_id));
+create policy "blog_comments: author or post author deletes" on public.blog_comments
+  for delete to authenticated using (author_id = auth.uid() or public.is_post_author(post_id));
+
+<span class="c">-- blog_likes</span>
+create policy "blog_likes: read own" on public.blog_likes
+  for select to authenticated using (user_id = auth.uid());
+create policy "blog_likes: member likes a live post" on public.blog_likes
+  for insert to authenticated
+  with check (user_id = auth.uid() and public.is_verified_member() and public.post_is_live(post_id));
+create policy "blog_likes: member removes own" on public.blog_likes
+  for delete to authenticated using (user_id = auth.uid());
+
+<span class="c">-- ---------------------------------------------------------------- admin moderation</span>
+create function public.admin_set_blog_post_hidden(p_id uuid, p_hidden boolean) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'Not allowed' using errcode = '42501'; end if;
+  update public.blog_posts set hidden = p_hidden where id = p_id;
+end;
+$$;
+
+create function public.admin_set_blog_comment_hidden(p_id uuid, p_hidden boolean) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'Not allowed' using errcode = '42501'; end if;
+  update public.blog_comments set hidden = p_hidden where id = p_id;
+end;
+$$;
+
+create function public.admin_set_member_blocked(p_id uuid, p_blocked boolean) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'Not allowed' using errcode = '42501'; end if;
+  update public.member_profiles set blocked = p_blocked where id = p_id;
+end;
+$$;
+
+<span class="c">-- A member deletes their own account. Their posts and comments stay, with no author ("Former member").</span>
+create function public.delete_my_account() returns void
+language plpgsql security definer set search_path = public, auth as $$
+begin
+  if auth.uid() is null then raise exception 'Not signed in' using errcode = '42501'; end if;
+  if public.is_admin() then raise exception 'Admin accounts cannot be deleted here' using errcode = '42501'; end if;
+  delete from auth.users where id = auth.uid();
+end;
+$$;
+
+revoke all on function
+  public.admin_set_blog_post_hidden(uuid, boolean),
+  public.admin_set_blog_comment_hidden(uuid, boolean),
+  public.admin_set_member_blocked(uuid, boolean),
+  public.delete_my_account(),
+  public.is_verified_member(),
+  public.author_ok(uuid),
+  public.post_is_live(uuid),
+  public.is_post_author(uuid)
+  from public, anon, authenticated;
+
+grant execute on function
+  public.admin_set_blog_post_hidden(uuid, boolean),
+  public.admin_set_blog_comment_hidden(uuid, boolean),
+  public.admin_set_member_blocked(uuid, boolean),
+  public.delete_my_account()
+  to authenticated;
+
+<span class="c">-- Policies call these as the signed-in or anonymous role, so those roles must be able to run them.</span>
+grant execute on function
+  public.is_verified_member(),
+  public.author_ok(uuid),
+  public.post_is_live(uuid),
+  public.is_post_author(uuid)
+  to anon, authenticated;
+
+<span class="c">-- ---------------------------------------------------------------- storage: members upload into their own folder</span>
+create policy "media: member insert own folder" on storage.objects
+  for insert to authenticated with check (
+    bucket_id = 'media' and (storage.foldername(name))[1] = 'members'
+    and (storage.foldername(name))[2] = auth.uid()::text and public.is_verified_member()
+  );
+create policy "media: member update own folder" on storage.objects
+  for update to authenticated
+  using (
+    bucket_id = 'media' and (storage.foldername(name))[1] = 'members'
+    and (storage.foldername(name))[2] = auth.uid()::text and public.is_verified_member()
+  )
+  with check (
+    bucket_id = 'media' and (storage.foldername(name))[1] = 'members'
+    and (storage.foldername(name))[2] = auth.uid()::text and public.is_verified_member()
+  );
+create policy "media: member delete own folder" on storage.objects
+  for delete to authenticated using (
+    bucket_id = 'media' and (storage.foldername(name))[1] = 'members'
+    and (storage.foldername(name))[2] = auth.uid()::text
+  );
+
+notify pgrst, 'reload schema';
+
+
+<span class="c">-- ---------------------------------------------------------------- 20261030000300_admin_members.sql</span>
+<span class="c">-- Smartmind: lets the admin see who the community members are (name and email) so they can spot a</span>
+<span class="c">-- spammer and block the account. Email addresses live in auth.users, which the API never exposes, so</span>
+<span class="c">-- this read-only function is the only way, and only an admin may call it.</span>
+
+create function public.admin_list_members()
+returns table (id uuid, email text, display_name text, blocked boolean, created_at timestamptz)
+language plpgsql stable security definer set search_path = public, auth as $$
+begin
+  if not public.is_admin() then raise exception 'Not allowed' using errcode = '42501'; end if;
+  return query
+    select m.id, u.email::text, m.display_name, m.blocked, m.created_at
+    from public.member_profiles m
+    join auth.users u on u.id = m.id
+    order by m.created_at desc;
+end;
+$$;
+
+revoke all on function public.admin_list_members() from public, anon, authenticated;
+grant execute on function public.admin_list_members() to authenticated;
+
+notify pgrst, 'reload schema';
+
+
+<span class="c">-- ---------------------------------------------------------------- 20261030000400_delete_account_keeps_blocks.sql</span>
+<span class="c">-- A blocked member must not be able to undo their block by deleting their account. Deleting an account</span>
+<span class="c">-- leaves their posts and comments behind with no author, and content with no author counts as</span>
+<span class="c">-- "Former member" and is public. So when a blocked member deletes their account, everything they wrote</span>
+<span class="c">-- is hidden first, and stays hidden.</span>
+
+create or replace function public.delete_my_account() returns void
+language plpgsql security definer set search_path = public, auth as $$
+begin
+  if auth.uid() is null then raise exception 'Not signed in' using errcode = '42501'; end if;
+  if public.is_admin() then raise exception 'Admin accounts cannot be deleted here' using errcode = '42501'; end if;
+  if exists (select 1 from public.member_profiles m where m.id = auth.uid() and m.blocked) then
+    update public.blog_posts set hidden = true where author_id = auth.uid();
+    update public.blog_comments set hidden = true where author_id = auth.uid();
+  end if;
+  delete from auth.users where id = auth.uid();
+end;
+$$;
+
+notify pgrst, 'reload schema';
+
+
+<span class="c">-- Tell the API to pick up the new tables.</span>
+notify pgrst, 'reload schema';
+
+commit;</code></pre></figure>
+  <p>Expected: <b>Success. No rows returned</b>. Then run the step 1 query again.</p>
+  <div class="done"><b>Done when</b><code>has_community</code> = t and <code>missing_tables</code> is empty. If you see &ldquo;already exists&rdquo;, the tables were already there: nothing changed, go on.</div>
+  <label class="task"><input type="checkbox"><span>Community tables present (or step 3 was not needed).</span></label>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="step" id="s4">
+  <header><span class="no">STEP 4</span><h2>Safety copy and pre-flight</h2><span class="time">10 min</span></header>
+  <h3>4a. Copy the members table</h3>
+  <p>The only existing rows the two security files change are in <code>member_profiles</code> (names and photo references). This copy lets you undo that.</p>
+  <p class="where"><b>Where:</b> SQL Editor &rarr; New query.</p>
+  <figure class="code"><figcaption><span class="lang">SQL</span><span class="meta">Supabase dashboard &gt; SQL Editor &gt; New query  |  4 lines</span><button class="copy" type="button">Copy</button></figcaption><pre><code>create table public.backup_member_profiles_20261104 as
+select * from public.member_profiles;
+
+select count(*) as rows_copied from public.backup_member_profiles_20261104;</code></pre></figure>
+  <p><code>rows_copied</code> must equal your member count from step 1 (or more, if step 3 just added profiles). If the editor says the table already exists, you made this copy earlier: go on.</p>
+
+  <h3>4b. Pre-flight check (read only)</h3>
+  <p>This lists everything that would be a problem, or that you should know about, before anything is changed. <b>No rows means all clear.</b></p>
+  <figure class="code"><figcaption><span class="lang">SQL</span><span class="meta">Supabase dashboard &gt; SQL Editor &gt; New query (read only)  |  101 lines</span><button class="copy" type="button">Copy</button></figcaption><pre class="long"><code>select * from (
+
+  <span class="c">-- 1. Tables and functions the two files rely on must exist.</span>
+  select 'STOP 1 missing table' as check, t as detail
+  from unnest(array['member_profiles','profiles','blog_posts','blog_comments','blog_likes']) t
+  where to_regclass('public.' || t) is null
+
+  union all
+  select 'STOP 1 missing function', n
+  from unnest(array['set_updated_at','handle_new_member','blog_like_counter','limit_blog_posts',
+    'limit_blog_comments','milestone_takes_post_tbc','post_tbc_to_milestones','is_admin',
+    'is_verified_member','is_post_author']) n
+  where not exists (select 1 from pg_proc p where p.proname = n and p.pronamespace = 'public'::regnamespace)
+
+  <span class="c">-- 2. The policies the files replace must have exactly these names.</span>
+  union all
+  select 'STOP 2 policy not found under the expected name', v.sch || '.' || v.tbl || ': ' || v.pol
+  from (values
+    ('public','member_profiles','member_profiles: public reads unblocked'),
+    ('public','member_profiles','member_profiles: update own'),
+    ('public','blog_comments','blog_comments: author or post author deletes'),
+    ('storage','objects','media: public read')
+  ) v(sch, tbl, pol)
+  where not exists (select 1 from pg_policies p
+    where p.schemaname = v.sch and p.tablename = v.tbl and p.policyname = v.pol)
+
+  <span class="c">-- 3. Any OTHER policy that lets people read storage files would keep the media list open.</span>
+  union all
+  select 'CHECK 3 another storage read policy (would keep listing open if it covers media)',
+    policyname || ' [' || cmd || '] to ' || array_to_string(roles, ',') || ' using ' || coalesce(qual, '')
+  from pg_policies
+  where schemaname = 'storage' and tablename = 'objects'
+    and cmd in ('SELECT', 'ALL') and policyname &lt;&gt; 'media: public read'
+
+  <span class="c">-- 4. Names the files create must not exist yet (if they do, one was partly applied before).</span>
+  union all
+  select 'STOP 4 already exists', conname::text from pg_constraint
+  where conname in ('member_display_name_clean', 'member_photo_own_folder')
+  union all
+  select 'STOP 4 already exists', tgname::text from pg_trigger
+  where tgname in ('blog_posts_cover_path', 'member_profiles_clean_name')
+  union all
+  select 'STOP 4 already exists', policyname from pg_policies
+  where policyname in ('member_profiles: public reads confirmed members', 'media: admin lists',
+    'media: member lists own folder')
+
+  <span class="c">-- 5. The media bucket must be PUBLIC, or every image link depends on the policy being dropped.</span>
+  union all
+  select 'STOP 5 media bucket is not public or does not exist', coalesce(b.id, 'media')
+  from (select 1) one left join storage.buckets b on b.id = 'media'
+  where b.id is null or not b.public
+
+  <span class="c">-- 6. What happens to each existing member (information; read each row).</span>
+  union all
+  select 'CHECK 6 admin profile will be renamed "Site team"',
+    m.id || ' currently "' || m.display_name || '"'
+  from public.member_profiles m where exists (select 1 from public.profiles p where p.id = m.id)
+  union all
+  select 'CHECK 6 name will change',
+    m.id || ' "' || m.display_name || '" becomes "' || r.new_name || '"'
+  from public.member_profiles m
+  cross join lateral (
+    <span class="c">-- the same cleaning the migration does (every character is written as a \u escape, none typed in)</span>
+    select btrim(left(btrim(
+      regexp_replace(
+        regexp_replace(normalize(m.display_name, NFKC), '[\t\n\r\f\v\u0085\u2028\u2029]', ' ', 'g'),
+        '[\u0000-\u001F\u007F-\u009F\u00AD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180B-\u180E\u200B-\u200F\u202A-\u202E\u2060-\u206F\u3164\uFEFF\uFFA0\uFFF9-\uFFFB]',
+        '', 'g')
+    ), 80)) as cleaned
+  ) c
+  cross join lateral (
+    select case
+      when char_length(c.cleaned) &lt; 2 then 'Member'
+      when c.cleaned ~* '(^|\W)(admin|administrator|smartmind|moderator|former member)(\W|$)' then 'Member'
+      else c.cleaned
+    end as new_name
+  ) r
+  where not exists (select 1 from public.profiles p where p.id = m.id)
+    and r.new_name &lt;&gt; m.display_name
+  union all
+  select 'CHECK 6 photo reference will be cleared (the file itself stays in storage)',
+    m.id || ' ' || m.photo_path
+  from public.member_profiles m
+  where m.photo_path is not null and m.photo_path !~ (
+    '^members/' || m.id::text || '/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpg|png|webp)$')
+
+  <span class="c">-- 7. Writing by people the public will no longer see: it will read "Former member".</span>
+  union all
+  select 'CHECK 7 posts by admins or unconfirmed accounts will read "Former member"', count(*)::text
+  from public.blog_posts b
+  where b.author_id in (select id from public.profiles)
+     or b.author_id in (select id from auth.users where email_confirmed_at is null)
+  having count(*) &gt; 0
+  union all
+  select 'CHECK 7 comments by admins or unconfirmed accounts will read "Former member"', count(*)::text
+  from public.blog_comments c
+  where c.author_id in (select id from public.profiles)
+     or c.author_id in (select id from auth.users where email_confirmed_at is null)
+  having count(*) &gt; 0
+
+) problems order by 1, 2;</code></pre></figure>
+  <div class="tablewrap"><table>
+    <tr><th>Row starts with</th><th>Meaning</th><th>What to do</th></tr>
+    <tr><td class="tag stop">STOP 1</td><td>A table or function the files need is missing.</td><td>Do not continue. The database is behind. Send me the row.</td></tr>
+    <tr><td class="tag stop">STOP 2</td><td>A policy has a different name on your project.</td><td>Do not continue. Send me the row; the file needs your name.</td></tr>
+    <tr><td class="tag stop">STOP 4</td><td>An earlier attempt was partly applied.</td><td>Do not continue. Send me the rows.</td></tr>
+    <tr><td class="tag stop">STOP 5</td><td>The <code>media</code> bucket is not public.</td><td>Do not do step 6. Find out why first.</td></tr>
+    <tr><td class="tag check">CHECK 3</td><td>Another policy can read storage files.</td><td>If it covers the <code>media</code> bucket for <code>anon</code> or <code>public</code>, visitors could still list files after step 6. Send me the row. If it is for another bucket, ignore it.</td></tr>
+    <tr><td class="tag check">CHECK 6 &ldquo;name will change&rdquo;</td><td>A member name will be cleaned or become <b>Member</b>. The row shows the new name.</td><td>If a real person would become <b>Member</b>, give them a plain name first (below), then run 4b again.</td></tr>
+    <tr><td class="tag check">CHECK 6 &ldquo;admin profile&rdquo;</td><td>An admin&rsquo;s member profile becomes <b>Site team</b> and is hidden from the public.</td><td>Normal. Nothing to do.</td></tr>
+    <tr><td class="tag check">CHECK 6 &ldquo;photo reference&rdquo;</td><td>A profile photo reference is in an unexpected shape and will be cleared. The file stays in storage.</td><td>Accept it, or ask me to fix the path.</td></tr>
+    <tr><td class="tag check">CHECK 7</td><td>This many posts or comments were written by admins or unconfirmed accounts. They will read <b>Former member</b>.</td><td>Accept the label, or tell me and I will change who counts as public.</td></tr>
+  </table></div>
+  <p>To give a member a plain name before continuing (replace both values):</p>
+  <figure class="code"><figcaption><span class="lang">SQL</span><span class="meta">Supabase dashboard &gt; SQL Editor &gt; New query  |  3 lines</span><button class="copy" type="button">Copy</button></figcaption><pre><code>update public.member_profiles
+set display_name = 'New Name'   <span class="c">-- two plain words; no "admin", "smartmind", "moderator", "former member"</span>
+where id = 'PASTE-THE-MEMBER-ID-FROM-THE-ROW';</code></pre></figure>
+  <div class="done"><b>Done when</b>There is no STOP row, and you are happy with every CHECK row.</div>
+  <label class="task"><input type="checkbox"><span>Safety copy made, and <code>rows_copied</code> matches.</span></label>
+  <label class="task"><input type="checkbox"><span>Pre-flight shows no STOP rows and I have read every CHECK row.</span></label>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="step" id="s5">
+  <header><span class="no">STEP 5</span><h2>Apply the members file</h2><span class="time">2 min</span></header>
+  <p>Cleans names, limits photo and cover paths to the member&rsquo;s own folder, hides unconfirmed and admin profiles, adds indexes and tightens comment deletion. The block below is the whole file already wrapped in <code>begin;</code> and <code>commit;</code>.</p>
+  <p class="where"><b>Where:</b> SQL Editor &rarr; New query &rarr; paste &rarr; Run. Confirm the &ldquo;destructive operations&rdquo; warning (the file drops and re-creates policies and constraints).</p>
+  <figure class="code"><figcaption><span class="lang">SQL</span><span class="meta">Supabase dashboard &gt; SQL Editor &gt; New query (already wrapped in begin / commit)  |  206 lines</span><button class="copy" type="button">Copy</button></figcaption><pre class="long"><code>begin;
+
+<span class="c">-- Smartmind: member data hardening (auth audit, DB findings F-01 to F-04, F-14 to F-16, F-18).</span>
+<span class="c">-- What a hand-made request can do is decided here, not in the app: a member's photo and blog covers</span>
+<span class="c">-- stay in their own folder, names cannot impersonate or hide, unconfirmed accounts and admins are not</span>
+<span class="c">-- listed publicly, and a hidden comment cannot be deleted by the people it is about.</span>
+
+<span class="c">-- ---------------------------------------------------------------- display names</span>
+<span class="c">-- Normalises a name: compatibility-composed Unicode (NFKC, so look-alike forms collapse), line breaks</span>
+<span class="c">-- and tabs become spaces, invisible and direction-changing characters are removed, ends are trimmed,</span>
+<span class="c">-- and it is cut to 80 characters.</span>
+create or replace function public.clean_display_name_once(t text) returns text
+language sql immutable set search_path = public as $$
+  select btrim(left(btrim(
+    regexp_replace(
+      regexp_replace(normalize(coalesce(t, ''), NFKC), '[\t\n\r\f\v\u0085\u2028\u2029]', ' ', 'g'),
+      '[\u0000-\u001F\u007F-\u009F\u00AD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180B-\u180E\u200B-\u200F\u202A-\u202E\u2060-\u206F\u3164\uFEFF\uFFA0\uFFF9-\uFFFB]',
+      '', 'g')
+  ), 80));
+$$;
+
+<span class="c">-- Applied twice so the result is stable: cleaning an already clean name changes nothing (stripping an</span>
+<span class="c">-- invisible character can leave two characters that combine under NFKC, which a single pass misses).</span>
+create or replace function public.clean_display_name(t text) returns text
+language sql immutable set search_path = public as $$
+  select public.clean_display_name_once(public.clean_display_name_once(t));
+$$;
+
+<span class="c">-- Names that would pass for the site or its team, or for the label shown for deleted accounts.</span>
+create or replace function public.is_reserved_display_name(t text) returns boolean
+language sql immutable set search_path = public as $$
+  select coalesce(t, '') ~* '(^|\W)(admin|administrator|smartmind|moderator|former member)(\W|$)';
+$$;
+
+<span class="c">-- A name that is safe to store: cleaned, and "Member" when nothing usable is left.</span>
+create or replace function public.safe_display_name(t text) returns text
+language sql immutable set search_path = public as $$
+  select case
+    when char_length(public.clean_display_name(t)) &lt; 2 then 'Member'
+    when public.is_reserved_display_name(public.clean_display_name(t)) then 'Member'
+    else public.clean_display_name(t)
+  end;
+$$;
+
+<span class="c">-- Existing rows first, so the constraints below can be checked against all of them. The admins'</span>
+<span class="c">-- profiles got their email's first part as a name; they are renamed (and hidden further down).</span>
+update public.member_profiles m set display_name = 'Site team'
+where exists (select 1 from public.profiles p where p.id = m.id);
+
+update public.member_profiles set display_name = public.safe_display_name(display_name)
+where display_name is distinct from public.safe_display_name(display_name);
+
+<span class="c">-- Names are cleaned on every write (trigger below), so a name with a non-breaking space or an invisible</span>
+<span class="c">-- character is saved tidied instead of being refused. The constraint is the backstop: it refuses what</span>
+<span class="c">-- cleaning cannot fix (too short once cleaned, or a reserved name).</span>
+create or replace function public.member_profile_clean_name() returns trigger
+language plpgsql set search_path = public as $$
+begin
+  new.display_name := public.clean_display_name(new.display_name);
+  return new;
+end;
+$$;
+drop trigger if exists member_profiles_clean_name on public.member_profiles;
+create trigger member_profiles_clean_name before insert or update of display_name on public.member_profiles
+  for each row execute function public.member_profile_clean_name();
+
+alter table public.member_profiles drop constraint if exists member_display_name_clean;
+alter table public.member_profiles add constraint member_display_name_clean check (
+  display_name = public.clean_display_name(display_name)
+  and char_length(display_name) between 2 and 80
+  and not public.is_reserved_display_name(display_name)
+) not valid;
+alter table public.member_profiles validate constraint member_display_name_clean;
+
+<span class="c">-- ---------------------------------------------------------------- photo and cover paths</span>
+<span class="c">-- The app only ever writes members/&lt;own id&gt;/&lt;uuid&gt;.&lt;ext&gt;; make the database say the same.</span>
+update public.member_profiles set photo_path = null
+where photo_path is not null and photo_path !~ (
+  '^members/' || id::text || '/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpg|png|webp)$'
+);
+
+alter table public.member_profiles drop constraint if exists member_photo_own_folder;
+alter table public.member_profiles add constraint member_photo_own_folder check (
+  photo_path is null or photo_path ~ (
+    '^members/' || id::text || '/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpg|png|webp)$'
+  )
+) not valid;
+alter table public.member_profiles validate constraint member_photo_own_folder;
+
+<span class="c">-- A post's author can be null once their account is gone, so this is checked when a cover is written</span>
+<span class="c">-- rather than as a constraint. Rows written before this migration are left as they are.</span>
+create or replace function public.blog_cover_own_folder() returns trigger
+language plpgsql set search_path = public as $$
+begin
+  <span class="c">-- An edit that sends the same cover back (every post edit does) is not a new cover: posts written</span>
+  <span class="c">-- before this migration stay editable.</span>
+  if tg_op = 'UPDATE' and new.cover_path is not distinct from old.cover_path then
+    return new;
+  end if;
+  if new.cover_path is not null and (new.author_id is null or new.cover_path !~ (
+    '^members/' || new.author_id::text || '/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpg|png|webp)$'
+  )) then
+    raise exception 'Invalid cover path' using errcode = '23514';
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists blog_posts_cover_path on public.blog_posts;
+create trigger blog_posts_cover_path before insert or update of cover_path on public.blog_posts
+  for each row execute function public.blog_cover_own_folder();
+
+<span class="c">-- ---------------------------------------------------------------- new accounts</span>
+<span class="c">-- The name comes from sign-up metadata, which anyone can set with the public key, so it is cleaned</span>
+<span class="c">-- here. It never falls back to the email, and nothing in it can stop the sign-up: if the profile</span>
+<span class="c">-- insert fails for any reason it is made again with the neutral name.</span>
+create or replace function public.handle_new_member() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  begin
+    insert into public.member_profiles (id, display_name)
+    values (new.id, public.safe_display_name(new.raw_user_meta_data -&gt;&gt; 'display_name'))
+    on conflict do nothing;
+  exception when others then
+    insert into public.member_profiles (id, display_name) values (new.id, 'Member') on conflict do nothing;
+  end;
+  return new;
+end;
+$$;
+
+<span class="c">-- Accounts that were created while no profile could be (see the audit): give them one.</span>
+insert into public.member_profiles (id, display_name)
+select id, 'Member' from auth.users
+on conflict do nothing;
+
+<span class="c">-- ---------------------------------------------------------------- who the public can see</span>
+<span class="c">-- Confirmed, unblocked members who are not admins. Unconfirmed sign-ups (which anyone can script)</span>
+<span class="c">-- and admin accounts are not listed.</span>
+create or replace function public.member_is_public(m uuid) returns boolean
+language sql stable security definer set search_path = public, auth as $$
+  select exists (
+    select 1 from public.member_profiles p
+    join auth.users u on u.id = p.id
+    where p.id = m and u.email_confirmed_at is not null and not p.blocked
+  ) and not exists (select 1 from public.profiles a where a.id = m);
+$$;
+
+drop policy "member_profiles: public reads unblocked" on public.member_profiles;
+drop policy if exists "member_profiles: public reads confirmed members" on public.member_profiles;
+create policy "member_profiles: public reads confirmed members" on public.member_profiles
+  for select to anon, authenticated using (public.member_is_public(id));
+
+<span class="c">-- Only a member who is confirmed and not blocked may change their profile.</span>
+drop policy "member_profiles: update own" on public.member_profiles;
+create policy "member_profiles: update own" on public.member_profiles
+  for update to authenticated
+  using (id = (select auth.uid()) and public.is_verified_member())
+  with check (id = (select auth.uid()));
+
+<span class="c">-- ---------------------------------------------------------------- moderation evidence</span>
+<span class="c">-- A comment the admin hid stays until the admin shows it again: neither its writer nor the post's</span>
+<span class="c">-- author can delete it.</span>
+drop policy "blog_comments: author or post author deletes" on public.blog_comments;
+create policy "blog_comments: author or post author deletes" on public.blog_comments
+  for delete to authenticated
+  using (not hidden and (author_id = (select auth.uid()) or public.is_post_author(post_id)));
+
+<span class="c">-- ---------------------------------------------------------------- indexes</span>
+create index if not exists blog_comments_author_idx on public.blog_comments (author_id, created_at desc);
+create index if not exists blog_likes_user_idx on public.blog_likes (user_id);
+create index if not exists blog_posts_author_created_idx on public.blog_posts (author_id, created_at desc);
+
+<span class="c">-- ---------------------------------------------------------------- function privileges</span>
+<span class="c">-- Trigger functions are not meant to be called through the API.</span>
+revoke all on function
+  public.set_updated_at(),
+  public.handle_new_member(),
+  public.blog_like_counter(),
+  public.limit_blog_posts(),
+  public.limit_blog_comments(),
+  public.milestone_takes_post_tbc(),
+  public.post_tbc_to_milestones(),
+  public.blog_cover_own_folder(),
+  public.member_profile_clean_name()
+  from public, anon, authenticated;
+
+<span class="c">-- The name checks run as the member who edits their profile (every update evaluates every check</span>
+<span class="c">-- constraint), so the signed-in role must be able to run them. They only look at the text they get.</span>
+revoke all on function
+  public.clean_display_name_once(text),
+  public.clean_display_name(text),
+  public.is_reserved_display_name(text),
+  public.safe_display_name(text)
+  from public, anon;
+grant execute on function
+  public.clean_display_name_once(text),
+  public.clean_display_name(text),
+  public.is_reserved_display_name(text),
+  public.safe_display_name(text)
+  to authenticated;
+
+revoke all on function public.member_is_public(uuid) from public;
+grant execute on function public.member_is_public(uuid) to anon, authenticated;
+
+notify pgrst, 'reload schema';
+
+commit;</code></pre></figure>
+  <div class="done"><b>Done when</b>The editor says <b>Success. No rows returned</b>. An error means nothing was applied: send it to me.</div>
+  <label class="task"><input type="checkbox"><span>Members file applied.</span></label>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="step" id="s6">
+  <header><span class="no">STEP 6</span><h2>Apply the media file</h2><span class="time">2 min</span></header>
+  <p>Stops visitors from <em>listing</em> every file in the image bucket. Image links keep working because the bucket is public. Do this step only if step 4 showed no <code>STOP 5</code>.</p>
+  <p class="where"><b>Where:</b> SQL Editor &rarr; New query.</p>
+  <figure class="code"><figcaption><span class="lang">SQL</span><span class="meta">Supabase dashboard &gt; SQL Editor &gt; New query (already wrapped in begin / commit)  |  25 lines</span><button class="copy" type="button">Copy</button></figcaption><pre class="long"><code>begin;
+
+<span class="c">-- Smartmind: the media bucket can no longer be listed by visitors (auth audit, DB finding F-05).</span>
+<span class="c">-- The bucket is public, so a file's address keeps working without any SELECT policy. That policy</span>
+<span class="c">-- only added the list/search API, which showed every file name to anyone: covers of drafts and</span>
+<span class="c">-- scheduled posts, and the folder of every member who ever uploaded something.</span>
+<span class="c">--</span>
+<span class="c">-- Listing now needs an account that has a reason to see names: the admin sees all, and a member sees</span>
+<span class="c">-- their own folder (which is also what replacing a file with `upsert` and the server's download and</span>
+<span class="c">-- remove steps need, because they run as the signed-in user).</span>
+
+drop policy "media: public read" on storage.objects;
+
+create policy "media: admin lists" on storage.objects
+  for select to authenticated
+  using (bucket_id = 'media' and public.is_admin());
+
+create policy "media: member lists own folder" on storage.objects
+  for select to authenticated
+  using (
+    bucket_id = 'media' and (storage.foldername(name))[1] = 'members'
+    and (storage.foldername(name))[2] = (select auth.uid())::text
+  );
+
+commit;</code></pre></figure>
+  <div class="done"><b>Done when</b>You see <b>Success. No rows returned</b>.</div>
+  <div class="callout warn">
+    <b class="t">If it says &ldquo;must be owner of table objects&rdquo;</b>
+    <p>Do it in the dashboard instead. Open <b>Storage &rarr; Policies</b>. Under the <code>media</code> bucket delete the policy <code>media: public read</code>. Then add two new <b>SELECT</b> policies for the role <code>authenticated</code>:</p>
+    <ul>
+      <li>Name <code>media: admin lists</code>, expression: <code>bucket_id = 'media' and public.is_admin()</code></li>
+      <li>Name <code>media: member lists own folder</code>, expression: <code>bucket_id = 'media' and (storage.foldername(name))[1] = 'members' and (storage.foldername(name))[2] = (select auth.uid())::text</code></li>
+    </ul>
+  </div>
+  <label class="task"><input type="checkbox"><span>Media file applied.</span></label>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="step" id="s7">
+  <header><span class="no">STEP 7</span><h2>Verify the database</h2><span class="time">10 min</span></header>
+  <h3>7a. Automatic check</h3>
+  <p class="where"><b>Where:</b> SQL Editor &rarr; New query.</p>
+  <figure class="code"><figcaption><span class="lang">SQL</span><span class="meta">Supabase dashboard &gt; SQL Editor &gt; New query (read only)  |  31 lines</span><button class="copy" type="button">Copy</button></figcaption><pre><code>select * from (
+  select 'name cleaning works (hidden characters removed)' as check_name,
+         public.clean_display_name('a' || chr(8203) || 'b') = 'ab' as ok
+  union all select 'reserved names are recognised',
+         public.is_reserved_display_name('Smartmind Team')
+  union all select 'old member-list policy is gone',
+         not exists (select 1 from pg_policies where tablename = 'member_profiles'
+                     and policyname = 'member_profiles: public reads unblocked')
+  union all select 'new member-list policy exists',
+         exists (select 1 from pg_policies where tablename = 'member_profiles'
+                 and policyname = 'member_profiles: public reads confirmed members')
+  union all select 'media: public read policy is gone',
+         not exists (select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects'
+                     and policyname = 'media: public read')
+  union all select 'media: admin lists policy exists',
+         exists (select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects'
+                 and policyname = 'media: admin lists')
+  union all select 'media: member lists own folder policy exists',
+         exists (select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects'
+                 and policyname = 'media: member lists own folder')
+  union all select 'name and photo constraints exist',
+         (select count(*) from pg_constraint
+          where conname in ('member_display_name_clean', 'member_photo_own_folder')) = 2
+  union all select 'name and cover triggers exist',
+         (select count(*) from pg_trigger
+          where tgname in ('member_profiles_clean_name', 'blog_posts_cover_path')) = 2
+  union all select 'no member profile was lost',
+         (select count(*) from public.member_profiles)
+           &gt;= (select count(*) from public.backup_member_profiles_20261104)
+) checks
+order by ok, check_name;</code></pre></figure>
+  <div class="done"><b>Done when</b>All 10 rows show <b>true</b> in the <code>ok</code> column. Then run the step 1 query again: <code>posts</code> must equal what you wrote down, and <code>members</code> must be the same or higher.</div>
+
+  <h3>7b. A visitor cannot list the bucket, but images still load</h3>
+  <p>You need the project&rsquo;s <b>anon / publishable key</b> (Project Settings &rarr; API Keys; it is the public one) and the address of any real image: in <b>Storage &rarr; media</b> open a file and use <b>Copy URL</b>.</p>
+  <p class="where"><b>Where:</b> Windows PowerShell. Replace the two placeholders.</p>
+  <figure class="code"><figcaption><span class="lang">PowerShell</span><span class="meta">Windows PowerShell  |  11 lines</span><button class="copy" type="button">Copy</button></figcaption><pre><code>$URL = "<span class="var" data-var="url">https://dbpxfhcjluidhajzjnak.supabase.co</span>"
+$KEY = "PASTE-THE-ANON-OR-PUBLISHABLE-KEY-HERE"
+$IMG = "PASTE-ONE-IMAGE-ADDRESS-FROM-STORAGE-HERE"
+
+<span class="c"># 1. a visitor must not be able to list the bucket: expect []</span>
+$resp = Invoke-WebRequest -UseBasicParsing -Method Post -Uri "$URL/storage/v1/object/list/media" -Headers @{ apikey = $KEY } -ContentType "application/json" -Body '{"prefix":"","limit":5}'
+"list response: " + $resp.Content
+
+<span class="c"># 2. a public image must still load: expect 200</span>
+try { $r = Invoke-WebRequest -UseBasicParsing -Uri $IMG -Method Head; "image status: " + [int]$r.StatusCode }
+catch { "image status: " + [int]$_.Exception.Response.StatusCode }</code></pre></figure>
+  <div class="done"><b>Done when</b>It prints <code>files a visitor can list: 0</code> and <code>image status: 200</code>.</div>
+
+  <h3>7c. Look at the live site</h3>
+  <p>The old app code still runs here and works with the new database.</p>
+  <label class="task"><input type="checkbox"><span>Home page, Research, Team: images show. <b>Stories &rarr; Blog</b>: posts and author names show.</span></label>
+  <label class="task"><input type="checkbox"><span>Admin login works, and uploading and removing an image on an admin page works.</span></label>
+  <label class="task"><input type="checkbox"><span>Database verification shows 10 of 10 true, and the counts match.</span></label>
+  <p>If anything here fails, go to <a href="#s14">step 14 (rollback)</a>.</p>
+</section>
+
+<!-- ============================================================ 8 -->
+<section class="step" id="s8">
+  <header><span class="no">STEP 8</span><h2>Record the history</h2><span class="time">1 min &middot; only if <code>has_migration_log</code> was t</span></header>
+  <p>Your project keeps a list of applied migration files. You applied some by hand, so add them to that list. Otherwise a later <code>supabase db push</code> would try to run them again and fail. If <code>has_migration_log</code> was f, skip this step.</p>
+  <figure class="code"><figcaption><span class="lang">SQL</span><span class="meta">Supabase dashboard &gt; SQL Editor &gt; New query  |  9 lines</span><button class="copy" type="button">Copy</button></figcaption><pre><code>insert into supabase_migrations.schema_migrations (version, name) values
+  ('20261030000000', 'medium_articles'),
+  ('20261030000100', 'home_sections'),
+  ('20261030000200', 'community'),
+  ('20261030000300', 'admin_members'),
+  ('20261030000400', 'delete_account_keeps_blocks'),
+  ('20261101000000', 'member_hardening'),
+  ('20261101000100', 'media_listing')
+on conflict do nothing;</code></pre></figure>
+  <div class="done"><b>Done when</b>The editor says <b>Success</b>.</div>
+</section>
+
+<!-- ============================================================ 9 -->
+<section class="step" id="s9">
+  <header><span class="no">STEP 9</span><h2>Supabase settings</h2><span class="time">20 min</span></header>
+  <p>The repository&rsquo;s <code>config.toml</code> only configures the <em>local</em> stack. The live project has its own copy of each setting below, so set each once in the dashboard. Menu names move around; pick the closest match.</p>
+
+  <h3>Address and sign-up</h3>
+  <p class="where"><b>Where:</b> Authentication &rarr; <b>URL Configuration</b>, and Authentication &rarr; <b>Sign In / Providers</b> (Email).</p>
+  <label class="task"><input type="checkbox"><span><b>Site URL</b> = <code><span class="var" data-var="domain">https://www.smartminduiai.com</span></code></span></label>
+  <label class="task"><input type="checkbox"><span><b>Redirect URLs</b> contains <code><span class="var" data-var="domain">https://www.smartminduiai.com</span>/auth/confirm</code> (add the same with or without <code>www</code> too, if both addresses open your site)</span></label>
+  <label class="task"><input type="checkbox"><span>Email provider on, <b>Allow new users to sign up</b> on, <b>Confirm email</b> on</span></label>
+  <label class="task"><input type="checkbox"><span><b>Minimum password length</b> = 12</span></label>
+  <label class="task"><input type="checkbox"><span><b>Secure password change</b> on (a session older than about a day must re-confirm before changing the password)</span></label>
+  <label class="task"><input type="checkbox"><span><b>Email OTP expiry</b> = 1800 seconds (or less)</span></label>
+  <label class="task"><input type="checkbox"><span>Leaked-password protection on, if your plan has it (Pro). If not, the 12-character minimum is the protection.</span></label>
+  <label class="task"><input type="checkbox"><span><b>CAPTCHA stays OFF.</b> The site&rsquo;s forms send no CAPTCHA answer, so turning it on would stop every sign-up and login.</span></label>
+  <label class="task"><input type="checkbox"><span>Sessions: set a time-box (for example 30 days) and, if your plan allows, an inactivity timeout (for example 7 days).</span></label>
+
+  <h3>The two email templates</h3>
+  <p class="where"><b>Where:</b> Authentication &rarr; Emails (or Email Templates) &rarr; <b>Confirm signup</b>, then <b>Reset password</b>. Paste the whole block into the message body and set the subject line shown.</p>
+  <div class="callout danger">
+    <b class="t">Keep the two links exactly as they are</b>
+    <p>They use <code>{{ .SiteURL }}</code> and <code>{{ .TokenHash }}</code>. Never replace them with Supabase&rsquo;s ready-made <code>{{ .ConfirmationURL }}</code>. That link makes Supabase use up the one-time token before the site sees it, and people land on &ldquo;That link has expired or was already used&rdquo;.</p>
+  </div>
+  <p><b>Confirm signup</b>, subject <code>Confirm your Smartmind account</code>:</p>
+  <figure class="code"><figcaption><span class="lang">HTML</span><span class="meta">Email template: Confirm signup  |  160 lines</span><button class="copy" type="button">Copy</button></figcaption><pre class="long"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Confirm your email | Smartmind&lt;/title&gt;
+&lt;/head&gt;
+&lt;!--
+  The two links below must stay exactly as they are: they open /auth/confirm on the site with the
+  one-use token, and the site uses it when the person presses its button. Do not replace them with
+  Supabase's ready-made ConfirmationURL link: that makes Supabase use the token before the site
+  sees it, and the site then reports "expired or already used".
+--&gt;
+
+&lt;body style="margin:0;padding:0;background:#f4f4f0;
+font-family:Arial,Helvetica,sans-serif;color:#161a1d;"&gt;
+
+&lt;table role="presentation" width="100%" cellpadding="0"
+cellspacing="0" style="background:#f4f4f0;"&gt;
+&lt;tr&gt;
+&lt;td align="center" style="padding:48px 18px;"&gt;
+
+&lt;table role="presentation" width="100%" cellpadding="0"
+cellspacing="0" style="max-width:600px;background:#ffffff;
+border:1px solid #e8e8e3;"&gt;
+
+&lt;!-- BRAND HEADER --&gt;
+&lt;tr&gt;
+&lt;td style="padding:35px 42px;
+border-bottom:1px solid #ededeb;"&gt;
+
+&lt;div style="font-size:23px;font-weight:700;
+letter-spacing:-1px;"&gt;
+SMARTMIND
+&lt;span style="color:#d87a4a;"&gt;&amp;#9650;&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;div style="font-size:10px;letter-spacing:2px;
+color:#777d80;margin-top:7px;"&gt;
+UI &amp;amp; SI · INTELLIGENCE + LOVE
+&lt;/div&gt;
+
+&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;!-- MAIN CONTENT --&gt;
+&lt;tr&gt;
+&lt;td style="padding:52px 42px 45px;"&gt;
+
+&lt;p style="font-size:11px;font-weight:700;
+letter-spacing:2px;color:#bb6c45;"&gt;
+01 / ACCOUNT VERIFICATION
+&lt;/p&gt;
+
+&lt;h1 style="font-size:40px;letter-spacing:-1.5px;
+line-height:1.18;margin:25px 0;color:#15191b;"&gt;
+You're almost&lt;br&gt;there.
+&lt;/h1&gt;
+
+&lt;p style="font-size:16px;line-height:1.8;
+color:#4d5555;"&gt;
+Welcome to Smartmind.
+&lt;/p&gt;
+
+&lt;p style="font-size:15px;line-height:1.85;
+color:#646a6a;margin-bottom:35px;"&gt;
+Please confirm your email address to complete
+your sign-up and start exploring ideas,
+research, and collaboration.
+&lt;/p&gt;
+
+&lt;!-- CONFIRMATION BUTTON --&gt;
+&lt;table role="presentation" cellpadding="0"
+cellspacing="0"&gt;
+&lt;tr&gt;
+&lt;td bgcolor="#15191b" style="border-radius:5px;"&gt;
+
+&lt;a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;amp;type=email"
+style="display:inline-block;
+padding:18px 32px;
+color:#ffffff;
+font-size:14px;
+font-weight:700;
+text-decoration:none;
+letter-spacing:0.3px;"&gt;
+Confirm my email &amp;nbsp; &amp;#8594;
+&lt;/a&gt;
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;!-- FALLBACK LINK --&gt;
+&lt;p style="margin-top:35px;padding-top:25px;
+border-top:1px solid #ededeb;
+font-size:12px;line-height:1.9;color:#858b8a;"&gt;
+If the button doesn't work,
+&lt;a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;amp;type=email"
+style="color:#42494a;text-decoration:underline;"&gt;
+open your verification link here&lt;/a&gt;.
+&lt;/p&gt;
+
+&lt;p style="font-size:12px;line-height:1.8;
+color:#858b8a;"&gt;
+If you didn't create a Smartmind account,
+you can safely ignore this email.
+&lt;/p&gt;
+
+&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;!-- PHILOSOPHY --&gt;
+&lt;tr&gt;
+&lt;td style="padding:28px 42px;background:#f8f8f5;
+border-top:1px solid #ededeb;"&gt;
+
+&lt;div style="font-size:10px;letter-spacing:2px;
+font-weight:700;color:#777c7c;"&gt;
+OUR APPROACH
+&lt;/div&gt;
+
+&lt;div style="font-size:15px;font-weight:600;
+margin-top:10px;color:#25292a;"&gt;
+Open &amp;middot; Reproducible &amp;middot; Simple
+&lt;/div&gt;
+
+&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;!-- FOOTER --&gt;
+&lt;tr&gt;
+&lt;td align="center" style="padding:30px;"&gt;
+
+&lt;p style="font-size:12px;line-height:1.8;
+color:#737b7b;"&gt;
+Smartmind — Understanding complex cities&lt;br&gt;
+with intelligence + love.
+&lt;/p&gt;
+
+&lt;a href="https://www.smartminduiai.com/"
+style="font-size:12px;color:#575f60;
+text-decoration:none;"&gt;
+www.smartminduiai.com
+&lt;/a&gt;
+
+&lt;p style="font-size:11px;color:#a0a5a3;
+margin-top:20px;"&gt;
+This is an automated account verification email.
+&lt;/p&gt;
+
+&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;/table&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre></figure>
+  <p><b>Reset password</b>, subject <code>Reset your Smartmind password</code>:</p>
+  <figure class="code"><figcaption><span class="lang">HTML</span><span class="meta">Email template: Reset password  |  209 lines</span><button class="copy" type="button">Copy</button></figcaption><pre class="long"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Reset your password | Smartmind&lt;/title&gt;
+&lt;/head&gt;
+&lt;!--
+  The two links below must stay exactly as they are: they open /auth/confirm on the site with the
+  one-use token, and the site uses it when the person presses its button. Do not replace them with
+  Supabase's ready-made ConfirmationURL link: that makes Supabase use the token before the site
+  sees it, and the site then reports "expired or already used".
+--&gt;
+
+&lt;body style="margin:0;padding:0;background:#f4f4f0;
+font-family:Arial,Helvetica,sans-serif;color:#161a1d;"&gt;
+
+&lt;table role="presentation" width="100%" cellpadding="0"
+cellspacing="0" style="background:#f4f4f0;"&gt;
+&lt;tr&gt;
+&lt;td align="center" style="padding:48px 18px;"&gt;
+
+&lt;table role="presentation" width="100%" cellpadding="0"
+cellspacing="0" style="max-width:600px;background:#ffffff;
+border:1px solid #e8e8e3;"&gt;
+
+&lt;!-- BRAND HEADER --&gt;
+&lt;tr&gt;
+&lt;td style="padding:35px 42px;
+border-bottom:1px solid #ededeb;"&gt;
+
+&lt;div style="font-size:23px;font-weight:700;
+letter-spacing:-1px;color:#15191b;"&gt;
+SMARTMIND
+&lt;span style="color:#d87a4a;"&gt;&amp;#9650;&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;div style="font-size:10px;letter-spacing:2px;
+color:#777d80;margin-top:7px;"&gt;
+UI &amp;amp; SI &amp;middot; INTELLIGENCE + LOVE
+&lt;/div&gt;
+
+&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;!-- MAIN CONTENT --&gt;
+&lt;tr&gt;
+&lt;td style="padding:52px 42px 45px;"&gt;
+
+&lt;p style="font-size:11px;font-weight:700;
+letter-spacing:2px;color:#bb6c45;
+margin:0 0 25px;"&gt;
+02 / ACCOUNT SECURITY
+&lt;/p&gt;
+
+&lt;h1 style="font-size:40px;letter-spacing:-1.5px;
+line-height:1.18;margin:0 0 30px;
+color:#15191b;font-weight:700;"&gt;
+A fresh start.&lt;br&gt;
+One click away.
+&lt;/h1&gt;
+
+&lt;p style="font-size:16px;line-height:1.8;
+color:#4d5555;margin:0 0 18px;"&gt;
+Hello,
+&lt;/p&gt;
+
+&lt;p style="font-size:15px;line-height:1.85;
+color:#646a6a;margin:0 0 18px;"&gt;
+We received a request to reset the password
+for your Smartmind account.
+&lt;/p&gt;
+
+&lt;p style="font-size:15px;line-height:1.85;
+color:#646a6a;margin:0 0 35px;"&gt;
+If this was you, select the button below
+to choose a new password and securely
+access your account.
+&lt;/p&gt;
+
+&lt;!-- RESET PASSWORD BUTTON --&gt;
+&lt;table role="presentation" cellpadding="0"
+cellspacing="0"&gt;
+&lt;tr&gt;
+&lt;td bgcolor="#15191b" style="border-radius:5px;"&gt;
+
+&lt;a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;amp;type=recovery"
+style="display:inline-block;
+padding:18px 32px;
+background:#15191b;
+color:#ffffff;
+font-size:14px;
+font-weight:700;
+text-decoration:none;
+letter-spacing:0.3px;
+border-radius:5px;"&gt;
+Reset my password &amp;nbsp; &amp;#8594;
+&lt;/a&gt;
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;!-- FALLBACK LINK --&gt;
+&lt;p style="margin:35px 0 0;
+padding-top:25px;
+border-top:1px solid #ededeb;
+font-size:12px;
+line-height:1.9;color:#858b8a;"&gt;
+Having trouble with the button?
+&lt;a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;amp;type=recovery"
+style="color:#42494a;text-decoration:underline;"&gt;
+Open your password reset link here.
+&lt;/a&gt;
+&lt;/p&gt;
+
+&lt;!-- SECURITY NOTE --&gt;
+&lt;table role="presentation" width="100%"
+cellpadding="0" cellspacing="0"
+style="margin-top:28px;background:#f8f8f5;"&gt;
+&lt;tr&gt;
+&lt;td style="padding:20px 23px;
+border-left:3px solid #d87a4a;"&gt;
+
+&lt;p style="font-size:11px;font-weight:700;
+letter-spacing:1.5px;color:#bb6c45;
+margin:0 0 10px;"&gt;
+SECURITY NOTE
+&lt;/p&gt;
+
+&lt;p style="font-size:12px;line-height:1.8;
+color:#737a79;margin:0;"&gt;
+If you didn't request a password reset,
+you can safely ignore this email.
+Your existing password will remain unchanged
+unless the reset is completed.
+&lt;/p&gt;
+
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;p style="font-size:12px;line-height:1.8;
+color:#858b8a;margin:25px 0 0;"&gt;
+For your security, never share this reset
+link with anyone.
+&lt;/p&gt;
+
+&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;!-- SMARTMIND PHILOSOPHY --&gt;
+&lt;tr&gt;
+&lt;td style="padding:28px 42px;
+background:#f8f8f5;
+border-top:1px solid #ededeb;"&gt;
+
+&lt;div style="font-size:10px;
+letter-spacing:2px;
+font-weight:700;color:#777c7c;"&gt;
+THE SMARTMIND APPROACH
+&lt;/div&gt;
+
+&lt;div style="font-size:15px;font-weight:600;
+margin-top:10px;color:#25292a;"&gt;
+Open &amp;middot; Reproducible &amp;middot; Simple
+&lt;/div&gt;
+
+&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;!-- FOOTER --&gt;
+&lt;tr&gt;
+&lt;td align="center" style="padding:35px 30px;"&gt;
+
+&lt;p style="font-size:12px;line-height:1.8;
+color:#737b7b;margin:0 0 12px;"&gt;
+Smartmind &amp;mdash; Understanding complex cities&lt;br&gt;
+with intelligence + love.
+&lt;/p&gt;
+
+&lt;a href="https://www.smartminduiai.com/"
+style="font-size:12px;color:#575f60;
+text-decoration:underline;"&gt;
+www.smartminduiai.com
+&lt;/a&gt;
+
+&lt;p style="font-size:11px;color:#a0a5a3;
+margin:22px 0 0;line-height:1.7;"&gt;
+This is an automated account security email.&lt;br&gt;
+Please do not reply to this message.
+&lt;/p&gt;
+
+&lt;p style="font-size:10px;
+letter-spacing:1.5px;
+color:#b0b5b2;margin:22px 0 0;"&gt;
+&amp;copy; SMARTMIND
+&lt;/p&gt;
+
+&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;/table&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre></figure>
+  <label class="task"><input type="checkbox"><span>Confirm signup template and subject saved.</span></label>
+  <label class="task"><input type="checkbox"><span>Reset password template and subject saved.</span></label>
+
+  <h3>Email sending (Brevo)</h3>
+  <p>Supabase&rsquo;s built-in sender allows only a few emails an hour, which is too few for real sign-ups. Brevo has a free plan; check its pricing page for the current daily limit.</p>
+  <ol>
+    <li>At brevo.com create an account, then <b>Senders, domains &amp; dedicated IPs &rarr; Senders &rarr; Add a sender</b>. Use an address that belongs to the team and enter the code Brevo emails to it.</li>
+    <li>Strongly recommended: <b>Domains &rarr; Add a domain</b> and add the DKIM and DMARC records Brevo shows to your domain&rsquo;s DNS. A free <code>@gmail.com</code> address as the sender is often refused or goes to spam.</li>
+    <li>In Brevo: <b>SMTP &amp; API &rarr; SMTP</b>, press <b>Generate a new SMTP key</b> and copy it at once (it is shown once).</li>
+  </ol>
+  <div class="tablewrap"><table>
+    <tr><th>In Supabase: Authentication &rarr; Emails &rarr; SMTP Settings</th><th>Value</th></tr>
+    <tr><td>Enable custom SMTP</td><td>on</td></tr>
+    <tr><td>Sender email</td><td>the verified sender from Brevo</td></tr>
+    <tr><td>Sender name</td><td><code>Smartmind</code></td></tr>
+    <tr><td>Host</td><td><code>smtp-relay.brevo.com</code></td></tr>
+    <tr><td>Port</td><td><code>587</code></td></tr>
+    <tr><td>Username</td><td>the SMTP login shown on Brevo&rsquo;s SMTP page (it is not your account email)</td></tr>
+    <tr><td>Password</td><td>the SMTP key you just generated</td></tr>
+  </table></div>
+  <label class="task"><input type="checkbox"><span>Sender verified in Brevo (and the domain authenticated, if you have one).</span></label>
+  <label class="task"><input type="checkbox"><span>Custom SMTP saved in Supabase, and <b>Authentication &rarr; Rate Limits &rarr; Emails sent per hour</b> raised (for example to 100).</span></label>
+</section>
+
+<!-- ============================================================ 10 -->
+<section class="step" id="s10">
+  <header><span class="no">STEP 10</span><h2>Vercel settings</h2><span class="time">5 min</span></header>
+  <p class="where"><b>Where:</b> Vercel &rarr; your project &rarr; <b>Settings &rarr; Environment Variables</b>. Add or edit each one for the <b>Production</b> environment.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Name</th><th>Value</th><th>Needed</th></tr>
+    <tr><td><code>NEXT_PUBLIC_SITE_URL</code></td><td><code><span class="var" data-var="domain">https://www.smartminduiai.com</span></code></td><td class="tag go">Yes. The live build fails without it.</td></tr>
+    <tr><td><code>NEXT_PUBLIC_SUPABASE_URL</code></td><td><code><span class="var" data-var="url">https://dbpxfhcjluidhajzjnak.supabase.co</span></code></td><td class="tag go">Yes</td></tr>
+    <tr><td><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></td><td>The anon or publishable key from Supabase &rarr; Project Settings &rarr; API Keys</td><td class="tag go">Yes</td></tr>
+    <tr><td><code>YOUTUBE_API_KEY</code></td><td>A Google API key with YouTube Data API v3 only (optional; used only when YouTube&rsquo;s public feed fails)</td><td>Optional</td></tr>
+    <tr><td><code>SUPABASE_SERVICE_ROLE_KEY</code></td><td>Do not add.</td><td class="tag stop">Never in Vercel</td></tr>
+  </table></div>
+  <p>Variables that start with <code>NEXT_PUBLIC_</code> are baked in when the site is built, so a change takes effect on the <em>next</em> deployment. Step 11 triggers one.</p>
+  <div class="callout ok">
+    <b class="t">Why the address matters</b>
+    <p>The live site had been publishing <code>http://localhost:3000</code> in its canonical links, <code>sitemap.xml</code>, <code>robots.txt</code> and share images, so Google had no reason to index your real address. A live build now refuses to finish when the address is missing, is localhost or is not https.</p>
+  </div>
+  <label class="task"><input type="checkbox"><span><code>NEXT_PUBLIC_SITE_URL</code> set to <code><span class="var" data-var="domain">https://www.smartminduiai.com</span></code> for Production.</span></label>
+  <label class="task"><input type="checkbox"><span><code>NEXT_PUBLIC_SUPABASE_URL</code> and <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> set for Production.</span></label>
+  <label class="task"><input type="checkbox"><span>Settings &rarr; Domains: one main domain, and the other form redirects to it.</span></label>
+</section>
+
+<!-- ============================================================ 11 -->
+<section class="step" id="s11">
+  <header><span class="no">STEP 11</span><h2>Deploy the code</h2><span class="time">15 min</span></header>
+  <div class="callout warn">
+    <b class="t">Pushing to master goes live</b>
+    <p>Vercel deploys <code>master</code> to production by itself. Do this only after steps 1 to 10 are finished and checked. The database is safe for both the old and the new code, so there is no gap.</p>
+  </div>
+  <h3>11a. Merge on your computer</h3>
+  <p class="where"><b>Where:</b> Windows PowerShell, in the project folder.</p>
+  <figure class="code"><figcaption><span class="lang">PowerShell</span><span class="meta">Windows PowerShell  |  4 lines</span><button class="copy" type="button">Copy</button></figcaption><pre><code>cd E:\Work\Smartmmind
+git status                       <span class="c"># a new untracked docs file is fine; anything else, stop and ask</span>
+git checkout master
+git merge --no-edit audit/auth-hardening</code></pre></figure>
+  <p>Expected: a clean merge with no conflicts.</p>
+  <h3>11b. Check the merged code</h3>
+  <p>Start Docker Desktop first and run <code>npx supabase start</code>; some tests and the build use the local database. Close any running <code>npm run dev</code> window first. The merge changes no packages, so no install is needed. These are the same checks that passed on a copy of this exact merge.</p>
+  <figure class="code"><figcaption><span class="lang">PowerShell</span><span class="meta">Windows PowerShell  |  8 lines</span><button class="copy" type="button">Copy</button></figcaption><pre><code>npm run typecheck
+npm test
+
+<span class="c"># rehearse the live build exactly as Vercel will run it</span>
+$env:NEXT_PUBLIC_SITE_URL = "<span class="var" data-var="domain">https://www.smartminduiai.com</span>"
+$env:VERCEL_ENV = "production"
+npx next build
+Remove-Item Env:NEXT_PUBLIC_SITE_URL, Env:VERCEL_ENV</code></pre></figure>
+  <div class="done"><b>Done when</b>typecheck prints no errors, the tests end with all passed, and the build ends with the route table and no error.</div>
+  <h3>11c. Publish</h3>
+  <figure class="code"><figcaption><span class="lang">PowerShell</span><span class="meta">Windows PowerShell  |  1 lines</span><button class="copy" type="button">Copy</button></figcaption><pre><code>git push origin master</code></pre></figure>
+  <p>Watch Vercel &rarr; <b>Deployments</b> until the new one says <b>Ready</b>. If the build fails, the message says what is missing (most often <code>NEXT_PUBLIC_SITE_URL</code>); fix the variable and press <b>Redeploy</b>. A failed build never replaces the working site.</p>
+  <div class="callout ok">
+    <b class="t">Want a review gate first?</b>
+    <p>Instead of merging on your computer, push the branch (<code>git push -u origin audit/auth-hardening</code>), open a pull request on GitHub and merge it there. The result is the same deployment. A preview deployment is good for looking at the layout only: it does not run the address check and has no database settings unless you add them for the Preview environment.</p>
+  </div>
+  <label class="task"><input type="checkbox"><span>Merge was clean; typecheck, tests and the rehearsal build passed.</span></label>
+  <label class="task"><input type="checkbox"><span>Pushed, and Vercel shows the deployment as <b>Ready</b>.</span></label>
+</section>
+
+<!-- ============================================================ 12 -->
+<section class="step" id="s12">
+  <header><span class="no">STEP 12</span><h2>Test the live site</h2><span class="time">25 min</span></header>
+  <h3>12a. Sign-up and email (the one thing nobody could test from outside)</h3>
+  <label class="task"><input type="checkbox"><span>In a private window: Register with an address you can read. The confirmation email arrives within a minute, from your Brevo sender.</span></label>
+  <label class="task"><input type="checkbox"><span>Click the link. You land on login with &ldquo;Your email is confirmed&rdquo;.</span></label>
+  <label class="task"><input type="checkbox"><span>Log in, press <b>Write</b>, publish a short post with a cover image. It shows under <b>Stories &rarr; Blog</b>.</span></label>
+  <label class="task"><input type="checkbox"><span>Use <b>Forgot your password?</b> and finish the reset.</span></label>
+  <label class="task"><input type="checkbox"><span>Comment on a post, then delete your own comment. Afterwards remove the test post and block the test account (Admin &rarr; Community &rarr; Members).</span></label>
+  <p>If the email does not arrive: spam folder, then Brevo &rarr; <b>Transactional &rarr; Logs</b>, then Supabase &rarr; Authentication &rarr; Logs.</p>
+
+  <h3>12b. Admin</h3>
+  <label class="task"><input type="checkbox"><span>Log in at <code>/admin/login</code>, upload an image, remove it. Opening <code>/admin</code> in a private window sends you to the login page.</span></label>
+  <p>Only if you need a new admin account. Run it from your own terminal against the <b>live</b> project. The two variables override <code>.env.local</code>; if you skip the first two lines the command creates the admin on your local database instead.</p>
+  <figure class="code"><figcaption><span class="lang">PowerShell</span><span class="meta">Windows PowerShell  |  4 lines</span><button class="copy" type="button">Copy</button></figcaption><pre><code>$env:NEXT_PUBLIC_SUPABASE_URL = "<span class="var" data-var="url">https://dbpxfhcjluidhajzjnak.supabase.co</span>"
+$env:SUPABASE_SERVICE_ROLE_KEY = "PASTE-THE-SERVICE-ROLE-OR-SECRET-KEY-HERE"
+npm run create-admin -- you@example.com      <span class="c"># prints a generated password once; save it</span>
+Remove-Item Env:NEXT_PUBLIC_SUPABASE_URL, Env:SUPABASE_SERVICE_ROLE_KEY</code></pre></figure>
+
+  <h3>12c. Search engine checks</h3>
+  <p class="where"><b>Where:</b> Windows PowerShell. <code>curl.exe</code> is used on purpose (plain <code>curl</code> is something else in PowerShell).</p>
+  <figure class="code"><figcaption><span class="lang">PowerShell</span><span class="meta">Windows PowerShell  |  13 lines</span><button class="copy" type="button">Copy</button></figcaption><pre><code>$site = "<span class="var" data-var="domain">https://www.smartminduiai.com</span>"
+
+<span class="c"># must show your live address in href</span>
+(curl.exe -s "$site/" | Select-String '&lt;link rel="canonical"[^&gt;]*&gt;').Matches.Value
+
+<span class="c"># must print nothing (True means the sitemap still mentions localhost)</span>
+curl.exe -s "$site/sitemap.xml" | Select-String -Pattern "localhost" -Quiet
+
+<span class="c"># the Sitemap: line must use your live address</span>
+curl.exe -s "$site/robots.txt"
+
+<span class="c"># must print True</span>
+curl.exe -s "$site/" | Select-String -Pattern '"@type":"WebSite"' -Quiet</code></pre></figure>
+  <div class="done"><b>Done when</b>The canonical link shows <code><span class="var" data-var="domain">https://www.smartminduiai.com</span>/</code>, the localhost check prints nothing (it prints <code>True</code> only if something is wrong), <code>robots.txt</code> has a <code>Sitemap:</code> line with your address, and the <code>WebSite</code> check prints <code>True</code>.</div>
+  <label class="task"><input type="checkbox"><span>Canonical, sitemap and robots.txt all use the live address.</span></label>
+</section>
+
+<!-- ============================================================ 13 -->
+<section class="step" id="s13">
+  <header><span class="no">STEP 13</span><h2>Search Console</h2><span class="time">10 min</span></header>
+  <label class="task"><input type="checkbox"><span>Open search.google.com/search-console and add your site (a Domain property with a DNS TXT record, or a URL-prefix property with the exact address <code><span class="var" data-var="domain">https://www.smartminduiai.com</span></code>).</span></label>
+  <label class="task"><input type="checkbox"><span><b>Sitemaps</b>: submit <code>sitemap.xml</code>.</span></label>
+  <label class="task"><input type="checkbox"><span><b>URL inspection</b>: enter the home page and press <b>Request indexing</b>.</span></label>
+  <p>Google cached the old <code>localhost</code> addresses, so allow days to weeks before search results change. Optionally add the same site in Bing Webmaster Tools, which can import from Search Console.</p>
+</section>
+
+<!-- ============================================================ 14 -->
+<section class="step" id="s14">
+  <header><span class="no">STEP 14</span><h2>Rollback</h2><span class="time">only if something is wrong</span></header>
+  <div class="tablewrap"><table>
+    <tr><th>What went wrong</th><th>Fix</th></tr>
+    <tr><td>The new site misbehaves</td><td>Vercel &rarr; Deployments &rarr; open the previous good deployment &rarr; <b>Instant Rollback</b> (or Promote to Production). The database can stay as it is: the old code works with the new database.</td></tr>
+    <tr><td>The database changes cause a problem</td><td>Run the block below. It puts back the old policies, the old names and the old photo references from your safety copy. It can be run more than once. Nothing else in the database was changed by the two files.</td></tr>
+    <tr><td>Rows were damaged some other way</td><td>Stop and send me the details. Do not restore a dump over a live project without checking first.</td></tr>
+  </table></div>
+  <p class="where"><b>Where:</b> SQL Editor &rarr; New query.</p>
+  <figure class="code"><figcaption><span class="lang">SQL</span><span class="meta">Supabase dashboard &gt; SQL Editor &gt; New query (already wrapped in begin / commit)  |  36 lines</span><button class="copy" type="button">Copy</button></figcaption><pre class="long"><code>begin;
+
+<span class="c">-- members file: remove the new guards</span>
+drop trigger if exists member_profiles_clean_name on public.member_profiles;
+drop trigger if exists blog_posts_cover_path on public.blog_posts;
+alter table public.member_profiles drop constraint if exists member_display_name_clean;
+alter table public.member_profiles drop constraint if exists member_photo_own_folder;
+
+<span class="c">-- members file: put the old policies back</span>
+drop policy if exists "member_profiles: public reads confirmed members" on public.member_profiles;
+drop policy if exists "member_profiles: public reads unblocked" on public.member_profiles;
+create policy "member_profiles: public reads unblocked" on public.member_profiles
+  for select to anon, authenticated using (not blocked);
+
+drop policy if exists "member_profiles: update own" on public.member_profiles;
+create policy "member_profiles: update own" on public.member_profiles
+  for update to authenticated using (id = auth.uid() and not blocked) with check (id = auth.uid());
+
+drop policy if exists "blog_comments: author or post author deletes" on public.blog_comments;
+create policy "blog_comments: author or post author deletes" on public.blog_comments
+  for delete to authenticated using (author_id = auth.uid() or public.is_post_author(post_id));
+
+<span class="c">-- members file: put the old names and photo references back from the safety copy</span>
+update public.member_profiles m
+set display_name = b.display_name, photo_path = b.photo_path
+from public.backup_member_profiles_20261104 b
+where b.id = m.id;
+
+<span class="c">-- media file: put the old public read policy back</span>
+drop policy if exists "media: admin lists" on storage.objects;
+drop policy if exists "media: member lists own folder" on storage.objects;
+drop policy if exists "media: public read" on storage.objects;
+create policy "media: public read" on storage.objects
+  for select to anon, authenticated using (bucket_id = 'media');
+
+commit;</code></pre></figure>
+  <p>The new helper functions and indexes can stay; they do nothing on their own. After a rollback, run the step 4 pre-flight again: it should show no STOP rows.</p>
+</section>
+
+<!-- ============================================================ 15 -->
+<section class="step" id="s15">
+  <header><span class="no">STEP 15</span><h2>After a week</h2><span class="time">2 min</span></header>
+  <p>When you are happy that everything works, remove the safety copy. Keep the dump files in <code>C:\Backups\smartmind</code>.</p>
+  <figure class="code"><figcaption><span class="lang">SQL</span><span class="meta">Supabase dashboard &gt; SQL Editor &gt; New query  |  1 lines</span><button class="copy" type="button">Copy</button></figcaption><pre><code>drop table public.backup_member_profiles_20261104;</code></pre></figure>
+  <p>Then read the &ldquo;not done by code&rdquo; list in <code>docs/community-setup.md</code> section 8: CAPTCHA, a shared rate-limit store and admin two-factor sign-in are the next things to add if abuse shows up.</p>
+</section>
+
+<!-- ============================================================ A -->
+<section class="step" id="appx">
+  <header><span class="no">APPENDIX A</span><h2>If something goes wrong</h2></header>
+  <div class="tablewrap"><table>
+    <tr><th>What you see</th><th>Cause and fix</th></tr>
+    <tr><td>&ldquo;syntax error&rdquo;, or odd characters in pasted SQL</td><td>The text was copied by hand or from another place. Use the Copy button on this page and paste into a <em>new</em> query.</td></tr>
+    <tr><td>&ldquo;relation &hellip; already exists&rdquo; when adding the community tables</td><td>They are already there. Nothing changed. Go on to step 4.</td></tr>
+    <tr><td>&ldquo;must be owner of table objects&rdquo;</td><td>Step 6 fallback: do the media policies in the Storage dashboard.</td></tr>
+    <tr><td>&ldquo;Email rate limit exceeded&rdquo; when registering</td><td>Supabase&rsquo;s built-in sender is still in use. Finish the Brevo SMTP settings and raise <b>Emails sent per hour</b>.</td></tr>
+    <tr><td>Every emailed link says &ldquo;expired or already used&rdquo;</td><td>The templates use <code>{{ .ConfirmationURL }}</code>, or the Site URL is wrong. Paste the two templates from step 9 again and recheck the Site URL.</td></tr>
+    <tr><td>Vercel build fails with <code>NEXT_PUBLIC_SITE_URL</code></td><td>The variable is missing, points at localhost, or does not start with <code>https://</code>. Fix it for Production and press Redeploy.</td></tr>
+    <tr><td>Images are broken after step 6</td><td>The bucket was not public. Run the step 14 rollback (it restores <code>media: public read</code>), then check Storage &rarr; media is Public.</td></tr>
+    <tr><td>A member&rsquo;s name became &ldquo;Member&rdquo;</td><td>Their old name contained a reserved word (admin, smartmind, moderator, former member). Set a plain name with the rename block in step 4. It is accepted when it has no reserved word.</td></tr>
+    <tr><td>The admin cannot log in</td><td>Run the admin command in step 12b against the live project. An existing admin&rsquo;s password is reset without any extra flag.</td></tr>
+  </table></div>
+  <p>For anything else: stop, copy the exact message, note the step number, and send both to me.</p>
+</section>
+
+<!-- ============================================================ B -->
+<section class="step" id="appb">
+  <header><span class="no">APPENDIX B</span><h2>If the live project is empty</h2></header>
+  <p>Use this only if step 1 showed the project has no site tables or no content. Never on a project that holds content you want to keep.</p>
+  <ol>
+    <li>Paste <code>hosted-clean-install.sql</code> (project folder root) into the SQL Editor and run it. It rebuilds everything up to the community migrations and creates the <code>media</code> bucket.</li>
+    <li>Apply steps 4 to 7 of this guide (the pre-flight will report there are no members yet).</li>
+    <li>Bring the content from your <em>local</em> database (posts, team, publications, awards, partners, projects and the image files). The hosted tables must be empty; the script refuses to run otherwise and never overwrites anything. It does not copy logins or blog posts and comments.</li>
+  </ol>
+  <figure class="code"><figcaption><span class="lang">PowerShell</span><span class="meta">Windows PowerShell  |  5 lines</span><button class="copy" type="button">Copy</button></figcaption><pre><code>$env:HOSTED_SUPABASE_URL = "<span class="var" data-var="url">https://dbpxfhcjluidhajzjnak.supabase.co</span>"
+$env:HOSTED_SERVICE_ROLE_KEY = "PASTE-THE-SERVICE-ROLE-OR-SECRET-KEY-HERE"
+npm run copy-to-hosted -- --dry      <span class="c"># only counts what it would copy</span>
+npm run copy-to-hosted
+Remove-Item Env:HOSTED_SUPABASE_URL, Env:HOSTED_SERVICE_ROLE_KEY</code></pre></figure>
+</section>
+
+<!-- ============================================================ C -->
+<section class="step" id="appc">
+  <header><span class="no">APPENDIX C</span><h2>What was tested, and what was not</h2></header>
+  <div class="callout ok">
+    <b class="t">Tested before this page was written (7 November 2026)</b>
+    <ul>
+      <li>The pre-flight, the members file, the media file, the verification block and the rollback block were run against a real Postgres copy of your local database (117 posts, 33 members) that had been put back to its pre-migration state, with bad names, a bad photo path and an account without a profile planted. Every prediction of the pre-flight matched what the file then did; verification showed 10 of 10; the rollback restored the old names, photo reference and policies; applying again afterwards still passed. Everything was rolled back and the scratch copies were removed.</li>
+      <li>The community block was applied to a copy where those tables had been removed. It succeeded inside <code>begin; &hellip; commit;</code>, and a second run failed cleanly with &ldquo;already exists&rdquo; and changed nothing.</li>
+      <li>The two PowerShell visitor checks were run against the local API: 0 files listable, image status 200.</li>
+      <li>The merge of <code>audit/auth-hardening</code> into <code>master</code> was done on a throwaway copy: no conflicts, typecheck clean, 563 of 563 tests passed, and the production-style build finished. The built <code>sitemap.xml</code> and <code>robots.txt</code> contained only the live address.</li>
+      <li>The page builder refuses to build if any non-ASCII character is inside a code block.</li>
+    </ul>
+  </div>
+  <div class="callout warn">
+    <b class="t">Not tested, because it needs your accounts</b>
+    <ul>
+      <li>Anything inside your Supabase, Vercel, Brevo, GitHub and Google Search Console dashboards, including the real email delivery. Step 12a is that test.</li>
+      <li>Your live database itself. It may differ from the local copy in ways only the step 1 and step 4 checks can reveal. That is why they exist and why a STOP row means stop.</li>
+      <li>The <code>supabase db dump</code> command and the browser sign-in for <code>supabase login</code>.</li>
+    </ul>
+  </div>
+  <footer class="end">Source files: <code>supabase/migrations</code>, <code>hosted-add-community.sql</code>, <code>supabase/templates</code>. SQL blocks were inserted from those files by the page builder, not retyped.</footer>
+</section>
+</main>
+</div>
+
+<script>
+(function () {
+  var DOMAIN_DEFAULT = "https://www.smartminduiai.com", REF_DEFAULT = "dbpxfhcjluidhajzjnak";
+  function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function save(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
+  // ---- your two values
+  var dIn = document.getElementById("v-domain"), rIn = document.getElementById("v-ref");
+  function clean(v, d) { return v.trim().replace(/\/+$/, "") || d; }
+  function paint() {
+    var domain = clean(dIn.value, DOMAIN_DEFAULT), ref = clean(rIn.value, REF_DEFAULT);
+    var map = { domain: domain, ref: ref, url: "https://" + ref + ".supabase.co" };
+    document.querySelectorAll("[data-var]").forEach(function (el) { el.textContent = map[el.getAttribute("data-var")]; });
+    dIn.setAttribute("aria-invalid", /^https:\/\/[^\s/]+$/.test(domain) ? "false" : "true");
+  }
+  var sd = load("sm-domain"), sr = load("sm-ref");
+  if (sd) dIn.value = sd; if (sr) rIn.value = sr;
+  dIn.addEventListener("input", function () { save("sm-domain", dIn.value); paint(); });
+  rIn.addEventListener("input", function () { save("sm-ref", rIn.value); paint(); });
+  paint();
+
+  // ---- copy buttons
+  document.querySelectorAll("button.copy").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var pre = btn.closest("figure").querySelector("pre"), text = pre.textContent;
+      function done() { btn.textContent = "Copied"; btn.classList.add("copied"); setTimeout(function () { btn.textContent = "Copy"; btn.classList.remove("copied"); }, 1600); }
+      function fallback() {
+        var r = document.createRange(); r.selectNodeContents(pre);
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        btn.textContent = "Press Ctrl+C";
+      }
+      try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+    });
+  });
+
+  // ---- tick boxes and progress
+  var boxes = Array.prototype.slice.call(document.querySelectorAll(".task input"));
+  var saved = {}; try { saved = JSON.parse(load("sm-ticks") || "{}"); } catch (e) {}
+  function progress() {
+    var n = boxes.filter(function (b) { return b.checked; }).length;
+    document.getElementById("pcount").textContent = n + " of " + boxes.length + " ticked";
+    document.getElementById("pbar").style.width = (boxes.length ? (100 * n / boxes.length) : 0) + "%";
+  }
+  boxes.forEach(function (b, i) {
+    if (saved[i]) b.checked = true;
+    b.addEventListener("change", function () { saved[i] = b.checked; save("sm-ticks", JSON.stringify(saved)); progress(); });
+  });
+  progress();
+
+  // ---- step list: open on wide screens, closed on phones
+  var det = document.querySelector(".toc details");
+  if (window.matchMedia("(max-width: 920px)").matches) det.removeAttribute("open");
+})();
+</script>
+
+</body>
+</html>

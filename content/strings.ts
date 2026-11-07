@@ -52,21 +52,35 @@ const en = {
     registerSubmit: 'Create account',
     registerBusy: 'Creating account',
     registerDoneTitle: 'Check your email',
-    registerDone:
-      'If that address can be registered, we have sent a link to confirm it. Open it to finish creating your account.',
+    registerDone: (email: string) =>
+      `We have sent a link to ${email} to confirm it, unless that address already has an account. It can take a few minutes to arrive and may land in your spam folder. Open it to finish creating your account.`,
+    registerDoneResend: 'Nothing arrived after a few minutes?',
+    registerDoneHaveAccount:
+      'Already have an account? Then no new link is sent. Log in, or reset your password if you have forgotten it.',
+    resendLead: 'Need a new confirmation link? Enter your email and we will send one.',
+    resendSubmit: 'Send the link again',
+    resendBusy: 'Sending',
+    resendDone: 'If that address is waiting for confirmation, we sent a new link.',
     haveAccount: 'Already have an account?',
     noAccount: 'New here?',
     loginTitle: 'Log in',
     loginLead: 'Welcome back.',
     loginSubmit: 'Log in',
     loginBusy: 'Logging in',
+    forgotBusy: 'Sending',
+    resetBusy: 'Saving',
     loginFailed: 'That email and password do not match.',
-    notConfirmed: 'Confirm your email first. Check your inbox for the link we sent.',
+    notConfirmed:
+      'Confirm your email first. Check your inbox and spam folder for the link we sent, or send it again below.',
     verifiedNotice: 'Your email is confirmed. You can log in now.',
     confirmFailed:
-      'That link has expired or was already used. If you have already confirmed your email, just log in below. If not, ask for a new link.',
+      'That link has expired or was already used. If you have already confirmed your email, just log in below. If not, send yourself a new link at the bottom of this page.',
     resetLinkFailed:
       'That reset link has expired or was already used. Enter your email to get a new one.',
+    confirmBusy:
+      'We could not check that link just now because too many requests came in. Wait a few minutes, then open it again.',
+    resetLinkBusy:
+      'We could not check that reset link just now because too many requests came in. Wait a few minutes, then open it again.',
     confirmTitle: 'Confirm your email',
     confirmLead: 'One more step to finish creating your account.',
     confirmButton: 'Confirm my email',
@@ -76,17 +90,28 @@ const en = {
     forgotTitle: 'Reset your password',
     forgotLead: 'Enter your email and we will send you a link.',
     forgotSubmit: 'Send reset link',
-    forgotDone: 'If that address has an account, a reset link is on its way.',
+    forgotDone:
+      'If that address has an account, a reset link is on its way. If nothing arrives in a few minutes, try again.',
     resetTitle: 'Choose a new password',
     resetSubmit: 'Save password',
-    resetDone: 'Your password is changed.',
     resetExpired: 'This reset link has expired. Ask for a new one.',
+    resetNewLink: 'Get a new reset link',
+    passwordChanged:
+      'Your password is changed. You are still logged in here, and logged out everywhere else.',
+    passwordChangedOthersFailed:
+      'Your password is changed. We could not log you out on your other devices, so log out and back in on each of them, or contact the team.',
     resetFailed: 'Could not change the password. Try again.',
     passwordShort: 'Use at least 12 characters',
     emailInvalid: 'Enter a valid email address.',
     fixFields: 'Fix the highlighted fields.',
     registerFailed: 'Could not create the account. Check the details and try again.',
     unavailable: 'Accounts are not available right now.',
+    tryLater: 'Too many requests right now. Wait a few minutes and try again.',
+    mailFailed: 'We could not send the email just now. Try again in a few minutes.',
+    weakPassword: 'Choose a stronger password that is harder to guess.',
+    samePassword: 'That is your current password. Choose a new one.',
+    tooManyAttempts: (minutes: number) =>
+      `Too many attempts. Try again in ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}.`,
     disabled: 'Accounts and blogging switch on once the site is connected to its database.',
     backToSite: 'Back to the site',
     deleteTitle: 'Delete your account',
@@ -106,6 +131,8 @@ const en = {
     uploadFailed: 'The upload failed. Try again.',
     imageRules: 'Use a JPEG, PNG or WebP image of 5 MB or less.',
     saveFailed: 'Could not save. Try again.',
+    nameNotAllowed:
+      'Choose a different name. It must have at least 2 visible characters, and cannot use words like admin, moderator or smartmind.',
     deleteFailed: 'Could not delete this post.',
     writeTitle: 'Write a post',
     editTitle: 'Edit your post',
@@ -159,6 +186,8 @@ const en = {
     unlike: 'Remove your like',
     needVerifyShort: 'Confirm your email to comment and like.',
     commentFailed: 'Could not post your comment. Try again.',
+    commentNotDeleted:
+      'This comment could not be deleted. It may already be gone or hidden by the team.',
     likeFailed: 'Could not save your like. Try again.',
   },
   stories: {
@@ -282,7 +311,13 @@ const en = {
   },
 } as const;
 
-type DeepString<T> = { [K in keyof T]: T[K] extends string ? string : DeepString<T[K]> };
+type DeepString<T> = {
+  [K in keyof T]: T[K] extends string
+    ? string
+    : T[K] extends (...args: never[]) => string
+      ? T[K]
+      : DeepString<T[K]>;
+};
 export type Strings = DeepString<typeof en>;
 
 const dictionaries: Record<'en', Strings> = { en };

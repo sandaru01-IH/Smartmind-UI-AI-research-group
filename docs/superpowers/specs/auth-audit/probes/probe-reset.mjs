@@ -1,0 +1,13 @@
+import { chromium } from 'file:///E:/Work/Smartmmind/node_modules/playwright/index.mjs';
+const b = await chromium.launch(); const p = await b.newPage();
+await p.goto('http://localhost:3000/register');
+await p.fill('#displayName', 'Typed Name'); await p.fill('#email', 'typed.person@example.test');
+await p.fill('#password', 'short'); await p.check('input[name=acceptTerms]');
+await p.click('button[type=submit]'); await p.waitForTimeout(2500);
+const v = async (s) => p.locator(s).inputValue().catch(()=> '(gone)');
+console.log('REGISTER after invalid submit -> name:', JSON.stringify(await v('#displayName')), 'email:', JSON.stringify(await v('#email')), 'terms checked:', await p.locator('input[name=acceptTerms]').isChecked());
+await p.goto('http://localhost:3000/login');
+await p.fill('#email', 'audit.user1@example.test'); await p.fill('#password', 'wrong-password-123');
+await p.click('button[type=submit]'); await p.waitForTimeout(2500);
+console.log('LOGIN after wrong password -> email:', JSON.stringify(await v('#email')), 'password:', JSON.stringify(await v('#password')));
+await b.close();

@@ -241,4 +241,85 @@ describe.skipIf(!enabled)('Row Level Security', () => {
       expect(up.error).not.toBeNull();
     });
   });
+
+  describe('media bucket listing', () => {
+    let memberId: string;
+    let adminId: string;
+    const coverPath = () => `covers/2026/rls-list-${RUN}.png`;
+    const ownPath = () => `members/${memberId}/00000000-0000-4000-8000-${RUN.padEnd(12, '0')}.png`;
+    const names = (rows: { name: string }[] | null) => (rows ?? []).map((r) => r.name);
+
+    beforeAll(async () => {
+      memberId = (await member.auth.getUser()).data.user!.id;
+      adminId = (await admin.auth.getUser()).data.user!.id;
+      // Fixtures are put there by the service key, so listing is the only thing under test.
+      for (const path of [coverPath(), ownPath(), `members/${adminId}/other-${RUN}.png`]) {
+        const up = await service.storage.from('media').upload(path, PNG, {
+          contentType: 'image/png',
+          upsert: true,
+        });
+        if (up.error) throw up.error;
+        uploaded.push(path);
+      }
+    });
+
+    it('lists nothing for a visitor, yet public links keep working', async () => {
+      for (const prefix of ['covers/2026', 'members', `members/${memberId}`, '']) {
+        const { data, error } = await anon.storage.from('media').list(prefix, { limit: 1000 });
+        expect(error, `list "${prefix}"`).toBeNull();
+        expect(data ?? [], `list "${prefix}"`).toEqual([]);
+      }
+      const url = anon.storage.from('media').getPublicUrl(coverPath()).data.publicUrl;
+      expect((await fetch(url)).status).toBe(200);
+      const own = anon.storage.from('media').getPublicUrl(ownPath()).data.publicUrl;
+      expect((await fetch(own)).status).toBe(200);
+    });
+
+    it('still lets the admin list everything', async () => {
+      const covers = await admin.storage.from('media').list('covers/2026', { limit: 1000 });
+      expect(names(covers.data)).toContain(`rls-list-${RUN}.png`);
+      const members = await admin.storage.from('media').list(`members/${memberId}`);
+      expect(names(members.data)).toHaveLength(1);
+    });
+
+    it('lets a member list only their own folder', async () => {
+      const own = await member.storage.from('media').list(`members/${memberId}`);
+      expect(own.error).toBeNull();
+      expect(names(own.data)).toHaveLength(1);
+      for (const prefix of ['covers/2026', `members/${adminId}`]) {
+        const { data } = await member.storage.from('media').list(prefix, { limit: 1000 });
+        expect(names(data), `list "${prefix}"`).toEqual([]);
+      }
+      // The root only shows the one folder that holds their own file, never covers or other members.
+      const root = await member.storage.from('media').list('', { limit: 1000 });
+      expect(names(root.data)).toEqual(['members']);
+      const folders = await member.storage.from('media').list('members', { limit: 1000 });
+      expect(names(folders.data)).toEqual([memberId]);
+      expect(names(folders.data)).not.toContain(adminId);
+    });
+
+    it('lets the owner replace their own file (upsert)', async () => {
+      const path = `members/${memberId}/11111111-1111-4111-8111-${RUN.padEnd(12, '1')}.png`;
+      uploaded.push(path);
+      const first = await member.storage
+        .from('media')
+        .upload(path, PNG, { contentType: 'image/png', upsert: true });
+      expect(first.error).toBeNull();
+      const again = await member.storage
+        .from('media')
+        .upload(path, PNG, { contentType: 'image/png', upsert: true });
+      expect(again.error).toBeNull();
+    });
+
+    it('still lets the admin replace a file (upsert)', async () => {
+      const path = `covers/2026/rls-upsert-${RUN}.png`;
+      uploaded.push(path);
+      for (let i = 0; i < 2; i++) {
+        const up = await admin.storage
+          .from('media')
+          .upload(path, PNG, { contentType: 'image/png', upsert: true });
+        expect(up.error, `upload ${i + 1}`).toBeNull();
+      }
+    });
+  });
 });

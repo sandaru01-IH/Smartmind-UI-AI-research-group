@@ -2,6 +2,8 @@ export interface ThrottleOptions {
   maxFailures: number;
   windowMs: number;
   lockMs: number;
+  /** Most keys held at once. Default 5000. */
+  maxKeys?: number;
   now?: () => number;
 }
 
@@ -17,27 +19,63 @@ interface Record {
 
 /**
  * Failed-login limiter. Kept in memory per server instance: it slows guessing on one instance, and
- * Supabase Auth applies its own rate limits on top. Swap the Map for a shared store (for example
- * Upstash) if the site runs on many instances.
+ * Supabase Auth applies its own rate limits on top. On several instances (or serverless functions
+ * that each start fresh) every instance counts for itself, so the real limit is higher. A shared
+ * store (for example Upstash) is the follow-up if that matters.
+ *
+ * Memory is bounded: the map keeps keys in the order they were last counted, records that can no
+ * longer matter (no lock, no failure inside the window) are swept out at least once per window, and
+ * above `maxKeys` the key counted longest ago goes first. A locked key is kept until its lock ends,
+ * and is only pushed out when every other key is locked too.
  */
-export function createThrottle({ maxFailures, windowMs, lockMs, now = Date.now }: ThrottleOptions) {
+export function createThrottle({
+  maxFailures,
+  windowMs,
+  lockMs,
+  maxKeys = 5000,
+  now = Date.now,
+}: ThrottleOptions) {
   const records = new Map<string, Record>();
+  let lastSweep = now();
 
   const prune = (r: Record, t: number) => {
     r.failures = r.failures.filter((f) => t - f < windowMs);
+  };
+  const isLocked = (r: Record, t: number) => r.lockedUntil > t;
+  const isSpent = (r: Record, t: number) =>
+    !isLocked(r, t) &&
+    (r.failures.length === 0 || t - r.failures[r.failures.length - 1] >= windowMs);
+
+  const sweep = (t: number) => {
+    lastSweep = t;
+    for (const [k, r] of records) if (isSpent(r, t)) records.delete(k);
+  };
+
+  /** Brings the map back to `maxKeys`, never dropping `keep`, the key being counted right now. */
+  const evict = (t: number, keep: string) => {
+    sweep(t);
+    for (const unlockedOnly of [true, false]) {
+      for (const [k, r] of records) {
+        if (records.size <= maxKeys) return;
+        if (k === keep || (unlockedOnly && isLocked(r, t))) continue;
+        records.delete(k);
+      }
+    }
   };
 
   return {
     check(key: string): ThrottleCheck {
       const r = records.get(key);
       const t = now();
-      if (r && r.lockedUntil > t)
+      if (r && isLocked(r, t))
         return { locked: true, retryAfterSeconds: Math.ceil((r.lockedUntil - t) / 1000) };
       return { locked: false, retryAfterSeconds: 0 };
     },
     fail(key: string): void {
       const t = now();
       const r = records.get(key) ?? { failures: [], lockedUntil: 0 };
+      // Delete and set again so this key moves to the end: the front is the least recently counted.
+      records.delete(key);
       prune(r, t);
       r.failures.push(t);
       if (r.failures.length >= maxFailures) {
@@ -45,13 +83,15 @@ export function createThrottle({ maxFailures, windowMs, lockMs, now = Date.now }
         r.failures = [];
       }
       records.set(key, r);
-      if (records.size > 5000) {
-        for (const [k, v] of records)
-          if (v.lockedUntil < t && v.failures.length === 0) records.delete(k);
-      }
+      if (records.size > maxKeys) evict(t, key);
+      else if (t - lastSweep >= windowMs) sweep(t);
     },
     reset(key: string): void {
       records.delete(key);
+    },
+    /** How many keys are held, for tests and monitoring. */
+    size(): number {
+      return records.size;
     },
   };
 }
@@ -96,6 +136,27 @@ export const memberAccountThrottle = createThrottle({
 
 /** Password-reset emails per address. */
 export const resetThrottle = createThrottle({
+  maxFailures: 5,
+  windowMs: 60 * 60_000,
+  lockMs: 60 * 60_000,
+});
+
+/** Confirmation emails sent again, per address: every attempt counts. */
+export const resendThrottle = createThrottle({
+  maxFailures: 3,
+  windowMs: 60 * 60_000,
+  lockMs: 60 * 60_000,
+});
+
+/** The same per email, whatever the address, so rotating addresses cannot flood one inbox. */
+export const resendEmailThrottle = createThrottle({
+  maxFailures: 3,
+  windowMs: 60 * 60_000,
+  lockMs: 60 * 60_000,
+});
+
+/** New passwords set per user: every attempt counts. */
+export const passwordChangeThrottle = createThrottle({
   maxFailures: 5,
   windowMs: 60 * 60_000,
   lockMs: 60 * 60_000,

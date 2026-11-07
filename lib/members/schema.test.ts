@@ -50,6 +50,42 @@ describe('safeMemberNext', () => {
     expect(safeMemberNext('/write')).toBe('/write');
     expect(safeMemberNext('/blog/some-post?x=1')).toBe('/blog/some-post?x=1');
     expect(safeMemberNext('/account/posts')).toBe('/account/posts');
+    expect(safeMemberNext('/')).toBe('/');
+    expect(safeMemberNext('/account?tab=1#top')).toBe('/account?tab=1#top');
+    expect(safeMemberNext('/blog/some-post')).toBe('/blog/some-post');
+  });
+
+  // Browsers strip tab/newline/CR while parsing, so '/\t/evil.example' becomes '//evil.example'.
+  it.each(['/\t/evil.example', '/\n/evil.example', '/\r/evil.example', '/\u0000/x', '/a\u007Fb'])(
+    'falls back for control characters in %j',
+    (bad) => {
+      expect(safeMemberNext(bad)).toBe('/');
+    },
+  );
+
+  it('never returns anything that parses to another origin', () => {
+    for (const input of [
+      '/\t/evil.example',
+      '/\n/evil.example',
+      '/\r/evil.example',
+      '/\u0000/x',
+      '/​/x',
+      '//evil.example',
+      '/\\evil.example',
+      '/..//evil',
+      '/admin',
+      '/admin?x=1',
+      '/account?tab=1#top',
+    ]) {
+      const out = safeMemberNext(input);
+      expect(new URL(out, 'http://site.test').origin, JSON.stringify(input)).toBe(
+        'http://site.test',
+      );
+    }
+  });
+
+  it('keeps refusing /admin with a query string', () => {
+    expect(safeMemberNext('/admin?x=1')).toBe('/');
   });
 
   it('falls back to the home page for anything that could leave the site or reach admin', () => {

@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { confirmLinkAction } from '@/app/members-actions';
 import { AuthShell } from '@/components/members/auth-shell';
-import { buttonClass } from '@/components/ui/button';
+import { ConfirmButton } from '@/components/members/confirm-button';
 import { t } from '@/content/strings';
 import { pageMeta } from '@/lib/seo';
 
@@ -33,16 +33,14 @@ async function Step({ searchParams }: { searchParams: SearchParams }) {
 
   return (
     <AuthShell
-      title={reset ? t.members.forgotTitle : t.members.confirmTitle}
+      title={reset ? t.members.resetTitle : t.members.confirmTitle}
       lead={reset ? t.members.confirmResetLead : t.members.confirmLead}
     >
       <form action={confirmLinkAction}>
         <input type="hidden" name="token_hash" value={tokenHash} />
         <input type="hidden" name="type" value={type} />
         <input type="hidden" name="code" value={code} />
-        <button type="submit" className={buttonClass('primary', 'w-full')}>
-          {reset ? t.members.confirmResetButton : t.members.confirmButton}
-        </button>
+        <ConfirmButton label={reset ? t.members.confirmResetButton : t.members.confirmButton} />
       </form>
     </AuthShell>
   );

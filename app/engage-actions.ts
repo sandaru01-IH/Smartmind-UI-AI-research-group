@@ -59,8 +59,15 @@ export async function deleteCommentAction(commentId: string, slug: string): Prom
   const member = await getMember();
   if (!member) return fail(t.blog.needLogin);
   if (!z.uuid().safeParse(commentId).success) return fail(t.blog.commentFailed);
-  const { error } = await member.supabase.from('blog_comments').delete().eq('id', commentId);
+  const { data, error } = await member.supabase
+    .from('blog_comments')
+    .delete()
+    .eq('id', commentId)
+    .select('id');
   if (error) return fail(t.blog.commentFailed);
+  // Row Level Security filters rows out instead of failing: nothing came back means nothing was
+  // deleted (someone else's comment, or one an admin hid), which must not read as success.
+  if (!data?.length) return fail(t.blog.commentNotDeleted);
   if (/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) refreshPost(slug);
   return { ok: true };
 }

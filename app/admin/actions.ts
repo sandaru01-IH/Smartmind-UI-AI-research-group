@@ -4,6 +4,9 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath, updateTag } from 'next/cache';
 import { z } from 'zod';
+import { t } from '@/content/strings';
+import { classifyAuthError } from '@/lib/auth/auth-errors';
+import { clientIpFrom } from '@/lib/auth/client-ip';
 import { requireAdmin } from '@/lib/auth/require-admin';
 import { setWorkPeople } from '@/lib/catalog/admin';
 import { safeNext } from '@/lib/auth/safe-next';
@@ -72,14 +75,13 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
   });
   if (!parsed.success) return { error: GENERIC_LOGIN_ERROR };
 
-  const h = await headers();
-  const ip = h.get('x-forwarded-for')?.split(',')[0]?.trim() || h.get('x-real-ip') || 'unknown';
-  const key = `${ip}|${parsed.data.email}`;
+  const ip = clientIpFrom(await headers());
+  const key = ip ? `${ip}|${parsed.data.email}` : parsed.data.email;
   const accountKey = parsed.data.email;
   const state = [loginThrottle.check(key), accountThrottle.check(accountKey)].find((s) => s.locked);
   if (state) {
     return {
-      error: `Too many attempts. Try again in ${Math.ceil(state.retryAfterSeconds / 60)} minutes.`,
+      error: t.members.tooManyAttempts(Math.ceil(state.retryAfterSeconds / 60)),
       retryAfter: state.retryAfterSeconds,
     };
   }
@@ -87,7 +89,24 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
   const supabase = await createSessionClient();
   if (!supabase) return { error: 'Sign-in is not available.' };
 
-  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
+  let result;
+  try {
+    result = await supabase.auth.signInWithPassword(parsed.data);
+  } catch (e) {
+    // Only the error's name is logged: its message can hold the address.
+    console.error('[auth]', { action: 'adminLogin', name: e instanceof Error ? e.name : typeof e });
+    return { error: t.members.unavailable };
+  }
+  const { data, error } = result;
+  const failure = classifyAuthError(error);
+  if (
+    error &&
+    (failure === 'rate_limited' || failure === 'email_rate_limited' || failure === 'send_failed')
+  ) {
+    // Supabase's own limit or outage is not a wrong password, so it does not count towards a lockout.
+    console.error('[auth]', { action: 'adminLogin', status: error.status, code: error.code });
+    return { error: failure === 'send_failed' ? t.members.unavailable : t.members.tryLater };
+  }
   if (error || !data.user) {
     loginThrottle.fail(key);
     accountThrottle.fail(accountKey);
@@ -99,7 +118,8 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
     .eq('id', data.user.id)
     .maybeSingle();
   if (profile.error || profile.data?.role !== 'admin') {
-    await supabase.auth.signOut();
+    // Only the session this login just opened; the member stays signed in on their other devices.
+    await supabase.auth.signOut({ scope: 'local' });
     loginThrottle.fail(key);
     accountThrottle.fail(accountKey);
     return { error: GENERIC_LOGIN_ERROR };
@@ -110,9 +130,10 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
   redirect(safeNext(String(formData.get('next') ?? '')));
 }
 
+/** Signs out this browser only; the admin's other devices stay signed in. */
 export async function logoutAction(): Promise<void> {
   const supabase = await createSessionClient();
-  await supabase?.auth.signOut();
+  await supabase?.auth.signOut({ scope: 'local' });
   redirect('/admin/login');
 }
 

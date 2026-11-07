@@ -8,6 +8,7 @@ import {
   getMyPost,
   insertMyPost,
   saveMyProfile,
+  ProfileNameRejectedError,
   updateMyPost,
 } from '@/lib/blog/member';
 import { blogPostInputSchema, memberProfileSchema } from '@/lib/blog/schema';
@@ -137,6 +138,9 @@ export async function saveProfileAction(values: unknown): Promise<ActionResult> 
     updateTag('blog');
     return { ok: true };
   } catch (e) {
+    if (e instanceof ProfileNameRejectedError) {
+      return fail(t.members.fixFields, { display_name: [t.blog.nameNotAllowed] });
+    }
     return fail(e instanceof Error ? e.message : t.blog.saveFailed);
   }
 }

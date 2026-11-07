@@ -10,11 +10,29 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
-async function Content() {
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+async function Content({ searchParams }: { searchParams: SearchParams }) {
+  const sp = await searchParams;
+  const password = Array.isArray(sp.password) ? sp.password[0] : sp.password;
+  const notice =
+    password === 'changed'
+      ? t.members.passwordChanged
+      : password === 'changed-only'
+        ? t.members.passwordChangedOthersFailed
+        : undefined;
   return (
     <MemberPage next="/account" title={t.blog.accountTitle} lead={t.blog.accountLead}>
       {(member) => (
         <>
+          {notice ? (
+            <p
+              role="status"
+              className="mb-8 border border-line-strong p-3 text-[0.95rem] text-muted"
+            >
+              {notice}
+            </p>
+          ) : null}
           <ProfileForm initial={member.profile} />
           <p className="mt-12 border-t border-line pt-6">
             <Link
@@ -30,10 +48,10 @@ async function Content() {
   );
 }
 
-export default function AccountPage() {
+export default function AccountPage({ searchParams }: { searchParams: SearchParams }) {
   return (
     <Suspense fallback={<div className="container-site h-96 py-20" aria-busy="true" />}>
-      <Content />
+      <Content searchParams={searchParams} />
     </Suspense>
   );
 }
