@@ -1,5 +1,7 @@
 # Putting the security update on the live Supabase project
 
+> **Superseded.** The complete, tested step-by-step is now `docs/go-live-guide.html` (open it in a browser). The pre-flight query below was corrected on 2026-11-07: the earlier version contained raw invisible characters that were damaged when copied.
+
 This is the step-by-step for the two new database files (`20261101000000_member_hardening.sql` and `20261101000100_media_listing.sql`). It is written for the live project that already holds your posts, members and uploaded images. **The site stays online the whole time.** The database changes take a fraction of a second on a project this size, and nothing here deletes a post, a comment, a member or a file.
 
 ## What these two files actually change
@@ -109,20 +111,27 @@ select * from (
     m.id || ' currently "' || m.display_name || '"'
   from public.member_profiles m where exists (select 1 from public.profiles p where p.id = m.id)
   union all
-  select 'CHECK 6 name will be changed',
-    m.id || ' "' || m.display_name || '"'
+  select 'CHECK 6 name will change',
+    m.id || ' "' || m.display_name || '" becomes "' || r.new_name || '"'
   from public.member_profiles m
+  cross join lateral (
+    -- the same cleaning the migration does (every character is written as a \u escape, none typed in)
+    select btrim(left(btrim(
+      regexp_replace(
+        regexp_replace(normalize(m.display_name, NFKC), '[\t\n\r\f\v\u0085\u2028\u2029]', ' ', 'g'),
+        '[\u0000-\u001F\u007F-\u009F\u00AD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180B-\u180E\u200B-\u200F\u202A-\u202E\u2060-\u206F\u3164\uFEFF\uFFA0\uFFF9-\uFFFB]',
+        '', 'g')
+    ), 80)) as cleaned
+  ) c
+  cross join lateral (
+    select case
+      when char_length(c.cleaned) < 2 then 'Member'
+      when c.cleaned ~* '(^|\W)(admin|administrator|smartmind|moderator|former member)(\W|$)' then 'Member'
+      else c.cleaned
+    end as new_name
+  ) r
   where not exists (select 1 from public.profiles p where p.id = m.id)
-    and (m.display_name <> normalize(m.display_name, NFKC)
-      or m.display_name ~ '[\u0000-\u001F\u007F-\u009F­͏؜ᅟᅠ឴឵᠋-᠎​-‏‪-‮⁠-⁯ㅤ﻿ﾠ￹-￻\u0085  ]'
-      or m.display_name <> btrim(m.display_name)
-      or char_length(m.display_name) < 2 or char_length(m.display_name) > 80)
-  union all
-  select 'CHECK 6 name contains a reserved word and will become "Member"',
-    m.id || ' "' || m.display_name || '"'
-  from public.member_profiles m
-  where not exists (select 1 from public.profiles p where p.id = m.id)
-    and m.display_name ~* '(^|\W)(admin|administrator|smartmind|moderator|former member)(\W|$)'
+    and r.new_name <> m.display_name
   union all
   select 'CHECK 6 photo reference will be cleared (the file itself stays in storage)',
     m.id || ' ' || m.photo_path
@@ -149,15 +158,15 @@ select * from (
 
 ### How to read the result
 
-| Row starts with | Meaning                                                                                                                    | What to do                                                                                                                                                                                                                                                                                                               |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `STOP 1`        | A table or function the files need is missing, so the live database is behind.                                             | **Do not continue.** Apply the earlier migrations first (section 1 of `community-setup.md`), then run this check again.                                                                                                                                                                                                  |
-| `STOP 2`        | A policy has a different name on the live project, so the file would stop with an error (nothing is changed when it does). | **Do not continue.** Send me the row; the file needs the live name.                                                                                                                                                                                                                                                      |
-| `STOP 4`        | A previous attempt was partly applied.                                                                                     | **Do not continue.** Compare with the file before doing anything.                                                                                                                                                                                                                                                        |
-| `STOP 5`        | The `media` bucket is not public (or missing). Dropping the read policy would break every image.                           | **Do not apply the second file.** Find out why first.                                                                                                                                                                                                                                                                    |
-| `CHECK 3`       | Another policy can read storage files.                                                                                     | Open it: if it covers the `media` bucket for `anon`/`public`, visitors can still list files after the update. Tell me and I will add it to the second file. If it is for another bucket, ignore it.                                                                                                                      |
-| `CHECK 6`       | Information about members that will be renamed or have a photo reference cleared.                                          | Read each row. A real person's name changing to **Member** is probably not what you want: set a new plain name for them first (`update public.member_profiles set display_name = 'New Name' where id = '...';`) and run the check again. A photo reference that will be cleared: either accept it or fix the path first. |
-| `CHECK 7`       | A count of posts or comments that will show as **Former member**.                                                          | If the number is above 0, decide first: accept the label, or tell me and I will change who counts as public.                                                                                                                                                                                                             |
+| Row starts with | Meaning                                                                                                                                                             | What to do                                                                                                                                                                                                                      |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `STOP 1`        | A table or function the files need is missing, so the live database is behind.                                                                                      | **Do not continue.** Apply the earlier migrations first (section 1 of `community-setup.md`), then run this check again.                                                                                                         |
+| `STOP 2`        | A policy has a different name on the live project, so the file would stop with an error (nothing is changed when it does).                                          | **Do not continue.** Send me the row; the file needs the live name.                                                                                                                                                             |
+| `STOP 4`        | A previous attempt was partly applied.                                                                                                                              | **Do not continue.** Compare with the file before doing anything.                                                                                                                                                               |
+| `STOP 5`        | The `media` bucket is not public (or missing). Dropping the read policy would break every image.                                                                    | **Do not apply the second file.** Find out why first.                                                                                                                                                                           |
+| `CHECK 3`       | Another policy can read storage files.                                                                                                                              | Open it: if it covers the `media` bucket for `anon`/`public`, visitors can still list files after the update. Tell me and I will add it to the second file. If it is for another bucket, ignore it.                             |
+| `CHECK 6`       | Information about members: a name that will change (the row shows the new name), an admin profile renamed **Site team**, or a photo reference that will be cleared. | Read each row. A real person's name changing to **Member** is probably not what you want: set a new plain name first (`update public.member_profiles set display_name = 'New Name' where id = '...';`) and run the check again. |
+| `CHECK 7`       | A count of posts or comments that will show as **Former member**.                                                                                                   | If the number is above 0, decide first: accept the label, or tell me and I will change who counts as public.                                                                                                                    |
 
 Continue only when there is no `STOP` row, and you are happy with every `CHECK` row.
 
@@ -298,6 +307,7 @@ where b.id = m.id;
 -- media file
 drop policy if exists "media: admin lists" on storage.objects;
 drop policy if exists "media: member lists own folder" on storage.objects;
+drop policy if exists "media: public read" on storage.objects;
 create policy "media: public read" on storage.objects
   for select to anon, authenticated using (bucket_id = 'media');
 
